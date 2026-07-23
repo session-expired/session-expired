@@ -2,15 +2,15 @@
 
 **Session Expired** is an online, turn-based deduction game inspired by classic murder-mystery board games. Players explore a procedurally arranged institution, question one another, gather evidence, and attempt to determine the truth behind an incident before their opponents do.
 
-The game takes place inside a heavily stylized and historically inaccurate asylum whose wards are themed around exaggerated interpretations of historical figures. The setting is intended as dark satire and fictional horror rather than a realistic depiction of psychiatric care, mental illness, or the people represented.
+The game takes place inside a heavily stylized and historically inaccurate asylum whose wards are themed around exaggerated interpretations of historical figures. The setting is intended as dark satire and fictional horror.
 
-> **Project status:** Early development. This repository currently contains the initial project structure and design direction.
+> **Project status:** Early development. This repository currently contains the initial project structure.
 
 ## Core Concept
 
-Each game places several players inside a newly generated asylum layout. Somewhere within the institution, an incident has occurred involving a suspect, a location, and an object or method.
+Each game places several players inside a newly generated asylum layout. Somewhere within the institution, a murder has occurred involving a victim, a location, an object, and a method.
 
-Players take turns moving between wards, making suggestions, revealing information, communicating with other players, and eventually submitting a formal accusation.
+Players take turns moving between wards, making suggestions, revealing information, communicating with other players, finding hints, and eventually submitting an accusation.
 
 The exact rules will evolve during development, but the central gameplay loop will remain focused on:
 
@@ -19,7 +19,7 @@ The exact rules will evolve during development, but the central gameplay loop wi
 * Player deception
 * Turn-based movement
 * Private and public communication
-* Replayable board layouts
+* Random board layouts
 
 ## Planned Features
 
@@ -34,7 +34,7 @@ Players will be able to:
 * View current and completed matches
 * Maintain basic profile and game statistics
 
-Authentication data will be stored securely. Passwords must never be stored as plain text.
+Authentication data will be stored securely. Passwords will never be stored as plain text.
 
 ### Concurrent Turn-Based Games
 
@@ -53,7 +53,7 @@ Each game will maintain its own:
 * Accusations
 * Win or loss state
 
-Gameplay will be turn-based, but the application must support multiple connected users viewing updates concurrently.
+Gameplay will be turn-based, but the application will support multiple connected users viewing updates concurrently.
 
 ### Changing Game Board
 
@@ -77,7 +77,7 @@ The game will include several forms of communication.
 
 **Global chat** will allow all players in a match to communicate.
 
-**Private chat** will allow direct communication between individual players.
+**Private chat** will allow direct communication between individual players using sockets.
 
 Future versions may also include:
 
@@ -86,22 +86,6 @@ Future versions may also include:
 * System announcements
 * Moderation tools
 * Chat history and timestamps
-
-Private messages should never be exposed to players outside the intended conversation.
-
-### Historical Wards
-
-Each ward will be based loosely on a historical figure, event, profession, or cultural period. These representations will be intentionally exaggerated and fictionalized to fit the game’s surreal horror setting.
-
-Examples might include:
-
-* The Tesla Electrical Ward
-* The Poe Observation Wing
-* The Rasputin Recovery Chamber
-* The Freud Interpretation Hall
-* The Napoleon Isolation Block
-
-Historical inspiration should be treated as a creative starting point rather than an attempt at accuracy.
 
 ## Technology
 
@@ -168,7 +152,7 @@ asylum/
 └── README.md
 ```
 
-This structure is provisional and will change as the project develops.
+This structure is in development and will change as the project evolves.
 
 ## Preliminary Database Model
 
@@ -235,26 +219,6 @@ For example, when a player attempts to move, the server should verify:
 
 Only after validation should the move be stored and broadcast to the other players.
 
-## Concurrency
-
-Concurrent gameplay introduces several potential conflicts:
-
-* Two clients may submit actions at nearly the same time.
-* A player may submit the same action more than once.
-* A disconnected client may act using outdated game data.
-* Multiple server processes may attempt to update the same game.
-* Chat messages may arrive in a different order than expected.
-
-Planned protections include:
-
-* Database transactions
-* Turn numbers or state-version numbers
-* Server-side timestamps
-* Unique action identifiers
-* Idempotent requests where practical
-* Row locking or optimistic concurrency control
-* Real-time event delivery
-* Automatic state resynchronization after reconnecting
 
 ## Security Goals
 
@@ -278,23 +242,6 @@ The project should eventually include:
 * Audit logging for important game actions
 
 No database credentials, API keys, session secrets, or production configuration files should be committed to the repository.
-
-## Accessibility
-
-The board should not rely entirely on color, images, or audio to communicate information.
-
-Planned accessibility considerations include:
-
-* Keyboard navigation
-* Visible focus indicators
-* Semantic HTML
-* Screen-reader labels
-* Text alternatives for icons
-* Sufficient contrast
-* Reduced-motion support
-* Scalable text
-* Non-color indicators for player identity and board state
-* Chat controls that remain usable without a mouse
 
 ## Development Roadmap
 
@@ -345,65 +292,3 @@ Planned accessibility considerations include:
 * Add moderation and reporting tools
 * Balance game rules
 * Conduct multiplayer testing
-
-## Local Development
-
-The local setup process has not yet been finalized.
-
-During the initial static-development phase, the project may be served with a basic local HTTP server rather than opening HTML files directly.
-
-For example:
-
-```bash
-python3 -m http.server 8000 --directory public
-```
-
-Then open:
-
-```text
-http://localhost:8000
-```
-
-A complete setup process will be added after the backend and database technologies are selected.
-
-## Design Direction
-
-The visual style will combine:
-
-* Institutional architecture
-* Surreal historical references
-* Dark humor
-* Unreliable documents
-* Handwritten annotations
-* Medical diagrams
-* Old administrative records
-* Inconsistent signage
-* Unsettling but readable interfaces
-
-The interface should feel as though the players are navigating a decaying institution with its own impossible internal bureaucracy.
-
-Despite the theme, gameplay information must remain understandable. Atmosphere should support the game rather than obscure important controls.
-
-## Content Notice
-
-This project uses an asylum setting as a fictional horror environment. It may contain dark themes, stylized institutional imagery, historical caricature, confinement, implied violence, and psychological horror.
-
-The project should avoid presenting real mental-health conditions as jokes, supernatural abilities, or shorthand for violence. The institution and its inhabitants are fictional, and the game’s absurdity should primarily target authority, bureaucracy, historical mythology, and the institution itself.
-
-## Contributing
-
-The project is not yet ready for outside contributions.
-
-Contribution guidelines, formatting rules, branch conventions, issue templates, and pull-request requirements will be added after the initial architecture is established.
-
-## License
-
-A license has not yet been selected.
-
-Until a license is added, the source code should be treated as copyrighted and not automatically available for redistribution or reuse.
-
-## Disclaimer
-
-This project is not affiliated with Hasbro or the official *Clue*/*Cluedo* board game.
-
-The final game should use original names, characters, artwork, rules, terminology, and presentation rather than reproducing protected material from an existing commercial game.
