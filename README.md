@@ -2,7 +2,7 @@
 
 **Session Expired** is a web based, turn driven deduction game. Players explore a randomly generated asylum, question one another, gather evidence, and attempt to determine the truth behind a murder before their opponents do.
 
-The game takes place inside an insane asylum whose wards are themed around historical figures. The setting is satirical fictional horror.
+The game takes place inside an insane asylum whose captives are themed around historical figures. The setting is comedic horror.
 
 > **Project status:** Early development. This is a fledgling project, base line functionality is not yet established
 
@@ -10,9 +10,9 @@ The game takes place inside an insane asylum whose wards are themed around histo
 
 Each game places several players inside a uniquely generated asylum layout. Somewhere within the institution, a murder has occurred involving a victim, a location, an object, and a method.
 
-Players take turns moving between rooms, gathering information, communicating with other players, finding hints, and eventually submitting an accusation.
+Players take turns moving between rooms, gathering information, communicating with other players, finding hints, and submitting accusations.
 
-The exact rules will evolve during development, but the central gameplay loop will focus on:
+The rules will evolve during development, but the central gameplay loop will focus on:
 
 * Deduction
 * Partial information
