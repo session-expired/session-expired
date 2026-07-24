@@ -1,8 +1,10 @@
 # Session Expired
 
-**Session Expired** is a web based, turn driven deduction game. Players explore a randomly generated asylum, question one another, gather evidence, and attempt to determine the truth behind a murder before their opponents do.
+**Session Expired** is a web based deduction game. Players explore a randomly generated asylum, question one another, gather evidence, and attempt to solve a murder before their opponents do.
 
 The game takes place inside an insane asylum whose captives are themed around historical figures. The setting is comedic horror.
+
+The art will likely be 32 bit.
 
 > **Project status:** Early development. This is a fledgling project, base line functionality is not yet established
 
@@ -85,7 +87,7 @@ The project will ONLY use:
 
 Persistent application data will use a SQL database.
 
-## Initial Project Structure
+## Project Structure
 
 *Update as needed*
 
@@ -114,13 +116,13 @@ session-expired/
 ├── server/
 │   ├── routes/
 │   ├── services/
-│   └── database/
+│   ├── database/
+│   └── server.js
 ├── sql/
 │   ├── schema.sql
 |   ├── *additional as needed*
-├── tests/
 ├── docs/
-├── server.js
+├── .gitignore
 └── README.md
 ```
 
