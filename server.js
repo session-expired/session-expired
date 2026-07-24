@@ -1,3 +1,5 @@
+//This is only intended as the entry point to start the project
+
 const express = require("express");
 const app = express();
 

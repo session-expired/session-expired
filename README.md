@@ -90,7 +90,7 @@ Persistent application data will use a SQL database.
 *Update as needed*
 
 ```text
-asylum/
+session-expired/
 ├── public/
 │   ├── pages/
 │   │   ├── login.html
@@ -120,6 +120,7 @@ asylum/
 |   ├── *additional as needed*
 ├── tests/
 ├── docs/
+├── server.js
 └── README.md
 ```
 
