@@ -120,7 +120,7 @@ session-expired/
 │   └── server.js
 ├── sql/
 │   ├── schema.sql
-|   ├── *additional as needed*
+│   └──*additional as needed*
 ├── docs/
 ├── .gitignore
 └── README.md
