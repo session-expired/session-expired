@@ -1,5 +1,7 @@
 ## This is a simple checklist for tracking progress
 
+## Place your initials in what section you are currently working on, and an X when complete.
+
 ## Basic application
 - [ ] Define the rules and victory conditions
 - [ ] Define the minimal playable version
