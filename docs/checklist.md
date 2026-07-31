@@ -56,7 +56,8 @@
 
 ## Work Completed Week 6
 - Ryan 
-- Sean 
+- Sean
+  -This week, I worked on creating the the design for the landing page, and created the barebones structure for the physical landing page.
 - Merlin 
 
 ## Work going to be done in week 7
