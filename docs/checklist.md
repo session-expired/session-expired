@@ -55,14 +55,14 @@
 - [ ] Prevent unauthorized users from viewing private game messages
 
 ## Work Completed Week 6
--Ryan -
--Sean -
--Merlin -
+- Ryan 
+- Sean 
+- Merlin 
 
 ## Work going to be done in week 7
--Ryan -
--Sean -
--Merlin -
+- Ryan 
+- Sean 
+- Merlin 
 
 #List of git commits
 
