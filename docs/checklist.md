@@ -65,5 +65,5 @@
 - Sean 
 - Merlin 
 
-#List of git commits
+## List of git commits
 
