@@ -53,6 +53,3 @@
 - [ ] Handle temporary disconnections and reconnections
 - [ ] Add chat moderation controls
 - [ ] Prevent unauthorized users from viewing private game messages
-
-
-
