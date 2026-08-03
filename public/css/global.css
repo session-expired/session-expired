@@ -1,0 +1,90 @@
+body{
+    background-color: slategray;
+}
+
+nav {
+    background-color: grey;
+    height: 50 px;
+}
+
+nav ul {
+    margin: 0px;
+    padding: 5px 0px 5px 30px;
+}
+
+nav li {
+    display: inline;
+    margin-right: 40px;
+}
+
+nav li a {
+    color: black;
+}
+
+nav li a:hover, nav li a.current{
+    color: red;
+
+}
+
+#interactions {
+    margin: 0px;
+    padding: 5px 0px 5px 30px;
+}
+
+#interactions ul {
+    display: flex;
+    justify-content: center;
+    gap: 45px;
+    margin: 0;
+    padding: 0;
+}
+
+#interactions li{
+    display: inline;
+    margin-right: 40px;
+   
+}
+
+#lobby {
+    width: 700px;
+    margin: 50px auto;
+    padding: 30px;
+    border: 2px solid black;
+    background-color: grey;
+}
+
+#lobby h1 {
+    text-align: center;
+}
+
+#playerLobby {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px 100px;
+    margin: 40px 50px;
+}
+
+.player {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.player-name {
+    flex: 1;
+    border: 2px solid black;
+    padding: 10px;
+    text-align: center;
+    background-color: white;
+}
+
+.ready-status {
+    width: 25px;
+    height: 25px;
+    border: 2px solid black;
+    background-color: white;
+}
+
+.player.ready .ready-status {
+    background-color: green;
+}
