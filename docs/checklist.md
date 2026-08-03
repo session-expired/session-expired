@@ -5,7 +5,7 @@
 ## Basic application
 - [ ] Define the rules and victory conditions
 - [ ] Define the minimal playable version
-- [ ] Create basic server functions
+- [RKN] Create basic server functions
 - [ ] Create basic sites
 - [ ] Define a color theme
 - [ ] Create the landing page
@@ -46,7 +46,7 @@
 - [ ] Allow the host to start the game
 
 ## Communication
-- [ ] Add global lobby chat
+- [RKN] Add global lobby chat
 - [ ] Add individual game chat
 - [ ] Add private player-to-player messages
 - [ ] Add system-generated game messages
