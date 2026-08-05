@@ -127,3 +127,20 @@ nav li a:hover, nav li a.current{
 #playOptions button:hover{
     background-color: white;
 }
+
+#interactions button{
+    background-color: #6e6101;
+    font-family: "Press start 2P";
+   
+    padding: 15px;
+    border-radius: 0px;
+    border: 2px solid black;
+    cursor: pointer;
+
+    box-shadow: 4px 4px 0px black;
+    transition: transform 0.05s, box-shadow 0.05s;
+}
+
+#interactions button:hover{
+    background-color: white;
+}
