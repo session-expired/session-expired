@@ -10,14 +10,23 @@ async function seedDevelopmentUsers(pool) {
     await client.query("BEGIN");
 
     for (const username of developmentUsers) {
-      await client.query(
-        `INSERT INTO users (username, email, password_hash)
-         VALUES ($1, $2, $3)
-         ON CONFLICT (LOWER(username)) DO UPDATE
-         SET email = EXCLUDED.email,
-             password_hash = EXCLUDED.password_hash`,
-        [username, `${username}@example.com`, passwordHash]
+      const values = [username, `${username}@example.com`, passwordHash];
+      const result = await client.query(
+        `UPDATE users
+         SET username = $1,
+             email = $2,
+             password_hash = $3
+         WHERE LOWER(username) = LOWER($1)`,
+        values
       );
+
+      if (result.rowCount === 0) {
+        await client.query(
+          `INSERT INTO users (username, email, password_hash)
+           VALUES ($1, $2, $3)`,
+          values
+        );
+      }
     }
 
     await client.query("COMMIT");

@@ -99,7 +99,9 @@ The account system requires Node.js 18 or newer and PostgreSQL.
 
 For local HTTP, leave `COOKIE_SECURE=false`. Set it to `true` when the application is served over HTTPS. Set `DATABASE_SSL=true` only when the PostgreSQL provider requires TLS.
 
-For development, run `npm run dev`. Before starting the server, it creates or refreshes four test accounts (`user1`, `user2`, `user3`, and `user4`), each with the password `password`. Their email addresses are `user1@example.com` through `user4@example.com`.
+For development, run `npm run dev`. It defaults to `http://localhost:3000` and the local database URL `postgresql://postgres:postgres@localhost:5432/session_expired`, so a `.env` file is not required when those defaults match your PostgreSQL setup. Set `DATABASE_URL` in `.env` when your local credentials differ.
+
+Before starting the server, the development command creates or refreshes four test accounts (`user1`, `user2`, `user3`, and `user4`), each with the password `password`. Their email addresses are `user1@example.com` through `user4@example.com`.
 
 ## Project Structure
 
