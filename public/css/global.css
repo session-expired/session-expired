@@ -1,150 +1,162 @@
-body{
-    background-color: #3b3a30;
-    font-family: "Press start 2P";
-    color: #e8e2c8
+body {
+  background-color: #3b3a30;
+  font-family: "Press start 2P";
+  color: #e8e2c8;
 }
 
 nav {
-    background-color: #4a4a42;
-    height: 50 px;
-    text-align: center;
+  background-color: #4a4a42;
+  height: 50 px;
+  text-align: center;
 }
 
 nav ul {
-    margin: 0px;
-    padding: 5px 0px 5px 30px;
+  margin: 0px;
+  padding: 5px 0px 5px 30px;
 }
 
 nav li {
-    display: inline;
-    margin-right: 40px;
+  display: inline;
+  margin-right: 40px;
 }
 
 nav li a {
-    color: #e8e2c8;
+  color: #e8e2c8;
 }
 
-nav li a:hover, nav li a.current{
-    color: #8b1e1e;
-
+nav li a:hover,
+nav li a.current {
+  color: #8b1e1e;
 }
 
 #interactions {
-    margin: 0px;
-    padding: 5px 0px 5px 30px;
+  margin: 0px;
+  padding: 5px 0px 5px 30px;
 }
 
 #interactions ul {
-    display: flex;
-    justify-content: center;
-    gap: 45px;
-    margin: 0;
-    padding: 0;
+  display: flex;
+  justify-content: center;
+  gap: 45px;
+  margin: 0;
+  padding: 0;
 }
 
-#interactions li{
-    display: inline;
-    margin-right: 40px;
-   
+#interactions li {
+  display: inline;
+  margin-right: 40px;
 }
 
 #lobby {
-    width: 700px;
-    margin: 50px auto;
-    padding: 30px;
-    border: 2px solid black;
-    background-color: #4a4a42;
+  width: 700px;
+  margin: 50px auto;
+  padding: 30px;
+  border: 2px solid black;
+  background-color: #4a4a42;
 }
 
 #lobby h1 {
-    text-align: center;
+  text-align: center;
 }
 
 #playerLobby {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 30px 100px;
-    margin: 40px 50px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 30px 100px;
+  margin: 40px 50px;
 }
 
 .player {
-    display: flex;
-    align-items: center;
-    gap: 15px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
 }
 
 .player-name {
-    flex: 1;
-    border: 2px solid black;
-    padding: 10px;
-    text-align: center;
-    background-color: white;
+  flex: 1;
+  border: 2px solid black;
+  padding: 10px;
+  text-align: center;
+  background-color: white;
 }
 
 .ready-status {
-    width: 25px;
-    height: 25px;
-    border: 2px solid black;
-    background-color: white;
+  width: 25px;
+  height: 25px;
+  border: 2px solid black;
+  background-color: white;
 }
 
 .player.ready .ready-status {
-    background-color: green;
+  background-color: green;
 }
 
-#welcome{
-    text-align: center;
+#welcome {
+  text-align: center;
 }
 
-#welcomeMessage{
-    background-color: #6e6101;
-    border: 5px solid black;
-    padding: 5px;
-    width: 75%;
-    margin: 0 auto;
-    text-align: center;
+#welcomeMessage {
+  background-color: #6e6101;
+  border: 5px solid black;
+  padding: 5px;
+  width: 75%;
+  margin: 0 auto;
+  text-align: center;
 }
 
-#playOptions{
-    margin: 0 auto;
-    text-align: center;
-    padding: 30px;
+#playOptions {
+  margin: 0 auto;
+  text-align: center;
+  padding: 30px;
 }
 
-#playOptions button{
-    background-color: #6e6101;
-    font-family: "Press start 2P";
-    margin-right: 50px;
-    padding: 15px;
-    border-radius: 0px;
-    border: 2px solid black;
-    cursor: pointer;
-    color: #e8e2c8;
+#playOptions button {
+  background-color: #6e6101;
+  font-family: "Press start 2P";
+  margin-right: 50px;
+  padding: 15px;
+  border-radius: 0px;
+  border: 2px solid black;
+  cursor: pointer;
+  color: #e8e2c8;
 
-    box-shadow: 4px 4px 0px black;
-    transition: transform 0.05s, box-shadow 0.05s;
+  box-shadow: 4px 4px 0px black;
+  transition:
+    transform 0.05s,
+    box-shadow 0.05s;
 }
 
-#playOptions button:hover{
-    background-color: white;
-    color: #8b1e1e;
+#playOptions button:hover {
+  background-color: white;
+  color: #8b1e1e;
 }
 
-#interactions button{
-    background-color: #6e6101;
-    font-family: "Press start 2P";
-   
-    padding: 15px;
-    border-radius: 0px;
-    border: 2px solid black;
-    cursor: pointer;
-    color: #e8e2c8;
+#interactions button {
+  background-color: #6e6101;
+  font-family: "Press start 2P";
 
-    box-shadow: 4px 4px 0px black;
-    transition: transform 0.05s, box-shadow 0.05s;
+  padding: 15px;
+  border-radius: 0px;
+  border: 2px solid black;
+  cursor: pointer;
+  color: #e8e2c8;
+
+  box-shadow: 4px 4px 0px black;
+  transition:
+    transform 0.05s,
+    box-shadow 0.05s;
 }
 
-#interactions button:hover{
-    background-color: white;
-    color: #8b1e1e;
+#interactions button:hover {
+  background-color: white;
+  color: #8b1e1e;
+}
+
+footer {
+  display: flex;
+  flex-direction: column;
+}
+
+#copy {
+  padding-top: 10px;
 }
