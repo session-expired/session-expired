@@ -1,9 +1,15 @@
 {
   "scripts": {
-    "start": "node server/server.js"
+    "start": "node server/server.js",
+    "dev": "node server/dev.js"
   },
   "dependencies": {
+    "bcrypt": "^6.0.0",
+    "connect-pg-simple": "^10.0.0",
+    "dotenv": "^17.4.2",
     "express": "^4.22.2",
+    "express-session": "^1.19.0",
+    "pg": "^8.22.0",
     "socket.io": "^4.8.3"
   }
 }

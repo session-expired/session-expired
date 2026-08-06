@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Account | Session Expired</title>
+    <link rel="stylesheet" href="/css/auth.css" />
+  </head>
+  <body>
+    <main class="auth-shell">
+      <section class="auth-card" aria-labelledby="page-title">
+        <p class="eyebrow">Patient Record</p>
+        <h1 id="page-title">Your account</h1>
+        <dl class="account-details"><div><dt>Username</dt><dd id="account-username">Loading…</dd></div><div><dt>Email</dt><dd id="account-email">Loading…</dd></div></dl>
+        <form method="post" action="/api/logout"><button type="submit">Log out</button></form>
+      </section>
+    </main>
+    <script src="/js/auth.js"></script>
+  </body>
+</html>

@@ -87,6 +87,20 @@ The project will ONLY use:
 
 Persistent application data will use a SQL database.
 
+## Authentication setup
+
+The account system requires Node.js 18 or newer and PostgreSQL.
+
+1. Install dependencies with `npm install`.
+2. Create a PostgreSQL database named `session_expired`.
+3. Apply the tables and indexes with `psql session_expired < sql/schema.sql`.
+4. Copy `.env.example` to `.env`, then set the database URL and replace the session secret with a long random value.
+5. Start the server with `npm start`, then visit `http://localhost:3000/register`.
+
+For local HTTP, leave `COOKIE_SECURE=false`. Set it to `true` when the application is served over HTTPS. Set `DATABASE_SSL=true` only when the PostgreSQL provider requires TLS.
+
+For development, run `npm run dev`. Before starting the server, it creates or refreshes four test accounts (`user1`, `user2`, `user3`, and `user4`), each with the password `password`. Their email addresses are `user1@example.com` through `user4@example.com`.
+
 ## Project Structure
 
 *Update as needed*

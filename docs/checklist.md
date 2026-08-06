@@ -5,18 +5,18 @@
 ## Basic application
 - [ ] Define the rules and victory conditions
 - [ ] Define the minimal playable version
-- [RKN] Create basic server functions
-- [ ] Create basic sites
-- [ ] Define a color theme
-- [ ] Create the landing page
+- [X] Create basic server functions
+- [X] Create basic sites
+- [X] Define a color theme
+- [X] Create the landing page
 
 ## Database Structure
-- [ ] Define the user data model
+- [X] Define the user data model
 - [ ] Define the game session data model
 - [ ] Define player and character data
 - [ ] Define room data
 - [ ] Define suspect, object, and murder data
-- [ ] Define item and hint dat
+- [ ] Define item and hint data
 - [ ] Define turn and action data
 - [ ] Define chat message data
 - [ ] Define saved-game and game-history data
