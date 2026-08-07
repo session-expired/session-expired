@@ -66,6 +66,12 @@ app.get("/login", (request, response) => {
   response.sendFile(path.join(publicPageDirectory, "login.html"));
 });
 app.get("/account", requireAuthentication, sendPage("account.html"));
+app.get("/lobby", requireAuthentication, (request, response) => {
+  response.sendFile(path.join(publicDirectory, "lobbyPage.html"));
+});
+app.get("/lobbyPage.html", requireAuthentication, (request, response) => {
+  response.redirect("/lobby");
+});
 
 app.post("/api/register", async (request, response, next) => {
   const username = typeof request.body.username === "string" ? request.body.username.trim() : "";
@@ -133,7 +139,7 @@ app.post("/api/login", async (request, response, next) => {
       request.session.userId = user.id;
       request.session.save((saveError) => {
         if (saveError) return next(saveError);
-        response.json({ ok: true, redirect: "/account" });
+        response.json({ ok: true, redirect: "/lobby" });
       });
     });
   } catch (error) {

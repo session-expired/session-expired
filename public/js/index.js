@@ -1,5 +1,5 @@
 let button = document.getElementById("joinGame");
 
 button.addEventListener("click", ()=>{
-   window.location.href='./lobbyPage.html'
+   window.location.href='/lobby'
 })

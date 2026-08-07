@@ -3,9 +3,8 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="/public/css/global.css" />
     <title>Session Expired</title>
-    <link rel="stylesheet" href="../css/global.css" />
+    <link rel="stylesheet" href="/css/global.css" />
     <link
       href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap"
       rel="stylesheet"
@@ -16,10 +15,12 @@
     <h1 style="text-align: center">SESSION EXPIRED</h1>
     <nav>
       <ul>
-        <li><a href="" class="current">Home</a></li>
-        <li><a href="./faq.html">FAQ</a></li>
-        <li><a href="./instructions.html">How to Play</a></li>
-        <li><a href="./contact.html">Contact</a></li>
+        <li><a href="/" class="current">Home</a></li>
+        <li><a href="/faq.html">FAQ</a></li>
+        <li><a href="/instructions.html">How to Play</a></li>
+        <li><a href="/contact.html">Contact</a></li>
+        <li><a href="/lobby">Lobby</a></li>
+        <li><a href="/login" data-auth-link>Login</a></li>
       </ul>
     </nav>
 
@@ -49,6 +50,7 @@
     <script src="/socket.io/socket.io.js"></script>
     <script src="js/chat.js"></script>
     <script src="js/index.js"></script>
+    <script src="js/session-nav.js"></script>
     <footer>
       <div id="copy">&copy: 2026 Session Expired</div>
     </footer>
