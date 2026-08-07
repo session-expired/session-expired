@@ -15,7 +15,14 @@ const io = new Server(server);
 const globalChatHistory = [];
 const globalChatWindowMs = 30 * 60 * 1000;
 const port = Number(process.env.PORT) || 3000;
-const hostname = process.env.HOST || "localhost";
+const isProduction = process.env.NODE_ENV === "production";
+const hostname = process.env.HOST || "0.0.0.0";
+const databaseSslEnabled = process.env.DATABASE_SSL
+  ? process.env.DATABASE_SSL === "true"
+  : isProduction;
+const secureCookies = process.env.COOKIE_SECURE
+  ? process.env.COOKIE_SECURE === "true"
+  : isProduction;
 const publicDirectory = path.join(__dirname, "..", "public");
 const pageDirectory = path.join(__dirname, "pages");
 const publicPageDirectory = path.join(publicDirectory, "pages");
@@ -30,11 +37,13 @@ if (!process.env.SESSION_SECRET || process.env.SESSION_SECRET.length < 32) {
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl: process.env.DATABASE_SSL === "true" ? { rejectUnauthorized: false } : false
+  ssl: databaseSslEnabled ? { rejectUnauthorized: false } : false
 });
 
 app.disable("x-powered-by");
+if (isProduction) app.set("trust proxy", 1);
 app.use(express.json({ limit: "10kb" }));
+app.get("/health", (request, response) => response.status(200).json({ status: "ok" }));
 const sessionMiddleware = session({
     store: new pgSession({ pool, tableName: "user_sessions", createTableIfMissing: false }),
     name: "session_expired.sid",
@@ -44,7 +53,7 @@ const sessionMiddleware = session({
     cookie: {
       httpOnly: true,
       sameSite: "lax",
-      secure: process.env.COOKIE_SECURE === "true",
+      secure: secureCookies,
       maxAge: 1000 * 60 * 60 * 24 * 7
     }
   });
@@ -179,7 +188,7 @@ app.post("/api/logout", (request, response, next) => {
     response.clearCookie("session_expired.sid", {
       httpOnly: true,
       sameSite: "lax",
-      secure: process.env.COOKIE_SECURE === "true"
+      secure: secureCookies
     });
     response.redirect(303, "/login");
   });
@@ -194,6 +203,9 @@ app.use((error, request, response, next) => {
 });
 
 io.engine.use(sessionMiddleware);
+io.engine.on("connection_error", (error) => {
+  console.error("Socket.IO connection error:", error.message);
+});
 
 io.on("connection", (socket) => {
   console.log("Socket connected:", socket.id);
@@ -248,6 +260,7 @@ io.on("connection", (socket) => {
       console.error("Unable to send private message:", error);
     }
   });
+  socket.on("error", (error) => console.error(`Socket ${socket.id} error:`, error));
   socket.on("disconnect", () => console.log("Socket disconnected:", socket.id));
 });
 
