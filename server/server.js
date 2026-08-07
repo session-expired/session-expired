@@ -12,6 +12,8 @@ const { Server } = require("socket.io");
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
+const globalChatHistory = [];
+const globalChatWindowMs = 30 * 60 * 1000;
 const port = Number(process.env.PORT) || 3000;
 const hostname = process.env.HOST || "localhost";
 const publicDirectory = path.join(__dirname, "..", "public");
@@ -33,8 +35,7 @@ const pool = new Pool({
 
 app.disable("x-powered-by");
 app.use(express.json({ limit: "10kb" }));
-app.use(
-  session({
+const sessionMiddleware = session({
     store: new pgSession({ pool, tableName: "user_sessions", createTableIfMissing: false }),
     name: "session_expired.sid",
     secret: process.env.SESSION_SECRET,
@@ -46,8 +47,8 @@ app.use(
       secure: process.env.COOKIE_SECURE === "true",
       maxAge: 1000 * 60 * 60 * 24 * 7
     }
-  })
-);
+  });
+app.use(sessionMiddleware);
 
 function sendPage(name) {
   return (request, response) => response.sendFile(path.join(pageDirectory, name));
@@ -160,6 +161,18 @@ app.get("/api/session", async (request, response, next) => {
   }
 });
 
+app.get("/api/users", requireAuthentication, async (request, response, next) => {
+  try {
+    const result = await pool.query(
+      "SELECT id, username FROM users WHERE id <> $1 ORDER BY LOWER(username)",
+      [request.session.userId]
+    );
+    response.json({ users: result.rows });
+  } catch (error) {
+    next(error);
+  }
+});
+
 app.post("/api/logout", (request, response, next) => {
   request.session.destroy((error) => {
     if (error) return next(error);
@@ -180,15 +193,60 @@ app.use((error, request, response, next) => {
   response.status(500).json({ errors: { form: "Something went wrong. Please try again." } });
 });
 
+io.engine.use(sessionMiddleware);
+
 io.on("connection", (socket) => {
   console.log("Socket connected:", socket.id);
-  socket.on("register-user", (userId) => socket.join(`user:${userId}`));
-  socket.on("private-message", (message) => {
-    const { senderId, recipientId, text } = message;
-    if (!senderId || !recipientId || !text?.trim()) return;
-    const savedMessage = { senderId, recipientId, text: text.trim(), sentAt: new Date().toISOString() };
-    io.to(`user:${recipientId}`).emit("private-message", savedMessage);
-    io.to(`user:${senderId}`).emit("private-message", savedMessage);
+  const userId = socket.request.session?.userId;
+  if (userId) {
+    socket.join(`user:${userId}`);
+    const cutoff = Date.now() - globalChatWindowMs;
+    while (globalChatHistory[0] && Date.parse(globalChatHistory[0].sentAt) < cutoff) {
+      globalChatHistory.shift();
+    }
+    socket.emit("global-history", globalChatHistory);
+  }
+
+  socket.on("global-message", async ({ text } = {}) => {
+    if (!userId || typeof text !== "string" || !text.trim()) return;
+    try {
+      const result = await pool.query("SELECT username FROM users WHERE id = $1", [userId]);
+      if (!result.rows[0]) return;
+      const message = {
+        senderId: userId,
+        sender: result.rows[0].username,
+        text: text.trim().slice(0, 500),
+        sentAt: new Date().toISOString()
+      };
+      globalChatHistory.push(message);
+      const cutoff = Date.now() - globalChatWindowMs;
+      while (globalChatHistory[0] && Date.parse(globalChatHistory[0].sentAt) < cutoff) {
+        globalChatHistory.shift();
+      }
+      io.emit("global-message", message);
+    } catch (error) {
+      console.error("Unable to send global message:", error);
+    }
+  });
+
+  socket.on("private-message", async ({ recipientId, text } = {}) => {
+    const targetId = Number(recipientId);
+    if (!userId || !Number.isInteger(targetId) || typeof text !== "string" || !text.trim()) return;
+    try {
+      const result = await pool.query("SELECT username FROM users WHERE id = $1", [userId]);
+      if (!result.rows[0]) return;
+      const savedMessage = {
+        senderId: userId,
+        sender: result.rows[0].username,
+        recipientId: targetId,
+        text: text.trim().slice(0, 500),
+        sentAt: new Date().toISOString()
+      };
+      io.to(`user:${targetId}`).emit("private-message", savedMessage);
+      io.to(`user:${userId}`).emit("private-message", savedMessage);
+    } catch (error) {
+      console.error("Unable to send private message:", error);
+    }
   });
   socket.on("disconnect", () => console.log("Socket disconnected:", socket.id));
 });

@@ -5,20 +5,46 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Login | Session Expired</title>
     <link rel="stylesheet" href="/css/auth.css" />
+    <link rel="stylesheet" href="../css/global.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap"
+      rel="stylesheet"
+    />
   </head>
   <body>
     <main class="auth-shell">
       <section class="auth-card" aria-labelledby="page-title">
         <p class="eyebrow">Session Expired</p>
         <h1 id="page-title">Return to the ward</h1>
-        <p class="notice" id="registered-notice" hidden>Account created. You may now sign in.</p>
+        <p class="notice" id="registered-notice" hidden>
+          Account created. You may now sign in.
+        </p>
         <form id="login-form" novalidate>
-          <div class="field"><label for="identifier">Username or email</label><input id="identifier" name="identifier" autocomplete="username" required /></div>
-          <div class="field"><label for="password">Password</label><input id="password" name="password" type="password" autocomplete="current-password" required /></div>
+          <div class="field">
+            <label for="identifier">Username or email</label
+            ><input
+              id="identifier"
+              name="identifier"
+              autocomplete="username"
+              required
+            />
+          </div>
+          <div class="field">
+            <label for="password">Password</label
+            ><input
+              id="password"
+              name="password"
+              type="password"
+              autocomplete="current-password"
+              required
+            />
+          </div>
           <p class="error form-error" id="form-error" role="alert"></p>
           <button type="submit">Sign in</button>
         </form>
-        <p class="switch-link">New patient? <a href="/register">Create an account</a></p>
+        <p class="switch-link">
+          New patient? <a href="/register">Create an account</a>
+        </p>
       </section>
     </main>
     <script src="/js/auth.js"></script>
