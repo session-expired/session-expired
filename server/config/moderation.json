@@ -112,12 +112,7 @@
       "spaz",
       "mouth breather"
     ],
-    "expletives": [
-      "fuck",
-      "fucking",
-      "motherfucker",
-      "cunt"
-    ]
+    "expletives": ["fuck", "fucking", "motherfucker", "cunt"]
   },
   "patterns": {
     "hate_phrases": [
@@ -127,9 +122,11 @@
       "\\b(black people|blacks|asians|jews|muslims|arabs|mexicans|immigrants|gay people|gays|lesbians|trans people|transgender people|disabled people)\\s+(are|are all)\\s+(vermin|subhuman|animals|diseased|a disease)\\b",
       "\\bno\\s+(black people|blacks|asians|jews|muslims|arabs|mexicans|immigrants|gay people|gays|lesbians|trans people|transgender people|disabled people)\\s+(allowed|welcome|permitted)\\b",
       "\\b(white|racial|ethnic|religious|christian|jewish|muslim)\\s+(power|purity|supremacy)\\b",
+      "\\b(trump|maga) (was|were|is) right\\b",
+      "\\btrump 2028\\b",
+      "\\bmake america great again\\b",
       "\\bgo back to (your|the) (country|homeland)\\b",
-      "\\b(hitler|the nazis) (was|were) right\\b",
-      "\\b(trump|maga) (was|were|is) right\\b"
+      "\\b(hitler|the nazis) (was|were) right\\b"
     ]
   }
 }
