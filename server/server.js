@@ -8,6 +8,8 @@ const session = require("express-session");
 const pgSession = require("connect-pg-simple")(session);
 const { Pool } = require("pg");
 const { Server } = require("socket.io");
+const { registerChatHandlers } = require("./chat/chatHandler");
+const { moderateUsername } = require("./chat/moderation");
 
 const app = express();
 const server = http.createServer(app);
@@ -93,6 +95,7 @@ app.post("/api/register", async (request, response, next) => {
   if (!username) errors.username = "Username is required.";
   else if (username.length < 3 || username.length > 30) errors.username = "Username must be between 3 and 30 characters.";
   else if (!/^[A-Za-z0-9_-]+$/.test(username)) errors.username = "Username may contain only letters, numbers, underscores, and hyphens.";
+  else if (moderateUsername(username).action === "block") errors.username = "That username is not allowed.";
 
   if (!email) errors.email = "Email address is required.";
   else if (email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) errors.email = "Enter a valid email address.";
@@ -207,62 +210,7 @@ io.engine.on("connection_error", (error) => {
   console.error("Socket.IO connection error:", error.message);
 });
 
-io.on("connection", (socket) => {
-  console.log("Socket connected:", socket.id);
-  const userId = socket.request.session?.userId;
-  if (userId) {
-    socket.join(`user:${userId}`);
-    const cutoff = Date.now() - globalChatWindowMs;
-    while (globalChatHistory[0] && Date.parse(globalChatHistory[0].sentAt) < cutoff) {
-      globalChatHistory.shift();
-    }
-    socket.emit("global-history", globalChatHistory);
-  }
-
-  socket.on("global-message", async ({ text } = {}) => {
-    if (!userId || typeof text !== "string" || !text.trim()) return;
-    try {
-      const result = await pool.query("SELECT username FROM users WHERE id = $1", [userId]);
-      if (!result.rows[0]) return;
-      const message = {
-        senderId: userId,
-        sender: result.rows[0].username,
-        text: text.trim().slice(0, 500),
-        sentAt: new Date().toISOString()
-      };
-      globalChatHistory.push(message);
-      const cutoff = Date.now() - globalChatWindowMs;
-      while (globalChatHistory[0] && Date.parse(globalChatHistory[0].sentAt) < cutoff) {
-        globalChatHistory.shift();
-      }
-      io.emit("global-message", message);
-    } catch (error) {
-      console.error("Unable to send global message:", error);
-    }
-  });
-
-  socket.on("private-message", async ({ recipientId, text } = {}) => {
-    const targetId = Number(recipientId);
-    if (!userId || !Number.isInteger(targetId) || typeof text !== "string" || !text.trim()) return;
-    try {
-      const result = await pool.query("SELECT username FROM users WHERE id = $1", [userId]);
-      if (!result.rows[0]) return;
-      const savedMessage = {
-        senderId: userId,
-        sender: result.rows[0].username,
-        recipientId: targetId,
-        text: text.trim().slice(0, 500),
-        sentAt: new Date().toISOString()
-      };
-      io.to(`user:${targetId}`).emit("private-message", savedMessage);
-      io.to(`user:${userId}`).emit("private-message", savedMessage);
-    } catch (error) {
-      console.error("Unable to send private message:", error);
-    }
-  });
-  socket.on("error", (error) => console.error(`Socket ${socket.id} error:`, error));
-  socket.on("disconnect", () => console.log("Socket disconnected:", socket.id));
-});
+registerChatHandlers({ io, pool, globalChatHistory, globalChatWindowMs });
 
 function startServer() {
   server.listen(port, hostname, () => console.log(`http://${hostname}:${port}`));

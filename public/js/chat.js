@@ -103,6 +103,9 @@
       });
       socket.on("global-message", (message) => addMessage("global", message));
       socket.on("private-message", (message) => addMessage("private", message));
+      socket.on("chat-rejected", ({ reason }) => {
+        status.textContent = reason || "This message could not be sent.";
+      });
     })
     .catch(() => {
       status.textContent = "Chat is currently unavailable.";

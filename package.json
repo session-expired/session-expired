@@ -2,7 +2,8 @@
   "scripts": {
     "start": "node server/server.js",
     "predev": "kill-port 3000 || true",
-    "dev": "node server/dev.js"
+    "dev": "node server/dev.js",
+    "test": "node --test"
   },
   "dependencies": {
     "bcrypt": "^6.0.0",
