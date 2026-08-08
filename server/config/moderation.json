@@ -129,7 +129,7 @@
       "\\b(white|racial|ethnic|religious|christian|jewish|muslim)\\s+(power|purity|supremacy)\\b",
       "\\bgo back to (your|the) (country|homeland)\\b",
       "\\b(hitler|the nazis) (was|were) right\\b",
-      "\\b(trump|maga) (was|were) right\\b"
+      "\\b(trump|maga) (was|were|is) right\\b"
     ]
   }
 }
