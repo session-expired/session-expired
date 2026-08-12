@@ -36,8 +36,20 @@
     <h1>Asylum Asset Tester</h1>
 
     <section>
-      <h2>Rasputin sprites</h2>
+      <h2>Character sprites</h2>
       <div class="controls">
+        <label>
+          Character
+          <select id="character">
+            <option value="rasputin">Rasputin</option>
+            <option value="brahe">Brahe</option>
+            <option value="lovelace">Lovelace</option>
+            <option value="crowley">Crowley</option>
+            <option value="curie">Curie</option>
+            <option value="mallon">Mallon</option>
+            <option value="bonaparte">Bonaparte</option>
+          </select>
+        </label>
         <label>
           Image
           <select id="sprite">
@@ -77,18 +89,16 @@
   </main>
 
   <script>
-    const assetRoot = "/assets/images/chars/rasputin";
     const canvas = document.querySelector("#sprite-canvas");
     const context = canvas.getContext("2d");
+    const characterSelect = document.querySelector("#character");
     const spriteSelect = document.querySelector("#sprite");
     const scaleSelect = document.querySelector("#scale");
     const pauseButton = document.querySelector("#pause");
     const spriteStatus = document.querySelector("#sprite-status");
 
-    const standingImage = new Image();
-    const walkingImage = new Image();
-    standingImage.src = `${assetRoot}/rasputin_standing.png`;
-    walkingImage.src = `${assetRoot}/rasputin_walk.png`;
+    let standingImage = null;
+    let walkingImage = null;
 
     let walkingFrames = [];
     let frameIndex = 0;
@@ -97,20 +107,41 @@
     let paused = false;
 
     async function loadSprites() {
+      const character = characterSelect.value;
+      const assetRoot = `/assets/images/chars/${character}`;
+      const requestedStandingImage = new Image();
+      const requestedWalkingImage = new Image();
+      requestedStandingImage.src = `${assetRoot}/${character}_standing.png`;
+      requestedWalkingImage.src = `${assetRoot}/${character}_walk.png`;
+      spriteStatus.textContent = `Loading ${character}…`;
+
       try {
-        const response = await fetch(`${assetRoot}/rasputin_walk.json`);
+        const response = await fetch(`${assetRoot}/${character}_walk.json`);
         if (!response.ok) throw new Error(`JSON request failed (${response.status})`);
         const asepriteData = await response.json();
 
         // This Aseprite export uses an object keyed by source frame name.
-        walkingFrames = Array.isArray(asepriteData.frames)
+        const requestedFrames = Array.isArray(asepriteData.frames)
           ? asepriteData.frames
           : Object.values(asepriteData.frames);
 
-        await Promise.all([standingImage.decode(), walkingImage.decode()]);
+        await Promise.all([requestedStandingImage.decode(), requestedWalkingImage.decode()]);
+        if (character !== characterSelect.value) return;
+
+        standingImage = requestedStandingImage;
+        walkingImage = requestedWalkingImage;
+        walkingFrames = requestedFrames;
+        frameIndex = 0;
+        frameElapsed = 0;
         drawSprite();
       } catch (error) {
-        spriteStatus.textContent = `Unable to load sprites: ${error.message}`;
+        if (character === characterSelect.value) {
+          standingImage = null;
+          walkingImage = null;
+          walkingFrames = [];
+          context.clearRect(0, 0, canvas.width, canvas.height);
+          spriteStatus.textContent = `${character}: assets not available yet (${error.message})`;
+        }
       }
     }
 
@@ -118,6 +149,7 @@
       const scale = Number(scaleSelect.value);
       const walking = spriteSelect.value === "walking";
       const image = walking ? walkingImage : standingImage;
+      if (!image) return;
       const frameData = walking ? walkingFrames[frameIndex] : null;
       const frame = frameData?.frame ?? { x: 0, y: 0, w: image.naturalWidth, h: image.naturalHeight };
 
@@ -127,9 +159,10 @@
       context.imageSmoothingEnabled = false;
       context.clearRect(0, 0, canvas.width, canvas.height);
       context.drawImage(image, frame.x, frame.y, frame.w, frame.h, 0, 0, canvas.width, canvas.height);
+      const character = characterSelect.value;
       spriteStatus.textContent = walking
-        ? `rasputin_walk.png — frame ${frameIndex + 1} of ${walkingFrames.length} (${frame.w} × ${frame.h}px)`
-        : `rasputin_standing.png — ${frame.w} × ${frame.h}px`;
+        ? `${character}_walk.png — frame ${frameIndex + 1} of ${walkingFrames.length} (${frame.w} × ${frame.h}px)`
+        : `${character}_standing.png — ${frame.w} × ${frame.h}px`;
     }
 
     function animate(time) {
@@ -149,6 +182,7 @@
       requestAnimationFrame(animate);
     }
 
+    characterSelect.addEventListener("change", loadSprites);
     spriteSelect.addEventListener("change", () => { frameIndex = 0; frameElapsed = 0; drawSprite(); });
     scaleSelect.addEventListener("change", drawSprite);
     pauseButton.addEventListener("click", () => {
