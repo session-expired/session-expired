@@ -1,6 +1,7 @@
 {
   "scripts": {
     "start": "node server/server.js",
+    "assets": "node server/assets.js",
     "predev": "kill-port 3000 || true",
     "dev": "node server/dev.js",
     "test": "node --test"

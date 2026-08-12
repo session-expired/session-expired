@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Asylum Asset Tester</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; padding: 24px; color: #eee; background: #171717; font-family: monospace; }
+    main { max-width: 900px; margin: 0 auto; }
+    section { margin-bottom: 24px; padding: 16px; border: 1px solid #555; background: #222; }
+    h1, h2 { margin-top: 0; }
+    .controls { display: flex; flex-wrap: wrap; align-items: center; gap: 16px; margin-bottom: 16px; }
+    label { display: flex; align-items: center; gap: 8px; }
+    button, select, input { font: inherit; }
+    #sprite-stage {
+      min-height: 320px;
+      display: grid;
+      place-items: center;
+      border: 1px solid #555;
+      background-color: #aaa;
+      background-image: linear-gradient(45deg, #777 25%, transparent 25%),
+        linear-gradient(-45deg, #777 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, #777 75%),
+        linear-gradient(-45deg, transparent 75%, #777 75%);
+      background-size: 32px 32px;
+      background-position: 0 0, 0 16px, 16px -16px, -16px 0;
+    }
+    canvas { image-rendering: pixelated; image-rendering: crisp-edges; }
+    .status { margin-top: 12px; color: #bbb; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Asylum Asset Tester</h1>
+
+    <section>
+      <h2>Rasputin sprites</h2>
+      <div class="controls">
+        <label>
+          Image
+          <select id="sprite">
+            <option value="standing">Standing</option>
+            <option value="walking">Walking</option>
+          </select>
+        </label>
+        <label>
+          Scale
+          <select id="scale">
+            <option value="1">1x</option>
+            <option value="2">2x</option>
+            <option value="3" selected>3x</option>
+            <option value="4">4x</option>
+            <option value="6">6x</option>
+            <option value="8">8x</option>
+          </select>
+        </label>
+        <button id="pause" type="button">Pause</button>
+      </div>
+      <div id="sprite-stage"><canvas id="sprite-canvas"></canvas></div>
+      <div id="sprite-status" class="status">Loading sprite…</div>
+    </section>
+
+    <section>
+      <h2>Music</h2>
+      <div class="controls">
+        <button id="music-play" type="button">Play</button>
+        <button id="music-mute" type="button">Mute</button>
+        <label>
+          Volume
+          <input id="music-volume" type="range" min="0" max="1" step="0.01" value="0.4">
+        </label>
+      </div>
+      <div id="music-status" class="status">game_loop.mp3 — stopped</div>
+    </section>
+  </main>
+
+  <script>
+    const assetRoot = "/assets/images/chars/rasputin";
+    const canvas = document.querySelector("#sprite-canvas");
+    const context = canvas.getContext("2d");
+    const spriteSelect = document.querySelector("#sprite");
+    const scaleSelect = document.querySelector("#scale");
+    const pauseButton = document.querySelector("#pause");
+    const spriteStatus = document.querySelector("#sprite-status");
+
+    const standingImage = new Image();
+    const walkingImage = new Image();
+    standingImage.src = `${assetRoot}/rasputin_standing.png`;
+    walkingImage.src = `${assetRoot}/rasputin_walk.png`;
+
+    let walkingFrames = [];
+    let frameIndex = 0;
+    let frameElapsed = 0;
+    let previousTime = 0;
+    let paused = false;
+
+    async function loadSprites() {
+      try {
+        const response = await fetch(`${assetRoot}/rasputin_walk.json`);
+        if (!response.ok) throw new Error(`JSON request failed (${response.status})`);
+        const asepriteData = await response.json();
+
+        // This Aseprite export uses an object keyed by source frame name.
+        walkingFrames = Array.isArray(asepriteData.frames)
+          ? asepriteData.frames
+          : Object.values(asepriteData.frames);
+
+        await Promise.all([standingImage.decode(), walkingImage.decode()]);
+        drawSprite();
+      } catch (error) {
+        spriteStatus.textContent = `Unable to load sprites: ${error.message}`;
+      }
+    }
+
+    function drawSprite() {
+      const scale = Number(scaleSelect.value);
+      const walking = spriteSelect.value === "walking";
+      const image = walking ? walkingImage : standingImage;
+      const frameData = walking ? walkingFrames[frameIndex] : null;
+      const frame = frameData?.frame ?? { x: 0, y: 0, w: image.naturalWidth, h: image.naturalHeight };
+
+      if (!frame.w || !frame.h) return;
+      canvas.width = frame.w * scale;
+      canvas.height = frame.h * scale;
+      context.imageSmoothingEnabled = false;
+      context.clearRect(0, 0, canvas.width, canvas.height);
+      context.drawImage(image, frame.x, frame.y, frame.w, frame.h, 0, 0, canvas.width, canvas.height);
+      spriteStatus.textContent = walking
+        ? `rasputin_walk.png — frame ${frameIndex + 1} of ${walkingFrames.length} (${frame.w} × ${frame.h}px)`
+        : `rasputin_standing.png — ${frame.w} × ${frame.h}px`;
+    }
+
+    function animate(time) {
+      const delta = time - previousTime;
+      previousTime = time;
+
+      if (!paused && spriteSelect.value === "walking" && walkingFrames.length) {
+        frameElapsed += delta;
+        const duration = walkingFrames[frameIndex].duration || 100;
+        if (frameElapsed >= duration) {
+          frameElapsed %= duration;
+          frameIndex = (frameIndex + 1) % walkingFrames.length;
+        }
+      }
+
+      drawSprite();
+      requestAnimationFrame(animate);
+    }
+
+    spriteSelect.addEventListener("change", () => { frameIndex = 0; frameElapsed = 0; drawSprite(); });
+    scaleSelect.addEventListener("change", drawSprite);
+    pauseButton.addEventListener("click", () => {
+      paused = !paused;
+      pauseButton.textContent = paused ? "Resume" : "Pause";
+    });
+
+    const music = new Audio("/assets/audio/game_loop.mp3");
+    music.loop = true;
+    music.volume = 0.4;
+    const playButton = document.querySelector("#music-play");
+    const muteButton = document.querySelector("#music-mute");
+    const musicStatus = document.querySelector("#music-status");
+
+    playButton.addEventListener("click", async () => {
+      try {
+        if (music.paused) {
+          await music.play();
+          playButton.textContent = "Pause";
+          musicStatus.textContent = "game_loop.mp3 — playing";
+        } else {
+          music.pause();
+          playButton.textContent = "Play";
+          musicStatus.textContent = "game_loop.mp3 — paused";
+        }
+      } catch (error) {
+        musicStatus.textContent = `Unable to play audio: ${error.message}`;
+      }
+    });
+
+    muteButton.addEventListener("click", () => {
+      music.muted = !music.muted;
+      muteButton.textContent = music.muted ? "Unmute" : "Mute";
+    });
+    document.querySelector("#music-volume").addEventListener("input", (event) => {
+      music.volume = Number(event.target.value);
+    });
+
+    loadSprites();
+    requestAnimationFrame(animate);
+  </script>
+</body>
+</html>
