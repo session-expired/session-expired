@@ -24,7 +24,7 @@
 
 ## Core Structure
 
-- Classic Clue-esque rules
+- Classic Hint-esque rules
   - Everybody is a detective
 - No physical cards
 - Suspects
