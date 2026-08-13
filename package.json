@@ -1,5 +1,6 @@
 {
   "scripts": {
+    "setup": "node server/database/setup.js",
     "start": "node server/server.js",
     "assets": "node server/assets.js",
     "predev": "kill-port 3000 || true",
