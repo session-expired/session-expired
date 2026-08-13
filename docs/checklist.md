@@ -1,18 +1,20 @@
 ## This is a simple checklist for tracking progress
 
 ## Basic application
+
 - [ ] Define the rules and victory conditions
 - [ ] Define the minimal playable version
-- [X] Create basic server functions
-- [X] Create basic sites
-- [X] Define a color theme
-- [X] Create the landing page
+- [x] Create basic server functions
+- [x] Create basic sites
+- [x] Define a color theme
+- [x] Create the landing page
 
 ## Database Structure
-- [X] Define the user data model
+
+- [x] Define the user data model
 - [ ] Define the game session data model
 - [ ] Define player and character data
-- [X] Define room data
+- [x] Define room data
 - [ ] Define suspect, object, and murder data
 - [ ] Define item and hint data
 - [ ] Define turn and action data
@@ -21,19 +23,21 @@
 - [ ] Create development seed data
 
 ## Visual Mockup
-- [X] Create the global page layout
-- [X] Create navigation
-- [X] Create signup and login pages
-- [X] Create the user profile page
-- [X] Create the game lobby page
+
+- [x] Create the global page layout
+- [x] Create navigation
+- [x] Create signup and login pages
+- [x] Create the user profile page
+- [x] Create the game lobby page
 - [ ] Create the main game page layout
 - [ ] Create interface components
 - [ ] Add basic responsive behavior
 
 ## Lobby and Game Creation
-- [X] Implement account registration
-- [X] Implement login and logout
-- [X] Maintain logged-in sessions
+
+- [x] Implement account registration
+- [x] Implement login and logout
+- [x] Maintain logged-in sessions
 - [ ] Allow basic profile editing
 - [ ] Display online and offline status
 - [ ] Display available game rooms
@@ -44,10 +48,11 @@
 - [ ] Allow the host to start the game
 
 ## Communication
-- [X] Add global lobby chat
+
+- [x] Add global lobby chat
 - [ ] Add individual game chat
-- [X] Add private player-to-player messages
+- [x] Add private player-to-player messages
 - [ ] Add system-generated game messages
 - [ ] Handle temporary disconnections and reconnections
-- [X] Add chat moderation controls
+- [x] Add chat moderation controls
 - [ ] Prevent unauthorized users from viewing private game messages
