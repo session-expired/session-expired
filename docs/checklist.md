@@ -1,4 +1,4 @@
-## This is a simple checklist for tracking progress
+# This is a simple checklist for tracking progress
 
 ## Basic application
 
