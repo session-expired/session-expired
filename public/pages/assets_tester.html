@@ -77,6 +77,12 @@
     <section>
       <h2>Music</h2>
       <div class="controls">
+        <label>
+          Track
+          <select id="music-track" disabled>
+            <option>Loading tracks…</option>
+          </select>
+        </label>
         <button id="music-play" type="button">Play</button>
         <button id="music-mute" type="button">Mute</button>
         <label>
@@ -84,7 +90,7 @@
           <input id="music-volume" type="range" min="0" max="1" step="0.01" value="0.4">
         </label>
       </div>
-      <div id="music-status" class="status">game_loop.mp3 — stopped</div>
+      <div id="music-status" class="status">Loading music folder…</div>
     </section>
   </main>
 
@@ -190,23 +196,68 @@
       pauseButton.textContent = paused ? "Resume" : "Pause";
     });
 
-    const music = new Audio("/assets/audio/game_loop.mp3");
+    const music = new Audio();
     music.loop = true;
     music.volume = 0.4;
+    const trackSelect = document.querySelector("#music-track");
     const playButton = document.querySelector("#music-play");
     const muteButton = document.querySelector("#music-mute");
     const musicStatus = document.querySelector("#music-status");
+
+    function selectedTrackName() {
+      return trackSelect.value;
+    }
+
+    function selectTrack() {
+      const track = selectedTrackName();
+      music.pause();
+      music.src = `/assets/audio/music/${encodeURIComponent(track)}`;
+      music.load();
+      playButton.textContent = "Play";
+      musicStatus.textContent = `${track} — stopped`;
+    }
+
+    async function loadMusicTracks() {
+      try {
+        const response = await fetch("/api/music");
+        if (!response.ok) throw new Error(`folder request failed (${response.status})`);
+        const { files } = await response.json();
+
+        trackSelect.replaceChildren();
+        for (const file of files) {
+          const option = document.createElement("option");
+          option.value = file;
+          option.textContent = file;
+          trackSelect.append(option);
+        }
+
+        if (!files.length) {
+          trackSelect.append(new Option("No audio files found", ""));
+          playButton.disabled = true;
+          musicStatus.textContent = "No supported audio files found";
+          return;
+        }
+
+        trackSelect.disabled = false;
+        selectTrack();
+      } catch (error) {
+        playButton.disabled = true;
+        musicStatus.textContent = `Unable to enumerate music: ${error.message}`;
+      }
+    }
+
+    trackSelect.addEventListener("change", selectTrack);
 
     playButton.addEventListener("click", async () => {
       try {
         if (music.paused) {
           await music.play();
           playButton.textContent = "Pause";
-          musicStatus.textContent = "game_loop.mp3 — playing";
+          musicStatus.textContent = `${selectedTrackName()} — playing`;
         } else {
           music.pause();
           playButton.textContent = "Play";
-          musicStatus.textContent = "game_loop.mp3 — paused";
+          musicStatus.textContent = `${selectedTrackName()} — paused`;
         }
       } catch (error) {
         musicStatus.textContent = `Unable to play audio: ${error.message}`;
@@ -222,6 +273,7 @@
     });
 
     loadSprites();
+    loadMusicTracks();
     requestAnimationFrame(animate);
   </script>
 </body>
