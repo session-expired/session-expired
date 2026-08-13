@@ -35,7 +35,7 @@ Players will be able to:
 * Reconnect to active games, without losing their game state
 * View current games as a spectator
 * View the winners of completed matches
-* View basic profile and game statistics
+* View basic profile and game statisticsπ
 
 ### Concurrent Games
 
