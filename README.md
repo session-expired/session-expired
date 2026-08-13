@@ -10,7 +10,7 @@ The art will likely be 32 bit.
 
 ## Core Concept
 
-Each game starts the players inside a uniquely generated asylum layout. Somewhere within the institution, a murder has occurred involving a victim, a location, an object, and a method.
+Each game starts the players inside a procedurally generated asylum layout. Somewhere within the institution, a murder has occurred involving a victim, a location, an object, and a method.
 
 Players take turns moving between rooms, gathering information, communicating with other players, finding hints, and submitting accusations.
 
