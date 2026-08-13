@@ -17,5 +17,8 @@
   },
   "devDependencies": {
     "kill-port": "^2.0.1"
+  },
+  "allowScripts": {
+    "bcrypt@6.0.0": true
   }
 }
