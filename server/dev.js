@@ -1,11 +1,7 @@
-require("dotenv").config({ quiet: true });
-
-process.env.NODE_ENV = "development";
-process.env.HOST = "localhost";
-process.env.PORT = "3000";
-process.env.DATABASE_URL ||= "postgresql://postgres:session_expired_user@localhost:5432/session_expired";
-process.env.SESSION_SECRET ||= "development-only-session-secret-change-me";
-process.env.COOKIE_SECURE ||= "false";
+require("dotenv").config({
+  path: require("path").join(__dirname, "..", ".env"),
+  quiet: true
+});
 
 const { pool, startServer } = require("./server");
 const { seedDevelopmentUsers } = require("./database/seed-dev");

@@ -94,12 +94,12 @@ The account system requires Node.js 18 or newer and PostgreSQL.
 1. Install dependencies with `npm install`.
 2. Create a PostgreSQL database named `session_expired`.
 3. Apply the tables and indexes with `psql session_expired < sql/schema.sql`.
-4. Copy `.env.example` to `.env`, then set the database URL and replace the session secret with a long random value.
+4. Configure the root `.env` using `.env.example` as a reference, then set the database URL and replace the session secret with a long random value.
 5. Start the server with `npm start`, then visit `http://localhost:3000/register`.
 
 For local HTTP, leave `COOKIE_SECURE=false`. Set it to `true` when the application is served over HTTPS. Set `DATABASE_SSL=true` only when the PostgreSQL provider requires TLS.
 
-For development, run `npm run dev`. It defaults to `http://localhost:3000` and the local database URL `postgresql://postgres:postgres@localhost:5432/session_expired`, so a `.env` file is not required when those defaults match your PostgreSQL setup. Set `DATABASE_URL` in `.env` when your local credentials differ.
+For development, run `npm run dev`. Server, database, cookie, and asset-server settings are loaded from the root `.env`; update that file when your local configuration differs.
 
 Before starting the server, the development command creates or refreshes four test accounts (`user1`, `user2`, `user3`, and `user4`), each with the password `password`. Their email addresses are `user1@example.com` through `user4@example.com`.
 
