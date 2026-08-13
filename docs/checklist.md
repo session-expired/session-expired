@@ -1,7 +1,5 @@
 ## This is a simple checklist for tracking progress
 
-## Place your initials in what section you are currently working on, and an X when complete.
-
 ## Basic application
 - [ ] Define the rules and victory conditions
 - [ ] Define the minimal playable version
@@ -14,7 +12,7 @@
 - [X] Define the user data model
 - [ ] Define the game session data model
 - [ ] Define player and character data
-- [ ] Define room data
+- [X] Define room data
 - [ ] Define suspect, object, and murder data
 - [ ] Define item and hint data
 - [ ] Define turn and action data
@@ -23,19 +21,19 @@
 - [ ] Create development seed data
 
 ## Visual Mockup
-- [ ] Create the global page layout
-- [ ] Create navigation
-- [ ] Create signup and login pages
-- [ ] Create the user profile page
-- [ ] Create the game lobby page
+- [X] Create the global page layout
+- [X] Create navigation
+- [X] Create signup and login pages
+- [X] Create the user profile page
+- [X] Create the game lobby page
 - [ ] Create the main game page layout
 - [ ] Create interface components
 - [ ] Add basic responsive behavior
 
 ## Lobby and Game Creation
-- [ ] Implement account registration
-- [ ] Implement login and logout
-- [ ] Maintain logged-in sessions
+- [X] Implement account registration
+- [X] Implement login and logout
+- [X] Maintain logged-in sessions
 - [ ] Allow basic profile editing
 - [ ] Display online and offline status
 - [ ] Display available game rooms
@@ -46,10 +44,10 @@
 - [ ] Allow the host to start the game
 
 ## Communication
-- [RKN] Add global lobby chat
+- [X] Add global lobby chat
 - [ ] Add individual game chat
-- [ ] Add private player-to-player messages
+- [X] Add private player-to-player messages
 - [ ] Add system-generated game messages
 - [ ] Handle temporary disconnections and reconnections
-- [ ] Add chat moderation controls
+- [X] Add chat moderation controls
 - [ ] Prevent unauthorized users from viewing private game messages
