@@ -18,13 +18,13 @@
   - Connects NE↔SW and NW↔SE corners
   - Free to use, no movement cost
 - Minimum 2 players
-  - Possibly 3, like classic Clue
+  - Possibly 3, like classic Hint
 - Maximum 4 players
-  - Possibly 6, like classic Clue
+  - Possibly 6, like classic Hint
 
 ## Core Structure
 
-- Classic Hint-esque rules
+- Classic Hint rules
   - Everybody is a detective
 - No physical cards
 - Suspects
@@ -43,7 +43,7 @@
   - Correctly guessing all three results in a win
   - Must head to Warden's Office to make your guess
 - Potential sanity feature
-  - If you make an incorrect accusation in classic Clue, you're out of the game
+  - If you make an incorrect accusation in classic Hint, you're out of the game
   - Potential feature where you have 2-3 accusations, and each accusation deteriorates your sanity; losing your sanity is a lose condition
     - This could potentially be too OP with multiple accusations — if implemented, max should be 2 accusations
 - Players get a notebook with various information inside of it
@@ -52,7 +52,7 @@
 ## Movement
 
 - 1d8 roll
-  - Our board is slightly larger than Clue's, which uses a 1d6, so 1d8 to compensate
+  - Our board is slightly larger than Hint's, which uses a 1d6, so 1d8 to compensate
 - No partial moves, must use the full roll
 - Each space = 1 point of movement
   - Entering/exiting a room costs 1 point of movement
@@ -63,7 +63,7 @@
 ### Player Turn / Guessing
 
 - Turn order will be determined at the beginning
-  - Classic Clue goes clockwise from the person who dealt cards; we will just assign an unseen value 1-4 to keep player order
+  - Classic Hint goes clockwise from the person who dealt cards; we will just assign an unseen value 1-4 to keep player order
 - Entering a room ends movement for the turn
   - "Guess" button will appear while in a room
   - Make a guess or end your turn
@@ -96,5 +96,5 @@
 
 ## Open Questions
 
-- Should the accused suspect be moved physically to the suggested room, like traditional Clue?
-- When a player is eliminated, are they sent back to their padded cell and still involved in the disprove process (like classic Clue), or is all their info disseminated to other players?
+- Should the accused suspect be moved physically to the suggested room, like traditional Hint?
+- When a player is eliminated, are they sent back to their padded cell and still involved in the disprove process (like classic Hint), or is all their info disseminated to other players?
