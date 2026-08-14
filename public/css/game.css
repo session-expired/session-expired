@@ -1,0 +1,11 @@
+#board {
+    display: grid;
+    grid-template-columns: repeat(30, 1fr);
+    grid-template-rows: repeat(24, 1fr);
+    width: 1150px;
+    height: 660px;
+}
+
+#board div {
+    border: 1px solid black;
+}
