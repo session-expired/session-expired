@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/png" href="/assets/images/favicon.png" />
-    <title>Session Expired</title>
+    <title>How to Play</title>
     <link rel="stylesheet" href="../css/global.css" />
     <link
       href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap"
@@ -13,7 +13,7 @@
   </head>
 
   <body>
-     <h1 style="text-align: center;">SESSION EXPIRED</h1>
+    <h1 style="text-align: center">SESSION EXPIRED</h1>
     <nav>
       <ul>
         <li><a href="../index.html">Home</a></li>
@@ -23,8 +23,169 @@
         <li><a href="./login.html" data-auth-link>Login</a></li>
       </ul>
     </nav>
-    <h2 style="text-align: center;">How to play:</h1>
+
+    <div class="howto-page">
+      <h1>How to Play</h1>
+
+      <h2>The Objective</h2>
+      <p>
+        Somewhere inside Ward 9, a patient was murdered. Every player is a
+        detective — there's no hero and no villain, just a room full of
+        people trying to reach the truth before anyone else does.
+      </p>
+      <p>
+        Move through the ward, gather what other players are forced to
+        reveal, and narrow down three facts: who did it, how, and where.
+        The first player to march into the Warden's Office and name all
+        three correctly wins.
+      </p>
+
+      <h2>The Board</h2>
+      <ul>
+        <li>30 columns × 24 rows, 1 unit per square</li>
+        <li>Warden's Office: 8×9, fixed in the center</li>
+        <li>4 corner rooms (two 9×7, two 9×8)</li>
+        <li>4 edge rooms (two 8×5, two 8×6)</li>
+        <li>8 spawn points located in the hallways</li>
+        <li>
+          Secret passages connect NE↔SW and NW↔SE corners, free to use with
+          no movement cost
+        </li>
+      </ul>
+      <div class="note">
+        Hallway squares can only hold one player at a time — you can't move
+        onto or through an occupied hallway square. Rooms have no limit;
+        any number of players can share a room.
+      </div>
+
+      <h2>Setup</h2>
+      <p>
+        2–4 players is standard, with room to stretch to 3 on the low end
+        or 6 on the high end.
+      </p>
+      <ul>
+        <li>6 suspects</li>
+        <li>6 weapons / causes of death</li>
+        <li>9 locations</li>
+      </ul>
+      <p>
+        One suspect, one weapon, and one location are set aside at random
+        as the solution. Everything else is dealt out evenly among
+        players. Turn order is assigned randomly at the start.
+      </p>
+      <p>
+        No physical cards are used — suspects, weapons, and locations are
+        tracked as names or simple drawings in each player's journal (or
+        as items in an inventory, if your version uses that).
+      </p>
+      <div class="note">
+        The Warden's Office is never part of the solution pool — it's only
+        where you go to make your final accusation.
+      </div>
+
+      <h2>Your Journal</h2>
+      <p>
+        Each player starts with a journal listing whatever suspects,
+        weapons, and locations they were dealt.
+      </p>
+      <ul>
+        <li>Anything shown to you during a disprove is logged automatically.</li>
+        <li>
+          Each guess gets its own entry: what you guessed, who showed you
+          something (and what), or a note that nobody could show you
+          anything.
+        </li>
+      </ul>
+
+      <h2>Taking Your Turn</h2>
+      <h3>Movement</h3>
+      <ul>
+        <li>Roll a number to move.</li>
+        <li>You must use the full roll — no partial movement.</li>
+        <li>
+          Each square costs 1 point of movement; entering or exiting a
+          room also costs 1 point.
+        </li>
+        <li>Secret passages are free to use.</li>
+      </ul>
+      <h3>Entering a Room</h3>
+      <p>
+        Entering a room ends your movement for the turn. A "Guess" option
+        becomes available — you can guess or simply end your turn. If
+        you're still in that room next turn, you can guess again without
+        rolling. If you choose to roll instead, you give up your chance to
+        guess that turn.
+      </p>
+      <p>
+        You get one guess per turn. You're allowed to reference cards you
+        already hold yourself when guessing.
+      </p>
+
+      <h2>Making a Guess</h2>
+      <p>
+        A guess names a suspect and a weapon/cause of death. The location
+        is automatically whatever room you're currently standing in — you
+        must be physically in the room to name it.
+      </p>
+      <p>
+        Self-guessing is allowed — you can name yourself as the suspect or
+        name a weapon/location you're holding.
+      </p>
+
+      <h2>The Disprove</h2>
+      <p>
+        After a guess, players are checked in turn order. The first player
+        holding a matching suspect, weapon, or location card must show one
+        of them — no bluffing or refusing. If they hold multiple matches,
+        they choose which one to reveal.
+      </p>
+      <p>
+        Only the first matching player is asked; no one further down the
+        order is approached, even if they also hold a match.
+      </p>
+      <div class="note">
+        The player disproving gets about 10 seconds to show the card,
+        which is then logged in the guesser's journal. Everyone at the
+        table sees the reveal window open, whether or not a card is
+        actually shown — so no one else can tell if information was
+        exchanged.
+      </div>
+      <p>
+        If nobody has a match, that's also logged — it's a useful clue on
+        its own.
+      </p>
+
+      <h2>Making an Accusation</h2>
+      <p>
+        Your final accusation — naming the full solution — can only be
+        made from inside the Warden's Office.
+      </p>
+      <div class="note">
+        Optional rule: instead of one wrong accusation ending your game,
+        allow 2 (at most 3) accusations, with each wrong guess costing
+        "sanity." Losing all your sanity eliminates you. 2 is the
+        recommended max.
+      </div>
+
+      <h2>Winning &amp; Losing</h2>
+      <p>
+        Correctly name the suspect, weapon, and location while in the
+        Warden's Office to win. A wrong accusation eliminates you from
+        guessing further — being the last player left doesn't win by
+        default; you still have to guess correctly.
+      </p>
+      <p>
+        If every player guesses wrong (or runs out of sanity), the game
+        ends with no winner, and the solution is revealed.
+      </p>
+
+    </div>
+
     <script src="/socket.io/socket.io.js"></script>
-    <script src="../js/chat.js"></script>
+    <script src="/js/chat.js"></script>
+    <script src="/js/session-nav.js"></script>
+    <footer>
+      <div id="copy">&copy; 2026 Session Expired</div>
+    </footer>
   </body>
 </html>
