@@ -1,0 +1,88 @@
+{ "frames": {
+   "session-expired 0.aseprite": {
+    "frame": { "x": 0, "y": 0, "w": 32, "h": 57 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 57 },
+    "sourceSize": { "w": 32, "h": 57 },
+    "duration": 100
+   },
+   "session-expired 1.aseprite": {
+    "frame": { "x": 32, "y": 0, "w": 32, "h": 57 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 57 },
+    "sourceSize": { "w": 32, "h": 57 },
+    "duration": 100
+   },
+   "session-expired 2.aseprite": {
+    "frame": { "x": 64, "y": 0, "w": 32, "h": 57 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 57 },
+    "sourceSize": { "w": 32, "h": 57 },
+    "duration": 100
+   },
+   "session-expired 3.aseprite": {
+    "frame": { "x": 96, "y": 0, "w": 32, "h": 57 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 57 },
+    "sourceSize": { "w": 32, "h": 57 },
+    "duration": 100
+   },
+   "session-expired 4.aseprite": {
+    "frame": { "x": 128, "y": 0, "w": 32, "h": 57 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 57 },
+    "sourceSize": { "w": 32, "h": 57 },
+    "duration": 100
+   },
+   "session-expired 5.aseprite": {
+    "frame": { "x": 160, "y": 0, "w": 32, "h": 57 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 57 },
+    "sourceSize": { "w": 32, "h": 57 },
+    "duration": 100
+   },
+   "session-expired 6.aseprite": {
+    "frame": { "x": 192, "y": 0, "w": 32, "h": 57 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 57 },
+    "sourceSize": { "w": 32, "h": 57 },
+    "duration": 100
+   },
+   "session-expired 7.aseprite": {
+    "frame": { "x": 224, "y": 0, "w": 32, "h": 57 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 57 },
+    "sourceSize": { "w": 32, "h": 57 },
+    "duration": 100
+   }
+ },
+ "meta": {
+  "app": "https://www.aseprite.org/",
+  "version": "1.3.15.2-x64",
+  "image": "curie.png",
+  "format": "RGBA8888",
+  "size": { "w": 256, "h": 57 },
+  "scale": "1",
+  "frameTags": [
+   { "name": "Standing", "from": 0, "to": 0, "direction": "forward", "color": "#000000ff" },
+   { "name": "walking", "from": 1, "to": 6, "direction": "forward", "color": "#000000ff" }
+  ],
+  "layers": [
+   { "name": "curie" },
+   { "name": "base_body Copy Copy Copy Copy", "group": "curie", "opacity": 255, "blendMode": "normal" },
+   { "name": "clothes", "group": "curie", "opacity": 255, "blendMode": "normal" },
+   { "name": "face", "group": "curie", "opacity": 255, "blendMode": "normal" },
+   { "name": "hair", "group": "curie", "opacity": 255, "blendMode": "normal" }
+  ],
+  "slices": [
+  ]
+ }
+}
