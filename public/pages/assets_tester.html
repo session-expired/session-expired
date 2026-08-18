@@ -51,10 +51,9 @@
           </select>
         </label>
         <label>
-          Image
-          <select id="sprite">
-            <option value="standing">Standing</option>
-            <option value="walking">Walking</option>
+          Tag area
+          <select id="sprite" disabled>
+            <option>Loading tags…</option>
           </select>
         </label>
         <label>
@@ -103,48 +102,85 @@
     const pauseButton = document.querySelector("#pause");
     const spriteStatus = document.querySelector("#sprite-status");
 
-    let standingImage = null;
-    let walkingImage = null;
-
-    let walkingFrames = [];
+    let spriteImage = null;
+    let spriteFile = "";
+    let taggedFrames = new Map();
+    let activeFrames = [];
     let frameIndex = 0;
     let frameElapsed = 0;
     let previousTime = 0;
     let paused = false;
 
+    function framesForTag(allFrames, tag) {
+      const from = Math.max(0, Number(tag.from));
+      const to = Math.min(allFrames.length - 1, Number(tag.to));
+      if (!Number.isInteger(from) || !Number.isInteger(to) || from > to) return [];
+
+      const frames = allFrames.slice(from, to + 1);
+      if (tag.direction === "reverse") return frames.reverse();
+      if (tag.direction === "pingpong" && frames.length > 2) {
+        return frames.concat(frames.slice(1, -1).reverse());
+      }
+      if (tag.direction === "pingpong_reverse" && frames.length > 2) {
+        return frames.slice().reverse().concat(frames.slice(1, -1));
+      }
+      return frames;
+    }
+
+    function selectTag() {
+      activeFrames = taggedFrames.get(spriteSelect.value) ?? [];
+      frameIndex = 0;
+      frameElapsed = 0;
+      drawSprite();
+    }
+
     async function loadSprites() {
       const character = characterSelect.value;
-      const assetRoot = `/assets/images/chars/${character}`;
-      const requestedStandingImage = new Image();
-      const requestedWalkingImage = new Image();
-      requestedStandingImage.src = `${assetRoot}/${character}_standing.png`;
-      requestedWalkingImage.src = `${assetRoot}/${character}_walk.png`;
+      const encodedCharacter = encodeURIComponent(character);
+      const assetRoot = `/assets/images/chars/${encodedCharacter}`;
+      const requestedImage = new Image();
       spriteStatus.textContent = `Loading ${character}…`;
+      spriteSelect.disabled = true;
 
       try {
-        const response = await fetch(`${assetRoot}/${character}_walk.json`);
+        const response = await fetch(`${assetRoot}/${encodedCharacter}.json`);
         if (!response.ok) throw new Error(`JSON request failed (${response.status})`);
         const asepriteData = await response.json();
 
         // This Aseprite export uses an object keyed by source frame name.
-        const requestedFrames = Array.isArray(asepriteData.frames)
+        const allFrames = Array.isArray(asepriteData.frames)
           ? asepriteData.frames
           : Object.values(asepriteData.frames);
+        const tags = asepriteData.meta?.frameTags ?? [];
+        if (!allFrames.length) throw new Error("JSON contains no frames");
+        if (!tags.length) throw new Error("JSON contains no frame tags");
 
-        await Promise.all([requestedStandingImage.decode(), requestedWalkingImage.decode()]);
+        const requestedTags = new Map();
+        for (const tag of tags) {
+          const frames = framesForTag(allFrames, tag);
+          if (tag.name && frames.length) requestedTags.set(tag.name, frames);
+        }
+        if (!requestedTags.size) throw new Error("JSON contains no valid frame tags");
+
+        const requestedSpriteFile = asepriteData.meta?.image || `${character}.png`;
+        requestedImage.src = `${assetRoot}/${encodeURIComponent(requestedSpriteFile)}`;
+
+        await requestedImage.decode();
         if (character !== characterSelect.value) return;
 
-        standingImage = requestedStandingImage;
-        walkingImage = requestedWalkingImage;
-        walkingFrames = requestedFrames;
-        frameIndex = 0;
-        frameElapsed = 0;
-        drawSprite();
+        spriteImage = requestedImage;
+        spriteFile = requestedSpriteFile;
+        taggedFrames = requestedTags;
+        spriteSelect.replaceChildren(...Array.from(taggedFrames.keys(), (tag) => new Option(tag, tag)));
+        spriteSelect.disabled = false;
+        selectTag();
       } catch (error) {
         if (character === characterSelect.value) {
-          standingImage = null;
-          walkingImage = null;
-          walkingFrames = [];
+          spriteImage = null;
+          taggedFrames = new Map();
+          activeFrames = [];
+          spriteSelect.replaceChildren(new Option("No tags available", ""));
+          spriteSelect.disabled = true;
           context.clearRect(0, 0, canvas.width, canvas.height);
           spriteStatus.textContent = `${character}: assets not available yet (${error.message})`;
         }
@@ -153,34 +189,30 @@
 
     function drawSprite() {
       const scale = Number(scaleSelect.value);
-      const walking = spriteSelect.value === "walking";
-      const image = walking ? walkingImage : standingImage;
-      if (!image) return;
-      const frameData = walking ? walkingFrames[frameIndex] : null;
-      const frame = frameData?.frame ?? { x: 0, y: 0, w: image.naturalWidth, h: image.naturalHeight };
+      if (!spriteImage || !activeFrames.length) return;
+      const frameData = activeFrames[frameIndex];
+      const frame = frameData.frame;
 
       if (!frame.w || !frame.h) return;
       canvas.width = frame.w * scale;
       canvas.height = frame.h * scale;
       context.imageSmoothingEnabled = false;
       context.clearRect(0, 0, canvas.width, canvas.height);
-      context.drawImage(image, frame.x, frame.y, frame.w, frame.h, 0, 0, canvas.width, canvas.height);
+      context.drawImage(spriteImage, frame.x, frame.y, frame.w, frame.h, 0, 0, canvas.width, canvas.height);
       const character = characterSelect.value;
-      spriteStatus.textContent = walking
-        ? `${character}_walk.png — frame ${frameIndex + 1} of ${walkingFrames.length} (${frame.w} × ${frame.h}px)`
-        : `${character}_standing.png — ${frame.w} × ${frame.h}px`;
+      spriteStatus.textContent = `${character} / ${spriteSelect.value} — ${spriteFile}, frame ${frameIndex + 1} of ${activeFrames.length} (${frame.w} × ${frame.h}px)`;
     }
 
     function animate(time) {
       const delta = time - previousTime;
       previousTime = time;
 
-      if (!paused && spriteSelect.value === "walking" && walkingFrames.length) {
+      if (!paused && activeFrames.length > 1) {
         frameElapsed += delta;
-        const duration = walkingFrames[frameIndex].duration || 100;
+        const duration = activeFrames[frameIndex].duration || 100;
         if (frameElapsed >= duration) {
           frameElapsed %= duration;
-          frameIndex = (frameIndex + 1) % walkingFrames.length;
+          frameIndex = (frameIndex + 1) % activeFrames.length;
         }
       }
 
@@ -189,7 +221,7 @@
     }
 
     characterSelect.addEventListener("change", loadSprites);
-    spriteSelect.addEventListener("change", () => { frameIndex = 0; frameElapsed = 0; drawSprite(); });
+    spriteSelect.addEventListener("change", selectTag);
     scaleSelect.addEventListener("change", drawSprite);
     pauseButton.addEventListener("click", () => {
       paused = !paused;
