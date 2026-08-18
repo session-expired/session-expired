@@ -31,6 +31,8 @@ const secureCookies = process.env.COOKIE_SECURE
 const publicDirectory = path.join(__dirname, "..", "public");
 const pageDirectory = path.join(__dirname, "pages");
 const publicPageDirectory = path.join(publicDirectory, "pages");
+const {rooms} = require("./game/board");
+
 
 if (!process.env.DATABASE_URL) {
   throw new Error("DATABASE_URL must be set. See .env.example.");
@@ -186,6 +188,11 @@ app.get("/api/users", requireAuthentication, async (request, response, next) => 
   } catch (error) {
     next(error);
   }
+});
+
+//mss446
+app.get("/api/board", (request, response) => {
+  response.json({ rooms });
 });
 
 app.post("/api/logout", (request, response, next) => {

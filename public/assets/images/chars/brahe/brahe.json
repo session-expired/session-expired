@@ -1,5 +1,5 @@
 { "frames": {
-   "session-expired-male #walking 0.aseprite": {
+   "session-expired-male 0.aseprite": {
     "frame": { "x": 0, "y": 0, "w": 32, "h": 57 },
     "rotated": false,
     "trimmed": false,
@@ -7,7 +7,7 @@
     "sourceSize": { "w": 32, "h": 57 },
     "duration": 100
    },
-   "session-expired-male #walking 1.aseprite": {
+   "session-expired-male 1.aseprite": {
     "frame": { "x": 32, "y": 0, "w": 32, "h": 57 },
     "rotated": false,
     "trimmed": false,
@@ -15,7 +15,7 @@
     "sourceSize": { "w": 32, "h": 57 },
     "duration": 100
    },
-   "session-expired-male #walking 2.aseprite": {
+   "session-expired-male 2.aseprite": {
     "frame": { "x": 64, "y": 0, "w": 32, "h": 57 },
     "rotated": false,
     "trimmed": false,
@@ -23,7 +23,7 @@
     "sourceSize": { "w": 32, "h": 57 },
     "duration": 100
    },
-   "session-expired-male #walking 3.aseprite": {
+   "session-expired-male 3.aseprite": {
     "frame": { "x": 96, "y": 0, "w": 32, "h": 57 },
     "rotated": false,
     "trimmed": false,
@@ -31,7 +31,7 @@
     "sourceSize": { "w": 32, "h": 57 },
     "duration": 100
    },
-   "session-expired-male #walking 4.aseprite": {
+   "session-expired-male 4.aseprite": {
     "frame": { "x": 128, "y": 0, "w": 32, "h": 57 },
     "rotated": false,
     "trimmed": false,
@@ -39,7 +39,7 @@
     "sourceSize": { "w": 32, "h": 57 },
     "duration": 100
    },
-   "session-expired-male #walking 5.aseprite": {
+   "session-expired-male 5.aseprite": {
     "frame": { "x": 160, "y": 0, "w": 32, "h": 57 },
     "rotated": false,
     "trimmed": false,
@@ -47,8 +47,16 @@
     "sourceSize": { "w": 32, "h": 57 },
     "duration": 100
    },
-   "session-expired-male #walking 6.aseprite": {
+   "session-expired-male 6.aseprite": {
     "frame": { "x": 192, "y": 0, "w": 32, "h": 57 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 57 },
+    "sourceSize": { "w": 32, "h": 57 },
+    "duration": 100
+   },
+   "session-expired-male 7.aseprite": {
+    "frame": { "x": 224, "y": 0, "w": 32, "h": 57 },
     "rotated": false,
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 57 },
@@ -59,23 +67,20 @@
  "meta": {
   "app": "https://www.aseprite.org/",
   "version": "1.3.15.2-x64",
-  "image": "crowley_walk.png",
+  "image": "brahe.png",
   "format": "RGBA8888",
-  "size": { "w": 224, "h": 57 },
+  "size": { "w": 256, "h": 57 },
   "scale": "1",
   "frameTags": [
-   { "name": "fight_idle", "from": 0, "to": 5, "direction": "forward", "color": "#000000ff" },
-   { "name": "Standing", "from": 6, "to": 6, "direction": "forward", "color": "#000000ff" },
-   { "name": "walking", "from": 7, "to": 13, "direction": "forward", "color": "#000000ff" },
-   { "name": "running", "from": 14, "to": 19, "direction": "forward", "color": "#000000ff" },
-   { "name": "wave", "from": 20, "to": 24, "direction": "forward", "color": "#000000ff" },
-   { "name": "idle", "from": 25, "to": 28, "direction": "forward", "color": "#000000ff" }
+   { "name": "Standing", "from": 0, "to": 0, "direction": "forward", "color": "#000000ff" },
+   { "name": "walking", "from": 1, "to": 6, "direction": "forward", "color": "#000000ff" }
   ],
   "layers": [
-   { "name": "crowley" },
-   { "name": "base_body", "group": "crowley", "opacity": 255, "blendMode": "normal" },
-   { "name": "clothes", "group": "crowley", "opacity": 255, "blendMode": "normal" },
-   { "name": "face", "group": "crowley", "opacity": 255, "blendMode": "normal" }
+   { "name": "brahe" },
+   { "name": "brahe_body", "group": "brahe", "opacity": 255, "blendMode": "normal" },
+   { "name": "clothes", "group": "brahe", "opacity": 255, "blendMode": "normal" },
+   { "name": "hair", "group": "brahe", "opacity": 255, "blendMode": "normal" },
+   { "name": "face", "group": "brahe", "opacity": 255, "blendMode": "normal" }
   ],
   "slices": [
   ]

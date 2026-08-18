@@ -9,9 +9,14 @@
     <title>Session Expired</title>
   </head>
   <body>
-    <main id="game"></main>
+    <main id="game">
+      <div id="board"></div>
+      <!-- This line is a temporary testing feature to see where you're clicking, see public/game/board.js -->
+      <p id="clickOutput"></p>
+    </main>
+    
     <script src="/socket.io/socket.io.js"></script>
     <script src="/js/chat.js"></script>
-    <script src="/js/game.js"></script>
+    <script src="/js/game/board.js"></script>
   </body>
 </html>
