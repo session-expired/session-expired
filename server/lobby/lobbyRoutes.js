@@ -5,6 +5,8 @@ function validId(value) {
   return /^[1-9]\d*$/.test(value);
 }
 
+const membershipError = "You are already in a lobby or game. Leave it before joining another.";
+
 function createLobbyRouter({ pool, requireAuthentication, minimumPlayers = 2 }) {
   const router = express.Router();
   router.use(requireAuthentication);
@@ -41,6 +43,14 @@ function createLobbyRouter({ pool, requireAuthentication, minimumPlayers = 2 }) 
     try {
       client = await pool.connect();
       await client.query("BEGIN");
+      const existingMembership = await client.query(
+        "SELECT 1 FROM lobby_players WHERE user_id = $1",
+        [request.session.userId]
+      );
+      if (existingMembership.rowCount) {
+        await client.query("ROLLBACK");
+        return response.status(409).json({ error: membershipError });
+      }
       const lobby = await client.query(
         "INSERT INTO lobbies (host_id, name) VALUES ($1, $2) RETURNING id",
         [request.session.userId, name]
@@ -53,6 +63,9 @@ function createLobbyRouter({ pool, requireAuthentication, minimumPlayers = 2 }) 
       response.status(201).json({ lobbyId: lobby.rows[0].id });
     } catch (error) {
       if (client) await client.query("ROLLBACK");
+      if (error.code === "23505" && error.constraint === "lobby_players_one_active_membership") {
+        return response.status(409).json({ error: membershipError });
+      }
       next(error);
     } finally {
       client?.release();
@@ -110,9 +123,13 @@ function createLobbyRouter({ pool, requireAuthentication, minimumPlayers = 2 }) 
         return response.status(409).json({ error: "This lobby has already started." });
       }
       const existing = await client.query(
-        "SELECT 1 FROM lobby_players WHERE lobby_id = $1 AND user_id = $2",
-        [request.params.lobbyId, request.session.userId]
+        "SELECT lobby_id FROM lobby_players WHERE user_id = $1",
+        [request.session.userId]
       );
+      if (existing.rowCount && String(existing.rows[0].lobby_id) !== String(request.params.lobbyId)) {
+        await client.query("ROLLBACK");
+        return response.status(409).json({ error: membershipError });
+      }
       if (!existing.rowCount) {
         const count = await client.query("SELECT COUNT(*)::integer AS count FROM lobby_players WHERE lobby_id = $1", [request.params.lobbyId]);
         if (count.rows[0].count >= lobby.max_players) {
@@ -128,6 +145,9 @@ function createLobbyRouter({ pool, requireAuthentication, minimumPlayers = 2 }) 
       response.json({ ok: true });
     } catch (error) {
       if (client) await client.query("ROLLBACK");
+      if (error.code === "23505" && error.constraint === "lobby_players_one_active_membership") {
+        return response.status(409).json({ error: membershipError });
+      }
       next(error);
     } finally {
       client?.release();

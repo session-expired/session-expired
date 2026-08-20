@@ -1,5 +1,29 @@
 const gameId = window.location.pathname.split("/").filter(Boolean).at(-1);
 const statusElement = document.getElementById("game-status");
+const quitButton = document.getElementById("quit-game");
+
+quitButton.addEventListener("click", async () => {
+    if (!window.confirm("Are you sure you want to quit this game?")) return;
+    quitButton.disabled = true;
+    try {
+        const response = await fetch(`/api/games/${gameId}/quit`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: "{}"
+        });
+        if (response.status === 401) {
+            window.location.assign("/login");
+            return;
+        }
+        const contentType = response.headers.get("content-type") || "";
+        const data = contentType.includes("application/json") ? await response.json() : {};
+        if (!response.ok) throw new Error(data.error || "Unable to quit the game.");
+        window.location.assign("/");
+    } catch (error) {
+        statusElement.textContent = error.message;
+        quitButton.disabled = false;
+    }
+});
 
 fetch(`/api/games/${gameId}`)
     .then(async response => {

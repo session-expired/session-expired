@@ -57,7 +57,27 @@ CREATE TABLE IF NOT EXISTS lobby_players (
     PRIMARY KEY (lobby_id, user_id)
 );
 
-CREATE INDEX IF NOT EXISTS lobby_players_user_idx
+-- Older builds allowed a player to join several lobbies. Preserve one
+-- membership, preferring a started game and then the most recent lobby.
+WITH ranked_memberships AS (
+    SELECT lp.lobby_id,
+           lp.user_id,
+           ROW_NUMBER() OVER (
+               PARTITION BY lp.user_id
+               ORDER BY (l.status = 'started') DESC, lp.joined_at DESC, lp.lobby_id DESC
+           ) AS membership_rank
+    FROM lobby_players lp
+    JOIN lobbies l ON l.id = lp.lobby_id
+)
+DELETE FROM lobby_players lp
+USING ranked_memberships ranked
+WHERE lp.lobby_id = ranked.lobby_id
+  AND lp.user_id = ranked.user_id
+  AND ranked.membership_rank > 1;
+
+DROP INDEX IF EXISTS lobby_players_user_idx;
+
+CREATE UNIQUE INDEX IF NOT EXISTS lobby_players_one_active_membership
     ON lobby_players (user_id);
 
 CREATE TABLE IF NOT EXISTS games (

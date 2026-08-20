@@ -12,10 +12,17 @@ body {
   background: radial-gradient(circle at top, #6e6101 0, #4a4a42 55%);
 }
 .auth-shell {
-  min-height: 100vh;
+  min-height: calc(100vh - 102px);
   display: grid;
   place-items: center;
   padding: 1.5rem;
+}
+.site-title {
+  margin: 0;
+  padding: 14px 10px;
+  text-align: center;
+  font-family: "Press Start 2P", monospace;
+  font-size: 2em;
 }
 .auth-card {
   width: min(100%, 31rem);
