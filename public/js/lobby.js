@@ -6,7 +6,18 @@ const joinButton = document.getElementById("join-lobby");
 const leaveButton = document.getElementById("leave-lobby");
 const launchButton = document.getElementById("launch-game");
 const deleteButton = document.getElementById("delete-lobby");
+const characterPicker = document.getElementById("character-picker");
+const characterOptions = document.getElementById("character-options");
 let selectedLobbyId = null;
+
+function createCharacterSprite(character) {
+  const sprite = document.createElement("span");
+  sprite.className = "character-sprite";
+  sprite.style.backgroundImage = `url("${character.image}")`;
+  sprite.setAttribute("role", "img");
+  sprite.setAttribute("aria-label", character.name);
+  return sprite;
+}
 
 async function api(url, options) {
   const response = await fetch(url, {
@@ -85,7 +96,8 @@ async function joinLobby() {
 async function loadLobbyDetail() {
   if (!selectedLobbyId) return;
   try {
-    const { lobby, players, currentUserId, minimumPlayers } = await api(`/api/lobbies/${selectedLobbyId}`);
+    const { lobby, players, currentUserId, minimumPlayers, characters } = await api(`/api/lobbies/${selectedLobbyId}`);
+    const charactersById = new Map(characters.map((character) => [character.id, character]));
     const isMember = players.some((player) => String(player.id) === currentUserId);
     if (isMember && lobby.status === "started" && lobby.game_id) {
       window.location.assign(`/game/${lobby.game_id}`);
@@ -97,17 +109,42 @@ async function loadLobbyDetail() {
     playerList.replaceChildren();
     for (const player of players) {
       const item = document.createElement("li");
-      item.textContent = `${player.username}${String(player.id) === String(lobby.host_id) ? " (host)" : ""}`;
+      const label = document.createElement("span");
+      label.textContent = `${player.username}${String(player.id) === String(lobby.host_id) ? " (host)" : ""}`;
+      item.appendChild(label);
+      const selectedCharacter = charactersById.get(player.selected_character);
+      if (selectedCharacter) item.appendChild(createCharacterSprite(selectedCharacter));
       playerList.appendChild(item);
     }
     const isHost = String(lobby.host_id) === currentUserId;
     const isFull = players.length >= lobby.max_players;
+    const currentPlayer = players.find((player) => String(player.id) === currentUserId);
+    const chosenCharacters = new Set(players.map((player) => player.selected_character).filter(Boolean));
+    const allCharactersSelected = players.length > 0 && players.every((player) => player.selected_character);
+    characterPicker.hidden = !isMember || lobby.status !== "waiting";
+    characterOptions.replaceChildren();
+    if (!characterPicker.hidden) {
+      for (const character of characters) {
+        const option = document.createElement("button");
+        option.type = "button";
+        option.className = "character-option";
+        const selectedByCurrentPlayer = currentPlayer?.selected_character === character.id;
+        option.disabled = chosenCharacters.has(character.id) && !selectedByCurrentPlayer;
+        option.classList.toggle("selected", selectedByCurrentPlayer);
+        option.append(createCharacterSprite(character));
+        const name = document.createElement("span");
+        name.textContent = character.name;
+        option.appendChild(name);
+        option.addEventListener("click", () => selectCharacter(character.id));
+        characterOptions.appendChild(option);
+      }
+    }
     joinButton.hidden = isMember || lobby.status !== "waiting";
     joinButton.disabled = isFull;
     joinButton.textContent = isFull ? "Lobby Full" : "Join Lobby";
     leaveButton.hidden = !isMember || lobby.status !== "waiting";
     launchButton.hidden = !isHost;
-    launchButton.disabled = players.length < minimumPlayers;
+    launchButton.disabled = players.length < minimumPlayers || !allCharactersSelected;
     deleteButton.hidden = !isHost || lobby.status !== "waiting";
     document.getElementById("launch-help").textContent = lobby.status !== "waiting"
       ? "This lobby has already started."
@@ -115,9 +152,26 @@ async function loadLobbyDetail() {
         ? isFull ? "This lobby is currently full." : "View the players above, then join when you are ready."
       : players.length < minimumPlayers
         ? `At least ${minimumPlayers} players are needed to launch.`
+        : !allCharactersSelected
+          ? "Every player must choose a character before the game can launch."
         : isHost ? "The game is ready to launch." : "Waiting for the host to launch the game.";
   } catch (error) {
     showStatus(error.message, true);
+  }
+}
+
+async function selectCharacter(character) {
+  if (!selectedLobbyId) return;
+  try {
+    await api(`/api/lobbies/${selectedLobbyId}/character`, {
+      method: "POST",
+      body: JSON.stringify({ character })
+    });
+    showStatus("");
+    await loadLobbyDetail();
+  } catch (error) {
+    showStatus(error.message, true);
+    await loadLobbyDetail();
   }
 }
 

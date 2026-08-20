@@ -57,9 +57,17 @@ ALTER TABLE lobbies
 CREATE TABLE IF NOT EXISTS lobby_players (
     lobby_id BIGINT NOT NULL REFERENCES lobbies(id) ON DELETE CASCADE,
     user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    selected_character VARCHAR(20),
     joined_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (lobby_id, user_id)
 );
+
+ALTER TABLE lobby_players
+    ADD COLUMN IF NOT EXISTS selected_character VARCHAR(20);
+
+CREATE UNIQUE INDEX IF NOT EXISTS lobby_players_unique_character
+    ON lobby_players (lobby_id, selected_character)
+    WHERE selected_character IS NOT NULL;
 
 -- Older builds allowed a player to join several lobbies. Preserve one
 -- membership, preferring a started game and then the most recent lobby.

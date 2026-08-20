@@ -1,6 +1,7 @@
 const express = require("express");
 const { createInitialGameState } = require("../game/board");
 const { moderateChatMessage } = require("../chat/moderation");
+const { characters, characterIds } = require("./characters");
 
 function validId(value) {
   return /^[1-9]\d*$/.test(value);
@@ -112,7 +113,7 @@ function createLobbyRouter({ pool, requireAuthentication, minimumPlayers = 2 }) 
       );
       if (!lobbyResult.rows[0]) return response.status(404).json({ error: "Lobby not found." });
       const players = await pool.query(
-        `SELECT u.id, u.username, lp.joined_at
+        `SELECT u.id, u.username, lp.selected_character, lp.joined_at
          FROM lobby_players lp
          JOIN users u ON u.id = lp.user_id
          WHERE lp.lobby_id = $1
@@ -123,7 +124,8 @@ function createLobbyRouter({ pool, requireAuthentication, minimumPlayers = 2 }) 
         lobby: lobbyResult.rows[0],
         players: players.rows,
         currentUserId: String(request.session.userId),
-        minimumPlayers
+        minimumPlayers,
+        characters
       });
     } catch (error) {
       next(error);
@@ -234,6 +236,49 @@ function createLobbyRouter({ pool, requireAuthentication, minimumPlayers = 2 }) 
     }
   });
 
+  router.post("/:lobbyId/character", async (request, response, next) => {
+    if (!validId(request.params.lobbyId)) return response.status(404).json({ error: "Lobby not found." });
+    const character = typeof request.body.character === "string" ? request.body.character : "";
+    if (!characterIds.has(character)) return response.status(400).json({ error: "Choose a valid character." });
+
+    let client;
+    try {
+      client = await pool.connect();
+      await client.query("BEGIN");
+      const lobby = await client.query(
+        "SELECT status FROM lobbies WHERE id = $1 FOR UPDATE",
+        [request.params.lobbyId]
+      );
+      if (!lobby.rows[0]) {
+        await client.query("ROLLBACK");
+        return response.status(404).json({ error: "Lobby not found." });
+      }
+      if (lobby.rows[0].status !== "waiting") {
+        await client.query("ROLLBACK");
+        return response.status(409).json({ error: "Characters cannot be changed after the game starts." });
+      }
+      const updated = await client.query(
+        `UPDATE lobby_players SET selected_character = $1
+         WHERE lobby_id = $2 AND user_id = $3 RETURNING user_id`,
+        [character, request.params.lobbyId, request.session.userId]
+      );
+      if (!updated.rowCount) {
+        await client.query("ROLLBACK");
+        return response.status(403).json({ error: "Join this lobby before choosing a character." });
+      }
+      await client.query("COMMIT");
+      response.json({ ok: true, character });
+    } catch (error) {
+      if (client) await client.query("ROLLBACK");
+      if (error.code === "23505" && error.constraint === "lobby_players_unique_character") {
+        return response.status(409).json({ error: "That character has already been chosen." });
+      }
+      next(error);
+    } finally {
+      client?.release();
+    }
+  });
+
   router.delete("/:lobbyId", async (request, response, next) => {
     if (!validId(request.params.lobbyId)) return response.status(404).json({ error: "Lobby not found." });
     let client;
@@ -290,7 +335,7 @@ function createLobbyRouter({ pool, requireAuthentication, minimumPlayers = 2 }) 
         return response.json({ gameId: existingGame.rows[0]?.id });
       }
       const players = await client.query(
-        `SELECT u.id, u.username FROM lobby_players lp
+        `SELECT u.id, u.username, lp.selected_character FROM lobby_players lp
          JOIN users u ON u.id = lp.user_id
          WHERE lp.lobby_id = $1 ORDER BY lp.joined_at, u.id`,
         [request.params.lobbyId]
@@ -300,6 +345,10 @@ function createLobbyRouter({ pool, requireAuthentication, minimumPlayers = 2 }) 
         return response.status(409).json({
           error: `At least ${minimumPlayers} player${minimumPlayers === 1 ? "" : "s"} ${minimumPlayers === 1 ? "is" : "are"} required to launch a game.`
         });
+      }
+      if (players.rows.some((player) => !player.selected_character)) {
+        await client.query("ROLLBACK");
+        return response.status(409).json({ error: "Every player must choose a character before the game starts." });
       }
       const state = createInitialGameState(players.rows);
       const game = await client.query(

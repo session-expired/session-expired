@@ -58,6 +58,7 @@ function createInitialGameState(gamePlayers) {
         players: gamePlayers.map((player, index) => ({
             id: String(player.id),
             username: player.username,
+            character: player.selected_character,
             position: spawnPoints[index]
         }))
     };

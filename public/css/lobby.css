@@ -21,11 +21,17 @@
 .empty-lobbies { padding: 24px; text-align: center; font-family: Arial, sans-serif; }
 .status-message { min-height: 20px; }
 .status-message.error { color: #ffb1b1; }
-#player-list li { margin-bottom: 10px; padding: 12px; background: #292923; font-family: Arial, sans-serif; }
+#player-list li { display: flex; min-height: 65px; margin-bottom: 10px; padding: 4px 12px; align-items: center; justify-content: space-between; gap: 12px; background: #292923; font-family: Arial, sans-serif; }
 .lobby-actions { display: flex; flex-wrap: wrap; gap: 10px; }
 .lobby-page .danger-button { background: #8b1e1e; }
 .lobby-page .danger-button:hover { background: white; color: #8b1e1e; }
+.character-options { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-bottom: 18px; }
+.lobby-page .character-option { display: flex; min-width: 0; padding: 6px; align-items: center; gap: 8px; background: #292923; text-align: left; }
+.lobby-page .character-option.selected { border-color: #d5c47f; background: #6e6101; }
+.lobby-page .character-option span:last-child { overflow-wrap: anywhere; }
+.character-sprite { display: inline-block; width: 32px; height: 57px; flex: 0 0 32px; background-position: 0 0; background-repeat: no-repeat; image-rendering: pixelated; }
 @media (max-width: 760px) {
   .lobby-page { grid-template-columns: 1fr; }
   .section-heading, .form-row { align-items: stretch; flex-direction: column; }
+  .character-options { grid-template-columns: 1fr; }
 }
