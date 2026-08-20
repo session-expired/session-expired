@@ -1,23 +1,52 @@
 .game-header {
+    display: flex;
     box-sizing: border-box;
     height: 52px;
     padding: 7px 12px;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
     border-bottom: 2px solid #171713;
     background: #4a4a42;
 }
 
-#quit-game {
+#quit-game,
+#music-toggle {
     padding: 10px 14px;
     border: 2px solid #171713;
-    background: #8b1e1e;
     color: #e8e2c8;
     font-family: "Press Start 2P", monospace;
     font-size: 10px;
     cursor: pointer;
 }
 
+#quit-game {
+    background: #8b1e1e;
+}
+
+.music-controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: "Press Start 2P", monospace;
+    font-size: 9px;
+}
+
+#music-toggle {
+    min-width: 124px;
+    background: #6e6101;
+}
+
+#music-volume {
+    width: 120px;
+    accent-color: #8b1e1e;
+    cursor: pointer;
+}
+
 #quit-game:hover,
-#quit-game:focus-visible {
+#quit-game:focus-visible,
+#music-toggle:hover,
+#music-toggle:focus-visible {
     background: white;
     color: #8b1e1e;
     outline: none;
@@ -43,18 +72,55 @@
     flex: 0 0 auto;
 }
 
+#board-viewport {
+    max-width: 100%;
+    max-height: calc(100vh - 52px - var(--footer-height) - var(--chat-dead-height, 0px) - 120px);
+    overflow: auto;
+    flex: 0 0 auto;
+}
+
 #board {
     display: grid;
     grid-template-columns: repeat(30, 1fr);
     grid-template-rows: repeat(24, 1fr);
-    width: min(1150px, 100%);
-    max-height: calc(100vh - 52px - var(--footer-height) - var(--chat-dead-height, 0px) - 120px);
     flex: 0 0 auto;
-    aspect-ratio: 5 / 4;
     background-image: url("/assets/images/board/board.png");
     background-repeat: no-repeat;
     background-position: center;
     background-size: 100% 100%;
+}
+
+.board-controls {
+    display: flex;
+    margin-bottom: 8px;
+    gap: 6px;
+}
+
+.board-controls button {
+    min-width: 42px;
+    padding: 7px 9px;
+    border: 2px solid #171713;
+    background: #6e6101;
+    color: #e8e2c8;
+    font-family: "Press Start 2P", monospace;
+    font-size: 10px;
+    cursor: pointer;
+}
+
+.board-controls button:hover:not(:disabled),
+.board-controls button:focus-visible {
+    background: white;
+    color: #8b1e1e;
+    outline: none;
+}
+
+.board-controls button:disabled {
+    cursor: default;
+    opacity: 0.45;
+}
+
+#zoom-reset {
+    min-width: 68px;
 }
 
 #board div {
@@ -62,4 +128,23 @@
     min-width: 0;
     min-height: 0;
     border: 1px solid rgba(0, 0, 0, 0.45);
+}
+
+@media (max-width: 560px) {
+    .music-controls label {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+    }
+
+    #music-toggle {
+        min-width: 108px;
+        padding-inline: 8px;
+    }
+
+    #music-volume {
+        width: 72px;
+    }
 }
