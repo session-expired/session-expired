@@ -55,7 +55,7 @@ zoomInButton.addEventListener("click", () => setZoom(zoomLevel + ZOOM_STEP));
 zoomResetButton.addEventListener("click", () => setZoom(1));
 
 quitButton.addEventListener("click", async () => {
-    if (!window.confirm("Are you sure you want to quit this game?")) return;
+    if (!window.confirm("Are you sure you want to leave this game? You will not be able to rejoin.")) return;
     quitButton.disabled = true;
     try {
         const response = await fetch(`/api/games/${gameId}/quit`, {

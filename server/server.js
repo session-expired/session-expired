@@ -173,11 +173,29 @@ app.post("/api/login", async (request, response, next) => {
 app.get("/api/session", async (request, response, next) => {
   if (!request.session.userId) return response.json({ authenticated: false });
   try {
-    const result = await pool.query("SELECT username, email FROM users WHERE id = $1", [request.session.userId]);
+    const result = await pool.query(
+      `SELECT u.username, u.email, active_game.id AS active_game_id
+       FROM users u
+       LEFT JOIN LATERAL (
+         SELECT g.id
+         FROM lobby_players lp
+         JOIN lobbies l ON l.id = lp.lobby_id AND l.status = 'started'
+         JOIN games g ON g.lobby_id = l.id
+         WHERE lp.user_id = u.id
+         LIMIT 1
+       ) active_game ON TRUE
+       WHERE u.id = $1`,
+      [request.session.userId]
+    );
     if (!result.rows[0]) {
       return request.session.destroy(() => response.json({ authenticated: false }));
     }
-    response.json({ authenticated: true, user: result.rows[0] });
+    const { active_game_id: activeGameId, ...user } = result.rows[0];
+    response.json({
+      authenticated: true,
+      user,
+      activeGame: activeGameId ? { id: String(activeGameId), url: `/game/${activeGameId}` } : null
+    });
   } catch (error) {
     next(error);
   }
