@@ -12,8 +12,23 @@ function createLobbyRouter({ pool, requireAuthentication, minimumPlayers = 2 }) 
   const router = express.Router();
   router.use(requireAuthentication);
 
+  async function removeExpiredEmptyLobbies() {
+    await pool.query(
+      `DELETE FROM lobbies l
+       WHERE l.status = 'waiting'
+         AND l.empty_since <= CURRENT_TIMESTAMP - INTERVAL '5 seconds'
+         AND NOT EXISTS (SELECT 1 FROM lobby_players lp WHERE lp.lobby_id = l.id)`
+    );
+  }
+
+  const cleanupTimer = setInterval(() => {
+    removeExpiredEmptyLobbies().catch((error) => console.error("Unable to clean up empty lobbies:", error));
+  }, 1000);
+  cleanupTimer.unref();
+
   router.get("/", async (request, response, next) => {
     try {
+      await removeExpiredEmptyLobbies();
       const result = await pool.query(
         `SELECT l.id, l.name, l.max_players, l.created_at,
                 u.username AS host_username,
@@ -152,6 +167,7 @@ function createLobbyRouter({ pool, requireAuthentication, minimumPlayers = 2 }) 
           "INSERT INTO lobby_players (lobby_id, user_id) VALUES ($1, $2)",
           [request.params.lobbyId, request.session.userId]
         );
+        await client.query("UPDATE lobbies SET empty_since = NULL WHERE id = $1", [request.params.lobbyId]);
       }
       await client.query("COMMIT");
       response.json({ ok: true });
@@ -160,6 +176,58 @@ function createLobbyRouter({ pool, requireAuthentication, minimumPlayers = 2 }) 
       if (error.code === "23505" && error.constraint === "lobby_players_one_active_membership") {
         return response.status(409).json({ error: membershipError });
       }
+      next(error);
+    } finally {
+      client?.release();
+    }
+  });
+
+  router.post("/:lobbyId/leave", async (request, response, next) => {
+    if (!validId(request.params.lobbyId)) return response.status(404).json({ error: "Lobby not found." });
+    let client;
+    try {
+      client = await pool.connect();
+      await client.query("BEGIN");
+      const result = await client.query(
+        "SELECT host_id, status FROM lobbies WHERE id = $1 FOR UPDATE",
+        [request.params.lobbyId]
+      );
+      const lobby = result.rows[0];
+      if (!lobby) {
+        await client.query("ROLLBACK");
+        return response.status(404).json({ error: "Lobby not found." });
+      }
+      if (lobby.status !== "waiting") {
+        await client.query("ROLLBACK");
+        return response.status(409).json({ error: "Use Quit Game after a lobby has started." });
+      }
+      const removed = await client.query(
+        "DELETE FROM lobby_players WHERE lobby_id = $1 AND user_id = $2 RETURNING user_id",
+        [request.params.lobbyId, request.session.userId]
+      );
+      if (!removed.rowCount) {
+        await client.query("ROLLBACK");
+        return response.status(409).json({ error: "You are not a member of this lobby." });
+      }
+
+      const remaining = await client.query(
+        `SELECT user_id FROM lobby_players
+         WHERE lobby_id = $1 ORDER BY joined_at, user_id LIMIT 1`,
+        [request.params.lobbyId]
+      );
+      const becameEmpty = !remaining.rowCount;
+      if (becameEmpty) {
+        await client.query("UPDATE lobbies SET empty_since = CURRENT_TIMESTAMP WHERE id = $1", [request.params.lobbyId]);
+      } else if (String(lobby.host_id) === String(request.session.userId)) {
+        await client.query(
+          "UPDATE lobbies SET host_id = $1, empty_since = NULL WHERE id = $2",
+          [remaining.rows[0].user_id, request.params.lobbyId]
+        );
+      }
+      await client.query("COMMIT");
+      response.json({ ok: true, deletesInSeconds: becameEmpty ? 5 : null });
+    } catch (error) {
+      if (client) await client.query("ROLLBACK");
       next(error);
     } finally {
       client?.release();

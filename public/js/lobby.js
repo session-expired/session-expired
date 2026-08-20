@@ -3,6 +3,7 @@ const lobbyStatus = document.getElementById("lobby-status");
 const lobbyDetail = document.getElementById("lobby-detail");
 const playerList = document.getElementById("player-list");
 const joinButton = document.getElementById("join-lobby");
+const leaveButton = document.getElementById("leave-lobby");
 const launchButton = document.getElementById("launch-game");
 const deleteButton = document.getElementById("delete-lobby");
 let selectedLobbyId = null;
@@ -104,6 +105,7 @@ async function loadLobbyDetail() {
     joinButton.hidden = isMember || lobby.status !== "waiting";
     joinButton.disabled = isFull;
     joinButton.textContent = isFull ? "Lobby Full" : "Join Lobby";
+    leaveButton.hidden = !isMember || lobby.status !== "waiting";
     launchButton.hidden = !isHost;
     launchButton.disabled = players.length < minimumPlayers;
     deleteButton.hidden = !isHost || lobby.status !== "waiting";
@@ -136,6 +138,21 @@ document.getElementById("create-lobby-form").addEventListener("submit", async (e
 });
 
 joinButton.addEventListener("click", joinLobby);
+
+leaveButton.addEventListener("click", async () => {
+  if (!selectedLobbyId || !window.confirm("Are you sure you want to leave this lobby?")) return;
+  leaveButton.disabled = true;
+  try {
+    const result = await api(`/api/lobbies/${selectedLobbyId}/leave`, { method: "POST", body: "{}" });
+    selectedLobbyId = null;
+    lobbyDetail.hidden = true;
+    showStatus(result.deletesInSeconds ? "Lobby left. The empty lobby will be removed in 5 seconds." : "Lobby left.");
+    await loadLobbies();
+  } catch (error) {
+    showStatus(error.message, true);
+    leaveButton.disabled = false;
+  }
+});
 
 deleteButton.addEventListener("click", async () => {
   if (!selectedLobbyId || !window.confirm("Are you sure you want to delete this lobby?")) return;

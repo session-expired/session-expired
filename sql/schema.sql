@@ -47,8 +47,12 @@ CREATE TABLE IF NOT EXISTS lobbies (
         CHECK (status IN ('waiting', 'started')),
     max_players SMALLINT NOT NULL DEFAULT 4
         CHECK (max_players BETWEEN 2 AND 8),
+    empty_since TIMESTAMPTZ,
     created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
+
+ALTER TABLE lobbies
+    ADD COLUMN IF NOT EXISTS empty_since TIMESTAMPTZ;
 
 CREATE TABLE IF NOT EXISTS lobby_players (
     lobby_id BIGINT NOT NULL REFERENCES lobbies(id) ON DELETE CASCADE,
