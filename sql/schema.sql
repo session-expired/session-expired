@@ -39,4 +39,32 @@ CREATE INDEX IF NOT EXISTS messages_sender_sent_idx
 CREATE INDEX IF NOT EXISTS messages_recipient_sent_idx
     ON messages (recipient_id, sent_at DESC);
 
+CREATE TABLE IF NOT EXISTS lobbies (
+    id BIGSERIAL PRIMARY KEY,
+    host_id BIGINT NOT NULL REFERENCES users(id),
+    name VARCHAR(50) NOT NULL,
+    status VARCHAR(12) NOT NULL DEFAULT 'waiting'
+        CHECK (status IN ('waiting', 'started')),
+    max_players SMALLINT NOT NULL DEFAULT 4
+        CHECK (max_players BETWEEN 2 AND 8),
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS lobby_players (
+    lobby_id BIGINT NOT NULL REFERENCES lobbies(id) ON DELETE CASCADE,
+    user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    joined_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (lobby_id, user_id)
+);
+
+CREATE INDEX IF NOT EXISTS lobby_players_user_idx
+    ON lobby_players (user_id);
+
+CREATE TABLE IF NOT EXISTS games (
+    id BIGSERIAL PRIMARY KEY,
+    lobby_id BIGINT NOT NULL UNIQUE REFERENCES lobbies(id),
+    state JSONB NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
 COMMIT;

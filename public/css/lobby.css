@@ -1,0 +1,28 @@
+.lobby-page {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(260px, 1fr);
+  gap: 24px;
+  width: min(1050px, calc(100% - 40px));
+  margin: 40px auto;
+}
+.lobby-browser, .lobby-detail { padding: 24px; border: 2px solid #171713; background: #4a4a42; }
+.section-heading, .form-row, .lobby-card { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.section-heading h1 { margin-bottom: 8px; }
+.section-heading p { margin: 0; font-family: Arial, sans-serif; }
+#create-lobby-form { margin: 28px 0 20px; }
+#create-lobby-form label { display: block; margin-bottom: 8px; font-size: 11px; }
+#lobby-name { flex: 1; min-width: 0; padding: 12px; background: #1b1b18; color: #e8e2c8; border: 1px solid #777263; }
+.lobby-page button { padding: 11px 14px; border: 2px solid #171713; background: #6e6101; color: #e8e2c8; font-family: inherit; font-size: 10px; cursor: pointer; }
+.lobby-page button:disabled { cursor: not-allowed; opacity: .45; }
+.lobby-list, #player-list { padding: 0; list-style: none; }
+.lobby-card { margin-bottom: 12px; padding: 16px; background: #292923; }
+.lobby-card div { display: grid; gap: 8px; }
+.lobby-card span, .status-message, #lobby-meta, #launch-help { font-family: Arial, sans-serif; }
+.empty-lobbies { padding: 24px; text-align: center; font-family: Arial, sans-serif; }
+.status-message { min-height: 20px; }
+.status-message.error { color: #ffb1b1; }
+#player-list li { margin-bottom: 10px; padding: 12px; background: #292923; font-family: Arial, sans-serif; }
+@media (max-width: 760px) {
+  .lobby-page { grid-template-columns: 1fr; }
+  .section-heading, .form-row { align-items: stretch; flex-direction: column; }
+}

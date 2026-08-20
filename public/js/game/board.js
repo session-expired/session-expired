@@ -1,8 +1,22 @@
-//Fetch call GET request server.js' api/board route
-fetch("/api/board")
-    .then(response => response.json())
-    .then(data => {
-        let rooms = data.rooms;
+const gameId = window.location.pathname.split("/").filter(Boolean).at(-1);
+const statusElement = document.getElementById("game-status");
+
+fetch(`/api/games/${gameId}`)
+    .then(async response => {
+        if (response.status === 401) {
+            window.location.assign("/login");
+            throw new Error("Your session has expired. Redirecting to login.");
+        }
+        const contentType = response.headers.get("content-type") || "";
+        if (!contentType.includes("application/json")) {
+            throw new Error(`The server returned an unexpected response (${response.status}).`);
+        }
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || "Unable to load this game.");
+        return data.game.state;
+    })
+    .then(state => {
+        const { rooms, rows, cols } = state.board;
 
         //Fetch brings over the raw Room array, brought the getSquareType logic here too
         function getSquareType(row, col) {
@@ -24,8 +38,10 @@ fetch("/api/board")
 
         let container = document.getElementById("board");
 
-        for (let row = 0; row < 24; row++) {
-            for (let col = 0; col < 30; col++) {
+        container.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+        container.style.gridTemplateRows = `repeat(${rows}, 1fr)`;
+        for (let row = 1; row <= rows; row++) {
+            for (let col = 1; col <= cols; col++) {
                 let square = document.createElement("div");
                 square.dataset.type = getSquareType(row, col);
                 square.dataset.row = row;
@@ -34,12 +50,14 @@ fetch("/api/board")
             }
         }
 
-        //Clicker functionality so you can click on the board and see if it's a room, hallway, or door
+        statusElement.textContent = `Game loaded · ${state.players.length} players`;
+
+        // Temporary inspection aid; no gameplay behavior is implemented yet.
         container.addEventListener("click", function(event) {
             let square = event.target;
-            //console.log(square.dataset.type);
-            //This is a temporary test feature that prints it on the screen under the board, the commented out line before this
-            //Shows the same thing but in the console instead of on the page
-            document.getElementById("clickOutput").textContent = square.dataset.type;
+            if (square.dataset.type) document.getElementById("clickOutput").textContent = square.dataset.type;
         });
+    })
+    .catch(error => {
+        statusElement.textContent = error.message;
     });

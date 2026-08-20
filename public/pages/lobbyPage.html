@@ -5,7 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/png" href="/assets/images/favicon.png" />
     <title>Session Expired</title>
-    <link rel="stylesheet" href="../css/global.css" />
+    <link rel="stylesheet" href="/css/global.css" />
+    <link rel="stylesheet" href="/css/lobby.css" />
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
   </head>
   
@@ -13,51 +14,48 @@
     <h1 id="welcome">SESSION EXPIRED</h1>
     <nav>
       <ul>
-        <li><a href="../index.html">Home</a></li>
-        <li><a href="./instructions.html">How to Play</a></li>
-        <li><a href="./contact.html">Contact</a></li>
-        <li><a href="" class="current">Lobby</a></li>
-        <li><a href="./login.html" data-auth-link>Login</a></li>
+        <li><a href="/">Home</a></li>
+        <li><a href="/pages/instructions.html">How to Play</a></li>
+        <li><a href="/pages/contact.html">Contact</a></li>
+        <li><a href="/lobby" class="current">Lobby</a></li>
+        <li><a href="/login" data-auth-link>Login</a></li>
       </ul>
     </nav>
 
-    <div id="lobby">
-      <h1>Pre-Game Lobby</h1>
-      <div id="playerLobby">
-        <div class="player">
-          <span class="player-name">Player 1</span>
-          <span class="ready-status"></span>
+    <main class="lobby-page">
+      <section class="lobby-browser" aria-labelledby="available-heading">
+        <div class="section-heading">
+          <div>
+            <h1 id="available-heading">Available Lobbies</h1>
+            <p>Join a waiting group or create a new one.</p>
+          </div>
+          <button id="refresh-lobbies" type="button">Refresh</button>
         </div>
+        <form id="create-lobby-form">
+          <label for="lobby-name">New lobby name</label>
+          <div class="form-row">
+            <input id="lobby-name" name="name" minlength="3" maxlength="50" required />
+            <button type="submit">Create Lobby</button>
+          </div>
+        </form>
+        <p id="lobby-status" class="status-message" role="status"></p>
+        <ul id="lobby-list" class="lobby-list"></ul>
+      </section>
 
-        <div class="player">
-          <span class="player-name">Player 2</span>
-          <span class="ready-status"></span>
-        </div>
-
-        <div class="player">
-          <span class="player-name">Player 3</span>
-          <span class="ready-status"></span>
-        </div>
-
-        <div class="player">
-          <span class="player-name">Player 4</span>
-          <span class="ready-status"></span>
-        </div>
-      </div>
-
-      <div id="interactions">
-        <ul id="interactions">
-          <li><button>Ready Up</button></li>
-          <li><button>Private Lobby</button></li>
-          <li><button>New Game</button></li>
-        </ul>
-        
-      </div>
-    </div>
-   <footer>&copy: 2026 Session Expired</footer>
+      <section id="lobby-detail" class="lobby-detail" aria-labelledby="detail-heading" hidden>
+        <h2 id="detail-heading">Lobby</h2>
+        <p id="lobby-meta"></p>
+        <h3>Players</h3>
+        <ul id="player-list"></ul>
+        <p id="launch-help"></p>
+        <button id="launch-game" type="button" hidden>Launch Game</button>
+      </section>
+    </main>
+   <footer>&copy; 2026 Session Expired</footer>
    <script src="/socket.io/socket.io.js"></script>
    <script src="../js/chat.js"></script>
    <script src="../js/session-nav.js"></script>
+   <script src="/js/lobby.js"></script>
   </body>
 
 </html>

@@ -13,6 +13,7 @@ const { Pool } = require("pg");
 const { Server } = require("socket.io");
 const { registerChatHandlers } = require("./chat/chatHandler");
 const { moderateUsername } = require("./chat/moderation");
+const { createLobbyRouter } = require("./lobby/lobbyRoutes");
 
 const app = express();
 const server = http.createServer(app);
@@ -32,6 +33,7 @@ const publicDirectory = path.join(__dirname, "..", "public");
 const pageDirectory = path.join(__dirname, "pages");
 const publicPageDirectory = path.join(publicDirectory, "pages");
 const {rooms} = require("./game/board");
+const minimumLobbyPlayers = process.env.SESSION_EXPIRED_DEV_RUNNER === "true" ? 1 : 2;
 
 
 if (!process.env.DATABASE_URL) {
@@ -72,6 +74,9 @@ function sendPage(name) {
 
 function requireAuthentication(request, response, next) {
   if (!request.session.userId) {
+    if (request.path.startsWith("/api/") || request.originalUrl.startsWith("/api/")) {
+      return response.status(401).json({ error: "Your session has expired. Please log in again." });
+    }
     return response.redirect("/login");
   }
   next();
@@ -84,7 +89,7 @@ app.get("/login", (request, response) => {
 });
 app.get("/account", requireAuthentication, sendPage("account.html"));
 app.get("/lobby", requireAuthentication, (request, response) => {
-  response.sendFile(path.join(publicDirectory, "lobbyPage.html"));
+  response.sendFile(path.join(publicPageDirectory, "lobbyPage.html"));
 });
 app.get("/lobbyPage.html", requireAuthentication, (request, response) => {
   response.redirect("/lobby");
@@ -190,8 +195,37 @@ app.get("/api/users", requireAuthentication, async (request, response, next) => 
   }
 });
 
+app.use("/api/lobbies", createLobbyRouter({
+  pool,
+  requireAuthentication,
+  minimumPlayers: minimumLobbyPlayers
+}));
+
+app.get("/game/:gameId", requireAuthentication, (request, response) => {
+  response.sendFile(path.join(publicPageDirectory, "game.html"));
+});
+
+app.get("/api/games/:gameId", requireAuthentication, async (request, response, next) => {
+  if (!/^[1-9]\d*$/.test(request.params.gameId)) {
+    return response.status(404).json({ error: "Game not found." });
+  }
+  try {
+    const result = await pool.query(
+      `SELECT g.id, g.state, g.created_at
+       FROM games g
+       JOIN lobby_players lp ON lp.lobby_id = g.lobby_id
+       WHERE g.id = $1 AND lp.user_id = $2`,
+      [request.params.gameId, request.session.userId]
+    );
+    if (!result.rows[0]) return response.status(404).json({ error: "Game not found." });
+    response.json({ game: result.rows[0] });
+  } catch (error) {
+    next(error);
+  }
+});
+
 //mss446
-app.get("/api/board", (request, response) => {
+app.get("/api/board", requireAuthentication, (request, response) => {
   response.json({ rooms });
 });
 
