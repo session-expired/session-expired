@@ -16,7 +16,6 @@ async function playMusic() {
     try {
         await music.play();
     } catch (error) {
-        // Browsers may require a user gesture before audio can begin.
     }
     updateToggleButton();
 }
@@ -33,8 +32,7 @@ toggleButton.addEventListener("click", () => {
 volumeControl.addEventListener("input", event => {
     music.volume = Number(event.target.value);
 });
-
-// Try on page load, then retry once after the first interaction if autoplay is blocked.
+blocked.
 playMusic();
 document.addEventListener("pointerdown", event => {
     if (event.target !== toggleButton) playMusic();
