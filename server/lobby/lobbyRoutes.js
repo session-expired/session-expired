@@ -1,5 +1,6 @@
 const express = require("express");
 const { createInitialGameState } = require("../game/board");
+const { moderateChatMessage } = require("../chat/moderation");
 
 function validId(value) {
   return /^[1-9]\d*$/.test(value);
@@ -37,6 +38,17 @@ function createLobbyRouter({ pool, requireAuthentication, minimumPlayers = 2 }) 
     const name = typeof request.body.name === "string" ? request.body.name.trim() : "";
     if (name.length < 3 || name.length > 50) {
       return response.status(400).json({ error: "Lobby name must be between 3 and 50 characters." });
+    }
+    const moderation = moderateChatMessage(name);
+    if (moderation.action === "block") {
+      return response.status(400).json({ error: "That lobby name violates the chat rules." });
+    }
+    if (moderation.action === "flag") {
+      console.warn("Lobby name moderation:", {
+        action: "flag",
+        userId: request.session.userId,
+        reasons: moderation.reasons
+      });
     }
 
     let client;
@@ -148,6 +160,40 @@ function createLobbyRouter({ pool, requireAuthentication, minimumPlayers = 2 }) 
       if (error.code === "23505" && error.constraint === "lobby_players_one_active_membership") {
         return response.status(409).json({ error: membershipError });
       }
+      next(error);
+    } finally {
+      client?.release();
+    }
+  });
+
+  router.delete("/:lobbyId", async (request, response, next) => {
+    if (!validId(request.params.lobbyId)) return response.status(404).json({ error: "Lobby not found." });
+    let client;
+    try {
+      client = await pool.connect();
+      await client.query("BEGIN");
+      const result = await client.query(
+        "SELECT host_id, status FROM lobbies WHERE id = $1 FOR UPDATE",
+        [request.params.lobbyId]
+      );
+      const lobby = result.rows[0];
+      if (!lobby) {
+        await client.query("ROLLBACK");
+        return response.status(404).json({ error: "Lobby not found." });
+      }
+      if (String(lobby.host_id) !== String(request.session.userId)) {
+        await client.query("ROLLBACK");
+        return response.status(403).json({ error: "Only the lobby creator can delete it." });
+      }
+      if (lobby.status !== "waiting") {
+        await client.query("ROLLBACK");
+        return response.status(409).json({ error: "A lobby cannot be deleted after its game starts." });
+      }
+      await client.query("DELETE FROM lobbies WHERE id = $1", [request.params.lobbyId]);
+      await client.query("COMMIT");
+      response.json({ ok: true });
+    } catch (error) {
+      if (client) await client.query("ROLLBACK");
       next(error);
     } finally {
       client?.release();

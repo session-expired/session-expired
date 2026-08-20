@@ -2,7 +2,9 @@ const lobbyList = document.getElementById("lobby-list");
 const lobbyStatus = document.getElementById("lobby-status");
 const lobbyDetail = document.getElementById("lobby-detail");
 const playerList = document.getElementById("player-list");
+const joinButton = document.getElementById("join-lobby");
 const launchButton = document.getElementById("launch-game");
+const deleteButton = document.getElementById("delete-lobby");
 let selectedLobbyId = null;
 
 async function api(url, options) {
@@ -50,8 +52,8 @@ async function loadLobbies() {
       details.append(name, meta);
       const button = document.createElement("button");
       button.type = "button";
-      button.textContent = lobby.joined ? "Open" : "Join";
-      button.addEventListener("click", () => joinLobby(lobby.id, lobby.joined));
+      button.textContent = "View Lobby";
+      button.addEventListener("click", () => viewLobby(lobby.id));
       item.append(details, button);
       lobbyList.appendChild(item);
     }
@@ -60,14 +62,22 @@ async function loadLobbies() {
   }
 }
 
-async function joinLobby(lobbyId, alreadyJoined) {
+async function viewLobby(lobbyId) {
+  selectedLobbyId = lobbyId;
+  showStatus("");
+  await loadLobbyDetail();
+}
+
+async function joinLobby() {
+  if (!selectedLobbyId) return;
+  joinButton.disabled = true;
   try {
-    if (!alreadyJoined) await api(`/api/lobbies/${lobbyId}/join`, { method: "POST", body: "{}" });
-    selectedLobbyId = lobbyId;
+    await api(`/api/lobbies/${selectedLobbyId}/join`, { method: "POST", body: "{}" });
     showStatus("");
     await Promise.all([loadLobbies(), loadLobbyDetail()]);
   } catch (error) {
     showStatus(error.message, true);
+    joinButton.disabled = false;
   }
 }
 
@@ -75,7 +85,8 @@ async function loadLobbyDetail() {
   if (!selectedLobbyId) return;
   try {
     const { lobby, players, currentUserId, minimumPlayers } = await api(`/api/lobbies/${selectedLobbyId}`);
-    if (lobby.status === "started" && lobby.game_id) {
+    const isMember = players.some((player) => String(player.id) === currentUserId);
+    if (isMember && lobby.status === "started" && lobby.game_id) {
       window.location.assign(`/game/${lobby.game_id}`);
       return;
     }
@@ -89,11 +100,20 @@ async function loadLobbyDetail() {
       playerList.appendChild(item);
     }
     const isHost = String(lobby.host_id) === currentUserId;
+    const isFull = players.length >= lobby.max_players;
+    joinButton.hidden = isMember || lobby.status !== "waiting";
+    joinButton.disabled = isFull;
+    joinButton.textContent = isFull ? "Lobby Full" : "Join Lobby";
     launchButton.hidden = !isHost;
     launchButton.disabled = players.length < minimumPlayers;
-    document.getElementById("launch-help").textContent = players.length < minimumPlayers
-      ? `At least ${minimumPlayers} players are needed to launch.`
-      : isHost ? "The game is ready to launch." : "Waiting for the host to launch the game.";
+    deleteButton.hidden = !isHost || lobby.status !== "waiting";
+    document.getElementById("launch-help").textContent = lobby.status !== "waiting"
+      ? "This lobby has already started."
+      : !isMember
+        ? isFull ? "This lobby is currently full." : "View the players above, then join when you are ready."
+      : players.length < minimumPlayers
+        ? `At least ${minimumPlayers} players are needed to launch.`
+        : isHost ? "The game is ready to launch." : "Waiting for the host to launch the game.";
   } catch (error) {
     showStatus(error.message, true);
   }
@@ -112,6 +132,23 @@ document.getElementById("create-lobby-form").addEventListener("submit", async (e
     await Promise.all([loadLobbies(), loadLobbyDetail()]);
   } catch (error) {
     showStatus(error.message, true);
+  }
+});
+
+joinButton.addEventListener("click", joinLobby);
+
+deleteButton.addEventListener("click", async () => {
+  if (!selectedLobbyId || !window.confirm("Are you sure you want to delete this lobby?")) return;
+  deleteButton.disabled = true;
+  try {
+    await api(`/api/lobbies/${selectedLobbyId}`, { method: "DELETE" });
+    selectedLobbyId = null;
+    lobbyDetail.hidden = true;
+    showStatus("Lobby deleted.");
+    await loadLobbies();
+  } catch (error) {
+    showStatus(error.message, true);
+    deleteButton.disabled = false;
   }
 });
 
