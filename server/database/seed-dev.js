@@ -40,4 +40,4 @@ async function seedDevelopmentUsers(pool) {
   console.log("Development users ready: user1, user2, user3, user4 (password: password)");
 }
 
-module.exports = { seedDevelopmentUsers };
+module.exports = { developmentUsers, seedDevelopmentUsers };
