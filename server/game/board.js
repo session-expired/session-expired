@@ -9,7 +9,7 @@ class Room {
 }
 
 //Array for the spawn locations
-let spawnPoints = [
+const spawnPoints = [
     {row: 1, col: 10}, {row: 1, col: 21},
     {row: 24, col: 10}, {row: 24, col: 21},
     {row: 9, col: 1}, {row: 9, col: 30},
@@ -28,7 +28,7 @@ let hydrotherapy = new Room("Hydrotherapy", {start: 1, end: 8}, {start: 10, end:
 let electrotherapy = new Room("Electrotherapy", {start: 23, end: 30}, {start: 10, end: 14}, {col: 24, row: 10});
 
 //Array of rooms to easily access their dimensions
-let rooms = [wardensOffice, paddedCells, cafeteria, operatingTheater, recRoom, showers, 
+const rooms = [wardensOffice, paddedCells, cafeteria, operatingTheater, recRoom, showers,
     solitaryConfinement, hydrotherapy, electrotherapy];
 
 //Tells you if you're in a room, if not, you're in a hallway
@@ -47,4 +47,21 @@ function getSquareType(row, col) {
     return "hallway";
 }
 
-module.exports = {rooms};
+function createInitialGameState(gamePlayers) {
+    return {
+        status: "initialized",
+        board: {
+            rows: 24,
+            cols: 30,
+            rooms
+        },
+        players: gamePlayers.map((player, index) => ({
+            id: String(player.id),
+            username: player.username,
+            character: player.selected_character,
+            position: spawnPoints[index]
+        }))
+    };
+}
+
+module.exports = { rooms, spawnPoints, createInitialGameState };

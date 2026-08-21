@@ -1,5 +1,3 @@
-BEGIN;
-
 CREATE TABLE IF NOT EXISTS users (
     id BIGSERIAL PRIMARY KEY,
     username VARCHAR(30) NOT NULL,
@@ -8,21 +6,16 @@ CREATE TABLE IF NOT EXISTS users (
     created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE UNIQUE INDEX IF NOT EXISTS users_username_lower_unique
-    ON users (LOWER(username));
+CREATE UNIQUE INDEX IF NOT EXISTS users_username_lower_unique ON users (LOWER(username));
+CREATE UNIQUE INDEX IF NOT EXISTS users_email_lower_unique ON users (LOWER(email));
 
-CREATE UNIQUE INDEX IF NOT EXISTS users_email_lower_unique
-    ON users (LOWER(email));
-
--- PostgreSQL session table used by connect-pg-simple.
 CREATE TABLE IF NOT EXISTS user_sessions (
     sid VARCHAR NOT NULL PRIMARY KEY,
     sess JSON NOT NULL,
     expire TIMESTAMP(6) NOT NULL
 );
 
-CREATE INDEX IF NOT EXISTS user_sessions_expire_idx
-    ON user_sessions (expire);
+CREATE INDEX IF NOT EXISTS user_sessions_expire_idx ON user_sessions (expire);
 
 CREATE TABLE IF NOT EXISTS messages (
     id BIGSERIAL PRIMARY KEY,
@@ -33,26 +26,20 @@ CREATE TABLE IF NOT EXISTS messages (
     read_at TIMESTAMPTZ
 );
 
-CREATE INDEX IF NOT EXISTS messages_sender_sent_idx
-    ON messages (sender_id, sent_at DESC);
-
-CREATE INDEX IF NOT EXISTS messages_recipient_sent_idx
-    ON messages (recipient_id, sent_at DESC);
+CREATE INDEX IF NOT EXISTS messages_sender_sent_idx ON messages (sender_id, sent_at DESC);
+CREATE INDEX IF NOT EXISTS messages_recipient_sent_idx ON messages (recipient_id, sent_at DESC);
 
 CREATE TABLE IF NOT EXISTS lobbies (
     id BIGSERIAL PRIMARY KEY,
     host_id BIGINT NOT NULL REFERENCES users(id),
     name VARCHAR(50) NOT NULL,
-    status VARCHAR(12) NOT NULL DEFAULT 'waiting'
-        CHECK (status IN ('waiting', 'started')),
-    max_players SMALLINT NOT NULL DEFAULT 4
-        CHECK (max_players BETWEEN 2 AND 8),
+    status VARCHAR(12) NOT NULL DEFAULT 'waiting' CHECK (status IN ('waiting', 'started')),
+    max_players SMALLINT NOT NULL DEFAULT 4 CHECK (max_players BETWEEN 2 AND 8),
     empty_since TIMESTAMPTZ,
     created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-ALTER TABLE lobbies
-    ADD COLUMN IF NOT EXISTS empty_since TIMESTAMPTZ;
+ALTER TABLE lobbies ADD COLUMN IF NOT EXISTS empty_since TIMESTAMPTZ;
 
 CREATE TABLE IF NOT EXISTS lobby_players (
     lobby_id BIGINT NOT NULL REFERENCES lobbies(id) ON DELETE CASCADE,
@@ -62,15 +49,8 @@ CREATE TABLE IF NOT EXISTS lobby_players (
     PRIMARY KEY (lobby_id, user_id)
 );
 
-ALTER TABLE lobby_players
-    ADD COLUMN IF NOT EXISTS selected_character VARCHAR(20);
+ALTER TABLE lobby_players ADD COLUMN IF NOT EXISTS selected_character VARCHAR(20);
 
-CREATE UNIQUE INDEX IF NOT EXISTS lobby_players_unique_character
-    ON lobby_players (lobby_id, selected_character)
-    WHERE selected_character IS NOT NULL;
-
--- Older builds allowed a player to join several lobbies. Preserve one
--- membership, preferring a started game and then the most recent lobby.
 WITH ranked_memberships AS (
     SELECT lp.lobby_id,
            lp.user_id,
@@ -88,9 +68,10 @@ WHERE lp.lobby_id = ranked.lobby_id
   AND ranked.membership_rank > 1;
 
 DROP INDEX IF EXISTS lobby_players_user_idx;
-
-CREATE UNIQUE INDEX IF NOT EXISTS lobby_players_one_active_membership
-    ON lobby_players (user_id);
+CREATE UNIQUE INDEX IF NOT EXISTS lobby_players_one_active_membership ON lobby_players (user_id);
+CREATE UNIQUE INDEX IF NOT EXISTS lobby_players_unique_character
+    ON lobby_players (lobby_id, selected_character)
+    WHERE selected_character IS NOT NULL;
 
 CREATE TABLE IF NOT EXISTS games (
     id BIGSERIAL PRIMARY KEY,
@@ -98,5 +79,3 @@ CREATE TABLE IF NOT EXISTS games (
     state JSONB NOT NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
-
-COMMIT;

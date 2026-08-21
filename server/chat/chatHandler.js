@@ -23,6 +23,13 @@ function checkMessage(socket, channel, userId, text) {
 }
 
 function registerChatHandlers({ io, pool, globalChatHistory, globalChatWindowMs }) {
+  const gameChatHistories = new Map();
+
+  function trimHistory(history) {
+    const cutoff = Date.now() - globalChatWindowMs;
+    while (history[0] && Date.parse(history[0].sentAt) < cutoff) history.shift();
+  }
+
   io.on("connection", (socket) => {
     console.log("Socket connected:", socket.id);
     const userId = socket.request.session?.userId;
@@ -80,6 +87,54 @@ function registerChatHandlers({ io, pool, globalChatHistory, globalChatWindowMs 
         io.to(`user:${userId}`).emit("private-message", message);
       } catch (error) {
         console.error("Unable to send private message:", error);
+      }
+    });
+
+    socket.on("join-game-chat", async ({ gameId } = {}) => {
+      const targetGameId = Number(gameId);
+      if (!userId || !Number.isInteger(targetGameId) || targetGameId < 1) return;
+      try {
+        const membership = await pool.query(
+          `SELECT 1 FROM games g
+           JOIN lobby_players lp ON lp.lobby_id = g.lobby_id
+           WHERE g.id = $1 AND lp.user_id = $2`,
+          [targetGameId, userId]
+        );
+        if (!membership.rowCount) return;
+        socket.data.gameId = targetGameId;
+        socket.join(`game:${targetGameId}`);
+        const history = gameChatHistories.get(targetGameId) || [];
+        trimHistory(history);
+        gameChatHistories.set(targetGameId, history);
+        socket.emit("game-chat-ready", { gameId: targetGameId });
+        socket.emit("game-history", history);
+      } catch (error) {
+        console.error("Unable to join game chat:", error);
+      }
+    });
+
+    socket.on("game-message", async ({ text } = {}) => {
+      const gameId = socket.data.gameId;
+      if (!userId || !gameId || typeof text !== "string" || !text.trim()) return;
+      const cleanText = text.trim().slice(0, 500);
+      if (!checkMessage(socket, "game", userId, cleanText)) return;
+
+      try {
+        const result = await pool.query("SELECT username FROM users WHERE id = $1", [userId]);
+        if (!result.rows[0]) return;
+        const message = {
+          senderId: userId,
+          sender: result.rows[0].username,
+          text: cleanText,
+          sentAt: new Date().toISOString()
+        };
+        const history = gameChatHistories.get(gameId) || [];
+        history.push(message);
+        trimHistory(history);
+        gameChatHistories.set(gameId, history);
+        io.to(`game:${gameId}`).emit("game-message", message);
+      } catch (error) {
+        console.error("Unable to send game message:", error);
       }
     });
 

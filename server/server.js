@@ -13,6 +13,7 @@ const { Pool } = require("pg");
 const { Server } = require("socket.io");
 const { registerChatHandlers } = require("./chat/chatHandler");
 const { moderateUsername } = require("./chat/moderation");
+const { createLobbyRouter } = require("./lobby/lobbyRoutes");
 
 const app = express();
 const server = http.createServer(app);
@@ -32,6 +33,7 @@ const publicDirectory = path.join(__dirname, "..", "public");
 const pageDirectory = path.join(__dirname, "pages");
 const publicPageDirectory = path.join(publicDirectory, "pages");
 const {rooms} = require("./game/board");
+const minimumLobbyPlayers = process.env.SESSION_EXPIRED_DEV_RUNNER === "true" ? 1 : 2;
 
 
 if (!process.env.DATABASE_URL) {
@@ -72,6 +74,9 @@ function sendPage(name) {
 
 function requireAuthentication(request, response, next) {
   if (!request.session.userId) {
+    if (request.path.startsWith("/api/") || request.originalUrl.startsWith("/api/")) {
+      return response.status(401).json({ error: "Your session has expired. Please log in again." });
+    }
     return response.redirect("/login");
   }
   next();
@@ -84,7 +89,7 @@ app.get("/login", (request, response) => {
 });
 app.get("/account", requireAuthentication, sendPage("account.html"));
 app.get("/lobby", requireAuthentication, (request, response) => {
-  response.sendFile(path.join(publicDirectory, "lobbyPage.html"));
+  response.sendFile(path.join(publicPageDirectory, "lobbyPage.html"));
 });
 app.get("/lobbyPage.html", requireAuthentication, (request, response) => {
   response.redirect("/lobby");
@@ -168,11 +173,29 @@ app.post("/api/login", async (request, response, next) => {
 app.get("/api/session", async (request, response, next) => {
   if (!request.session.userId) return response.json({ authenticated: false });
   try {
-    const result = await pool.query("SELECT username, email FROM users WHERE id = $1", [request.session.userId]);
+    const result = await pool.query(
+      `SELECT u.username, u.email, active_game.id AS active_game_id
+       FROM users u
+       LEFT JOIN LATERAL (
+         SELECT g.id
+         FROM lobby_players lp
+         JOIN lobbies l ON l.id = lp.lobby_id AND l.status = 'started'
+         JOIN games g ON g.lobby_id = l.id
+         WHERE lp.user_id = u.id
+         LIMIT 1
+       ) active_game ON TRUE
+       WHERE u.id = $1`,
+      [request.session.userId]
+    );
     if (!result.rows[0]) {
       return request.session.destroy(() => response.json({ authenticated: false }));
     }
-    response.json({ authenticated: true, user: result.rows[0] });
+    const { active_game_id: activeGameId, ...user } = result.rows[0];
+    response.json({
+      authenticated: true,
+      user,
+      activeGame: activeGameId ? { id: String(activeGameId), url: `/game/${activeGameId}` } : null
+    });
   } catch (error) {
     next(error);
   }
@@ -190,8 +213,79 @@ app.get("/api/users", requireAuthentication, async (request, response, next) => 
   }
 });
 
+app.use("/api/lobbies", createLobbyRouter({
+  pool,
+  requireAuthentication,
+  minimumPlayers: minimumLobbyPlayers
+}));
+
+app.get("/game/:gameId", requireAuthentication, (request, response) => {
+  response.sendFile(path.join(publicPageDirectory, "game.html"));
+});
+
+app.get("/api/games/:gameId", requireAuthentication, async (request, response, next) => {
+  if (!/^[1-9]\d*$/.test(request.params.gameId)) {
+    return response.status(404).json({ error: "Game not found." });
+  }
+  try {
+    const result = await pool.query(
+      `SELECT g.id, g.state, g.created_at
+       FROM games g
+       JOIN lobby_players lp ON lp.lobby_id = g.lobby_id
+       WHERE g.id = $1 AND lp.user_id = $2`,
+      [request.params.gameId, request.session.userId]
+    );
+    if (!result.rows[0]) return response.status(404).json({ error: "Game not found." });
+    response.json({ game: result.rows[0] });
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.post("/api/games/:gameId/quit", requireAuthentication, async (request, response, next) => {
+  if (!/^[1-9]\d*$/.test(request.params.gameId)) {
+    return response.status(404).json({ error: "Game not found." });
+  }
+
+  let client;
+  try {
+    client = await pool.connect();
+    await client.query("BEGIN");
+    const result = await client.query(
+      `SELECT g.lobby_id, g.state
+       FROM games g
+       JOIN lobby_players lp ON lp.lobby_id = g.lobby_id
+       WHERE g.id = $1 AND lp.user_id = $2
+       FOR UPDATE OF g`,
+      [request.params.gameId, request.session.userId]
+    );
+    const game = result.rows[0];
+    if (!game) {
+      await client.query("ROLLBACK");
+      return response.status(404).json({ error: "Game not found." });
+    }
+
+    const state = game.state;
+    state.players = Array.isArray(state.players)
+      ? state.players.filter((player) => String(player.id) !== String(request.session.userId))
+      : [];
+    await client.query("UPDATE games SET state = $1::jsonb WHERE id = $2", [JSON.stringify(state), request.params.gameId]);
+    await client.query(
+      "DELETE FROM lobby_players WHERE lobby_id = $1 AND user_id = $2",
+      [game.lobby_id, request.session.userId]
+    );
+    await client.query("COMMIT");
+    response.json({ ok: true, redirect: "/" });
+  } catch (error) {
+    if (client) await client.query("ROLLBACK");
+    next(error);
+  } finally {
+    client?.release();
+  }
+});
+
 //mss446
-app.get("/api/board", (request, response) => {
+app.get("/api/board", requireAuthentication, (request, response) => {
   response.json({ rooms });
 });
 

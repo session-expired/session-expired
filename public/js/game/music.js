@@ -1,21 +1,42 @@
-const music = new Audio("../assets/audio/game_loop.mp3");
+const music = new Audio("/assets/audio/music/game_loop_1.mp3");
+const toggleButton = document.getElementById("music-toggle");
+const volumeControl = document.getElementById("music-volume");
 
 music.loop = true;
-music.volume = 0.4;
+music.volume = Number(volumeControl.value);
 
-export function playMusic() {
-    music.play();
+function updateToggleButton() {
+    const isPaused = music.paused;
+    toggleButton.textContent = isPaused ? "Play music" : "Pause music";
+    toggleButton.setAttribute("aria-label", isPaused ? "Play music" : "Pause music");
+    toggleButton.setAttribute("aria-pressed", String(!isPaused));
 }
 
-export function pauseMusic() {
-    music.pause();
+async function playMusic() {
+    try {
+        await music.play();
+    } catch (error) {
+    }
+    updateToggleButton();
 }
 
-export function setVolume(volume) {
-    music.volume = volume;
-}
+toggleButton.addEventListener("click", () => {
+    if (music.paused) {
+        playMusic();
+    } else {
+        music.pause();
+        updateToggleButton();
+    }
+});
 
-export function toggleMute() {
-    music.muted = !music.muted;
-    return music.muted;
-}
+volumeControl.addEventListener("input", event => {
+    music.volume = Number(event.target.value);
+});
+blocked.
+playMusic();
+document.addEventListener("pointerdown", event => {
+    if (event.target !== toggleButton) playMusic();
+}, { once: true });
+document.addEventListener("keydown", event => {
+    if (event.target !== toggleButton) playMusic();
+}, { once: true });
