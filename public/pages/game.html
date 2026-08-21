@@ -8,19 +8,42 @@
     <link rel="stylesheet" href="../css/global.css" />
     <title>Session Expired</title>
   </head>
-  <body>
+  <body class="game-page">
     <header class="game-header">
-      <button id="quit-game" type="button">Quit Game</button>
+      <button id="quit-game" type="button">Leave Game</button>
+      <div class="music-controls" aria-label="Game music controls">
+        <button id="music-toggle" type="button" aria-pressed="true" aria-label="Pause music">
+          Pause music
+        </button>
+        <label for="music-volume">Volume</label>
+        <input
+          id="music-volume"
+          type="range"
+          min="0"
+          max="1"
+          step="0.05"
+          value="0.4"
+          aria-label="Music volume"
+        />
+      </div>
     </header>
     <main id="game">
       <p id="game-status" role="status">Loading game…</p>
-      <div id="board"></div>
+      <div class="board-controls" aria-label="Board zoom controls">
+        <button id="zoom-out" type="button" aria-label="Zoom out">−</button>
+        <button id="zoom-reset" type="button">100%</button>
+        <button id="zoom-in" type="button" aria-label="Zoom in">+</button>
+      </div>
+      <div id="board-viewport">
+        <div id="board"></div>
+      </div>
       <!-- This line is a temporary testing feature to see where you're clicking, see public/game/board.js -->
       <p id="clickOutput"></p>
     </main>
     
     <script src="/socket.io/socket.io.js"></script>
     <script src="/js/chat.js"></script>
+    <script src="/js/game/music.js"></script>
     <script src="/js/game/board.js"></script>
   </body>
 </html>

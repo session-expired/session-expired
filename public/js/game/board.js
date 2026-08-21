@@ -1,9 +1,61 @@
 const gameId = window.location.pathname.split("/").filter(Boolean).at(-1);
 const statusElement = document.getElementById("game-status");
 const quitButton = document.getElementById("quit-game");
+const gameElement = document.getElementById("game");
+const boardElement = document.getElementById("board");
+const boardViewport = document.getElementById("board-viewport");
+const zoomOutButton = document.getElementById("zoom-out");
+const zoomResetButton = document.getElementById("zoom-reset");
+const zoomInButton = document.getElementById("zoom-in");
+const MIN_ZOOM = 1;
+const MAX_ZOOM = 2.5;
+const ZOOM_STEP = 0.25;
+let zoomLevel = 1;
+let fittedCellSize = 1;
+let boardRows = 0;
+let boardCols = 0;
+
+function applyBoardZoom() {
+    const cellSize = fittedCellSize * zoomLevel;
+    boardElement.style.width = `${cellSize * boardCols}px`;
+    boardElement.style.height = `${cellSize * boardRows}px`;
+    zoomResetButton.textContent = `${Math.round(zoomLevel * 100)}%`;
+    zoomOutButton.disabled = zoomLevel <= MIN_ZOOM;
+    zoomInButton.disabled = zoomLevel >= MAX_ZOOM;
+}
+
+function setZoom(nextZoom) {
+    zoomLevel = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, nextZoom));
+    applyBoardZoom();
+}
+
+function sizeBoard(rows, cols) {
+    const gameStyles = window.getComputedStyle(gameElement);
+    const horizontalPadding = parseFloat(gameStyles.paddingLeft) + parseFloat(gameStyles.paddingRight);
+    const availableWidth = gameElement.clientWidth - horizontalPadding;
+
+    // Match the vertical space reserved for the board in game.css.
+    const rootStyles = window.getComputedStyle(document.documentElement);
+    const footerHeight = parseFloat(rootStyles.getPropertyValue("--footer-height")) || 0;
+    const chatDeadHeight = parseFloat(rootStyles.getPropertyValue("--chat-dead-height")) || 0;
+    const availableHeight = window.innerHeight - 52 - footerHeight - chatDeadHeight - 120;
+
+    // Whole-pixel cells keep every horizontal and vertical interval identical.
+    fittedCellSize = Math.max(1, Math.floor(Math.min(1150 / cols, availableWidth / cols, availableHeight / rows)));
+    boardRows = rows;
+    boardCols = cols;
+    boardViewport.style.width = `${fittedCellSize * cols}px`;
+    boardViewport.style.height = `${fittedCellSize * rows}px`;
+    boardElement.style.aspectRatio = `${cols} / ${rows}`;
+    applyBoardZoom();
+}
+
+zoomOutButton.addEventListener("click", () => setZoom(zoomLevel - ZOOM_STEP));
+zoomInButton.addEventListener("click", () => setZoom(zoomLevel + ZOOM_STEP));
+zoomResetButton.addEventListener("click", () => setZoom(1));
 
 quitButton.addEventListener("click", async () => {
-    if (!window.confirm("Are you sure you want to quit this game?")) return;
+    if (!window.confirm("Are you sure you want to leave this game? You will not be able to rejoin.")) return;
     quitButton.disabled = true;
     try {
         const response = await fetch(`/api/games/${gameId}/quit`, {
@@ -60,10 +112,15 @@ fetch(`/api/games/${gameId}`)
 
         //This loop creates the board
 
-        let container = document.getElementById("board");
+        let container = boardElement;
 
         container.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
         container.style.gridTemplateRows = `repeat(${rows}, 1fr)`;
+        sizeBoard(rows, cols);
+        window.addEventListener("resize", () => sizeBoard(rows, cols));
+        if (window.ResizeObserver) {
+            new ResizeObserver(() => sizeBoard(rows, cols)).observe(gameElement);
+        }
         for (let row = 1; row <= rows; row++) {
             for (let col = 1; col <= cols; col++) {
                 let square = document.createElement("div");

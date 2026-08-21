@@ -32,6 +32,22 @@ nav li a.current {
   color: #8b1e1e;
 }
 
+nav li a.back-to-game-link {
+  display: inline-block;
+  padding: 7px 9px;
+  border: 2px solid #e8e2c8;
+  background: #8b1e1e;
+  color: #fff7d6;
+  text-decoration: none;
+}
+
+nav li a.back-to-game-link:hover,
+nav li a.back-to-game-link:focus-visible {
+  border-color: #fff7d6;
+  background: #a92a2a;
+  color: white;
+}
+
 #interactions {
   margin: 0px;
   padding: 5px 0px 5px 30px;
