@@ -143,6 +143,7 @@ async function loadLobbyDetail() {
     joinButton.disabled = isFull;
     joinButton.textContent = isFull ? "Lobby Full" : "Join Lobby";
     leaveButton.hidden = !isMember || lobby.status !== "waiting";
+    leaveButton.disabled = false;
     launchButton.hidden = !isHost;
     launchButton.disabled = players.length < minimumPlayers || !allCharactersSelected;
     deleteButton.hidden = !isHost || lobby.status !== "waiting";
