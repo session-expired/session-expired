@@ -16,16 +16,21 @@ const spawnPoints = [
     {row: 15, col: 1}, {row: 15, col: 30}
 ];
 
+const secretPass = [
+    {row:2, col: 23}, {row:23, col: 3},
+    {row:2, col: 7}, {row:23, col: 28},
+]
+
 //Initializing all rooms
-let wardensOffice = new Room("Wardens_office", {start: 12, end: 19}, {start: 8, end: 16}, {col: 19, row: 12});
-let paddedCells = new Room("Padded Cells", {start: 1, end: 9}, {start: 1, end: 7}, {col: 6, row: 7});
+let wardensOffice = new Room("Wardens_office", {start: 12, end: 19}, {start: 8, end: 17}, {col: 19, row: 12});
+let paddedCells = new Room("Padded Cells", {start: 1, end: 9}, {start: 17, end: 24}, {col: 6, row: 7});
 let cafeteria = new Room("Cafeteria", {start: 22, end: 30}, {start: 1, end: 7}, {col: 28, row: 7});
-let operatingTheater = new Room("Operating Theater", {start: 1, end: 9}, {start: 17, end: 24}, {col: 4, row: 17});
-let recRoom = new Room("Rec Room", {start: 22, end: 30}, {start: 17, end: 24}, {col: 26, row: 17});
-let showers = new Room("Showers", {start: 12, end: 19}, {start: 1, end: 5}, {col: 16, row: 5});
-let solitaryConfinement = new Room("Solitary Confinement", {start: 12, end: 19}, {start: 19, end: 24}, {col: 15, row: 19});
-let hydrotherapy = new Room("Hydrotherapy", {start: 1, end: 8}, {start: 10, end: 14}, {col: 7, row: 14});
-let electrotherapy = new Room("Electrotherapy", {start: 23, end: 30}, {start: 10, end: 14}, {col: 24, row: 10});
+let operatingTheater = new Room("Operating Theater", {start: 22, end: 30}, {start: 17, end: 24}, {col: 4, row: 17});
+let recRoom = new Room("Rec Room", {start: 1, end: 9}, {start: 1, end: 7}, {col: 26, row: 17});
+let showers = new Room("Solitary Confinement", {start: 12, end: 19}, {start: 1, end: 5}, {col: 16, row: 5});
+let solitaryConfinement = new Room("Showers", {start: 12, end: 19}, {start: 19, end: 24}, {col: 15, row: 19});
+let hydrotherapy = new Room("Electrotherapy", {start: 1, end: 8}, {start: 10, end: 14}, {col: 7, row: 14});
+let electrotherapy = new Room("Hydrotherapy", {start: 23, end: 30}, {start: 10, end: 14}, {col: 24, row: 10});
 
 //Array of rooms to easily access their dimensions
 const rooms = [wardensOffice, paddedCells, cafeteria, operatingTheater, recRoom, showers,
@@ -64,4 +69,4 @@ function createInitialGameState(gamePlayers) {
     };
 }
 
-module.exports = { rooms, spawnPoints, createInitialGameState };
+module.exports = { rooms, spawnPoints, secretPass, createInitialGameState };

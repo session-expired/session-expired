@@ -32,7 +32,7 @@ const secureCookies = process.env.COOKIE_SECURE
 const publicDirectory = path.join(__dirname, "..", "public");
 const pageDirectory = path.join(__dirname, "pages");
 const publicPageDirectory = path.join(publicDirectory, "pages");
-const {rooms} = require("./game/board");
+const { rooms, spawnPoints, secretPass } = require("./game/board");
 const minimumLobbyPlayers = process.env.SESSION_EXPIRED_DEV_RUNNER === "true" ? 1 : 2;
 
 
@@ -286,7 +286,7 @@ app.post("/api/games/:gameId/quit", requireAuthentication, async (request, respo
 
 //mss446
 app.get("/api/board", requireAuthentication, (request, response) => {
-  response.json({ rooms });
+  response.json({ rooms, spawnPoints, secretPass });
 });
 
 app.post("/api/logout", (request, response, next) => {

@@ -82,6 +82,11 @@
     flex: 0 0 auto;
 }
 
+#clickOutput {
+    text-align: center;
+    white-space: pre-line;
+}
+
 #board-viewport {
     max-width: 100%;
     max-height: calc(100vh - 52px - var(--footer-height) - var(--chat-dead-height, 0px) - 120px);

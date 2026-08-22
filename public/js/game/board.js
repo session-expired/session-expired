@@ -77,8 +77,14 @@ quitButton.addEventListener("click", async () => {
     }
 });
 
-fetch(`/api/games/${gameId}`)
-    .then(async response => {
+Promise.all([
+    fetch(`/api/games/${gameId}`),
+    // This endpoint reads server/game/board.js, so the inspection aid always
+    // uses the current room placement instead of the game's saved snapshot.
+    fetch("/api/board")
+])
+    .then(async ([gameResponse, boardResponse]) => {
+        const response = gameResponse;
         if (response.status === 401) {
             window.location.assign("/login");
             throw new Error("Your session has expired. Redirecting to login.");
@@ -89,25 +95,34 @@ fetch(`/api/games/${gameId}`)
         }
         const data = await response.json();
         if (!response.ok) throw new Error(data.error || "Unable to load this game.");
-        return data.game.state;
+
+        if (boardResponse.status === 401) {
+            window.location.assign("/login");
+            throw new Error("Your session has expired. Redirecting to login.");
+        }
+        const boardContentType = boardResponse.headers.get("content-type") || "";
+        if (!boardContentType.includes("application/json")) {
+            throw new Error(`The server returned an unexpected response (${boardResponse.status}).`);
+        }
+        const boardData = await boardResponse.json();
+        if (!boardResponse.ok) throw new Error(boardData.error || "Unable to load the board.");
+
+        return {
+            state: data.game.state,
+            rooms: boardData.rooms,
+            spawnPoints: boardData.spawnPoints,
+            secretPass: boardData.secretPass
+        };
     })
-    .then(state => {
-        const { rooms, rows, cols } = state.board;
+    .then(({ state, rooms, spawnPoints, secretPass }) => {
+        const { rows, cols } = state.board;
 
-        //Fetch brings over the raw Room array, brought the getSquareType logic here too
-        function getSquareType(row, col) {
-            for (let room of rooms) {
-                let inRows = row >= room.rows.start && row <= room.rows.end;
-                let inCols = col >= room.cols.start && col <= room.cols.end;
-
-                if (inRows && inCols) {
-                    if (row == room.doors.row && col == room.doors.col) {
-                        return "door";
-                    }
-                    return "room";
-                }
-            }
-        return "hallway";
+        function getRoomAt(row, col) {
+            return rooms.find(room => {
+                const inRows = row >= room.rows.start && row <= room.rows.end;
+                const inCols = col >= room.cols.start && col <= room.cols.end;
+                return inRows && inCols;
+            });
         }
 
         //This loop creates the board
@@ -124,7 +139,20 @@ fetch(`/api/games/${gameId}`)
         for (let row = 1; row <= rows; row++) {
             for (let col = 1; col <= cols; col++) {
                 let square = document.createElement("div");
-                square.dataset.type = getSquareType(row, col);
+                const room = getRoomAt(row, col);
+                const isDoor = room && row === room.doors.row && col === room.doors.col;
+                const isSpawnPoint = spawnPoints.some(point => row === point.row && col === point.col);
+                const isSecretPass = secretPass.some(point => row === point.row && col === point.col);
+                square.dataset.type = isSecretPass
+                    ? "secret passage"
+                    : isDoor
+                        ? "door"
+                        : room
+                            ? "room"
+                            : isSpawnPoint
+                                ? "spawn point"
+                                : "hallway";
+                if (room) square.dataset.roomName = room.name;
                 square.dataset.row = row;
                 square.dataset.col = col;
                 container.appendChild(square);
@@ -136,7 +164,13 @@ fetch(`/api/games/${gameId}`)
         // Temporary inspection aid; no gameplay behavior is implemented yet.
         container.addEventListener("click", function(event) {
             let square = event.target;
-            if (square.dataset.type) document.getElementById("clickOutput").textContent = square.dataset.type;
+            if (!square.dataset.type) return;
+
+            const tileLabel = ["door", "secret passage"].includes(square.dataset.type)
+                ? [square.dataset.type, square.dataset.roomName].filter(Boolean).join(", ")
+                : square.dataset.roomName || square.dataset.type;
+            document.getElementById("clickOutput").textContent =
+                `${tileLabel}\ncol ${square.dataset.col}, row ${square.dataset.row}`;
         });
     })
     .catch(error => {
