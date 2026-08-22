@@ -2,7 +2,7 @@ const path = require("path");
 const express = require("express");
 const http = require("http");
 const { Server } = require("socket.io");
-const { createInitialGameState, rooms, spawnPoints, secretPass } = require("./game/board");
+const { createInitialGameState, rooms, spawnPoints, secretPass, rollMovementDie, movePlayer } = require("./game/board");
 
 const app = express();
 const server = http.createServer(app);
@@ -35,7 +35,26 @@ app.get("/api/session", (request, response) => {
 });
 app.get("/api/users", (request, response) => response.json({ users: [] }));
 app.get(`/api/games/${gameId}`, (request, response) => {
-  response.json({ game: { id: gameId, state, created_at: new Date(0).toISOString() } });
+  response.json({
+    game: { id: gameId, state, created_at: new Date(0).toISOString() },
+    currentUserId: user.id
+  });
+});
+app.post(`/api/games/${gameId}/roll`, (request, response) => {
+  try {
+    const roll = rollMovementDie(state, user.id);
+    response.json({ roll, state });
+  } catch (error) {
+    response.status(409).json({ error: error.message });
+  }
+});
+app.post(`/api/games/${gameId}/move`, (request, response) => {
+  try {
+    const cost = movePlayer(state, user.id, request.body);
+    response.json({ cost, state });
+  } catch (error) {
+    response.status(409).json({ error: error.message });
+  }
 });
 app.post(`/api/games/${gameId}/quit`, (request, response) => {
   response.json({ ok: true, redirect: `/game/${gameId}` });

@@ -32,7 +32,7 @@ const secureCookies = process.env.COOKIE_SECURE
 const publicDirectory = path.join(__dirname, "..", "public");
 const pageDirectory = path.join(__dirname, "pages");
 const publicPageDirectory = path.join(publicDirectory, "pages");
-const { rooms, spawnPoints, secretPass } = require("./game/board");
+const { rooms, spawnPoints, secretPass, rollMovementDie, movePlayer } = require("./game/board");
 const minimumLobbyPlayers = process.env.SESSION_EXPIRED_DEV_RUNNER === "true" ? 1 : 2;
 
 
@@ -236,9 +236,89 @@ app.get("/api/games/:gameId", requireAuthentication, async (request, response, n
       [request.params.gameId, request.session.userId]
     );
     if (!result.rows[0]) return response.status(404).json({ error: "Game not found." });
-    response.json({ game: result.rows[0] });
+    response.json({ game: result.rows[0], currentUserId: String(request.session.userId) });
   } catch (error) {
     next(error);
+  }
+});
+
+app.post("/api/games/:gameId/roll", requireAuthentication, async (request, response, next) => {
+  if (!/^[1-9]\d*$/.test(request.params.gameId)) {
+    return response.status(404).json({ error: "Game not found." });
+  }
+
+  let client;
+  try {
+    client = await pool.connect();
+    await client.query("BEGIN");
+    const result = await client.query(
+      `SELECT g.state FROM games g
+       JOIN lobby_players lp ON lp.lobby_id = g.lobby_id
+       WHERE g.id = $1 AND lp.user_id = $2
+       FOR UPDATE OF g`,
+      [request.params.gameId, request.session.userId]
+    );
+    if (!result.rows[0]) {
+      await client.query("ROLLBACK");
+      return response.status(404).json({ error: "Game not found." });
+    }
+
+    const state = result.rows[0].state;
+    let roll;
+    try {
+      roll = rollMovementDie(state, request.session.userId);
+    } catch (error) {
+      await client.query("ROLLBACK");
+      return response.status(409).json({ error: error.message });
+    }
+    await client.query("UPDATE games SET state = $1::jsonb WHERE id = $2", [JSON.stringify(state), request.params.gameId]);
+    await client.query("COMMIT");
+    response.json({ roll, state });
+  } catch (error) {
+    if (client) await client.query("ROLLBACK");
+    next(error);
+  } finally {
+    client?.release();
+  }
+});
+
+app.post("/api/games/:gameId/move", requireAuthentication, async (request, response, next) => {
+  if (!/^[1-9]\d*$/.test(request.params.gameId)) {
+    return response.status(404).json({ error: "Game not found." });
+  }
+
+  let client;
+  try {
+    client = await pool.connect();
+    await client.query("BEGIN");
+    const result = await client.query(
+      `SELECT g.state FROM games g
+       JOIN lobby_players lp ON lp.lobby_id = g.lobby_id
+       WHERE g.id = $1 AND lp.user_id = $2
+       FOR UPDATE OF g`,
+      [request.params.gameId, request.session.userId]
+    );
+    if (!result.rows[0]) {
+      await client.query("ROLLBACK");
+      return response.status(404).json({ error: "Game not found." });
+    }
+
+    const state = result.rows[0].state;
+    let cost;
+    try {
+      cost = movePlayer(state, request.session.userId, request.body);
+    } catch (error) {
+      await client.query("ROLLBACK");
+      return response.status(409).json({ error: error.message });
+    }
+    await client.query("UPDATE games SET state = $1::jsonb WHERE id = $2", [JSON.stringify(state), request.params.gameId]);
+    await client.query("COMMIT");
+    response.json({ cost, state });
+  } catch (error) {
+    if (client) await client.query("ROLLBACK");
+    next(error);
+  } finally {
+    client?.release();
   }
 });
 

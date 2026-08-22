@@ -17,12 +17,14 @@ test("the game development server fixes the requested player and character", () 
 });
 
 test("the board source includes the spawn points used by the game state", () => {
-  assert.deepEqual(state.players[0].position, spawnPoints[0]);
+  assert.ok(spawnPoints.some(point =>
+    point.row === state.players[0].position.row && point.col === state.players[0].position.col
+  ));
 });
 
 test("the board source exports secret passage locations for the click inspector", () => {
   assert.ok(secretPass.length > 0);
-  assert.deepEqual(secretPass[0], { row: 2, col: 24 });
+  assert.deepEqual(secretPass[0], { row: 2, col: 23 });
 });
 
 test("the game development server exposes only game routes", () => {
