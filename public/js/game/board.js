@@ -44,6 +44,33 @@ function squareAt(row, col) {
     return boardElement.querySelector(`[data-row="${row}"][data-col="${col}"]`);
 }
 
+function positionSpeechBubbles() {
+    const boardBounds = boardElement.getBoundingClientRect();
+    if (!boardBounds.width || !boardBounds.height) return;
+
+    boardElement.querySelectorAll(".character-speech").forEach(speech => {
+        speech.style.maxWidth = `${Math.max(0, boardBounds.width - 4)}px`;
+        speech.style.transform = "translateX(-50%)";
+        const bubbleBounds = speech.getBoundingClientRect();
+        let horizontalShift = 0;
+        let verticalShift = 0;
+
+        if (bubbleBounds.left < boardBounds.left + 2) {
+            horizontalShift = boardBounds.left + 2 - bubbleBounds.left;
+        } else if (bubbleBounds.right > boardBounds.right - 2) {
+            horizontalShift = boardBounds.right - 2 - bubbleBounds.right;
+        }
+        if (bubbleBounds.top < boardBounds.top + 2) {
+            verticalShift = boardBounds.top + 2 - bubbleBounds.top;
+        } else if (bubbleBounds.bottom > boardBounds.bottom - 2) {
+            verticalShift = boardBounds.bottom - 2 - bubbleBounds.bottom;
+        }
+
+        speech.style.transform =
+            `translate(calc(-50% + ${horizontalShift}px), ${verticalShift}px)`;
+    });
+}
+
 function renderPlayers() {
     boardElement.querySelectorAll(".player-sprite").forEach(sprite => sprite.remove());
     const entities = [
@@ -72,6 +99,7 @@ function renderPlayers() {
         }
         square.appendChild(sprite);
     });
+    window.requestAnimationFrame(positionSpeechBubbles);
 }
 
 function animateWardenMove(previousPosition) {
@@ -183,6 +211,7 @@ function applyBoardZoom() {
     zoomResetButton.textContent = `${Math.round(zoomLevel * 100)}%`;
     zoomOutButton.disabled = zoomLevel <= MIN_ZOOM;
     zoomInButton.disabled = zoomLevel >= MAX_ZOOM;
+    window.requestAnimationFrame(positionSpeechBubbles);
 }
 
 function setZoom(nextZoom) {
