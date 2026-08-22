@@ -35,7 +35,7 @@ function showCharacterDialogue(character, group) {
         if (activeDialogue.get(character) !== entry) return;
         activeDialogue.delete(character);
         renderPlayers();
-    }, 5000);
+    }, 10000);
     activeDialogue.set(character, entry);
     return entry.text;
 }
