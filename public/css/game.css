@@ -193,18 +193,18 @@
     transform: translateX(-50%);
 }
 
-#board .warden-speech {
+#board .character-speech {
     position: absolute;
     z-index: 4;
     left: 50%;
     bottom: calc(100% + 5px);
-    width: 230px;
+    width: 300px;
     padding: 5px 7px;
     border: 1px solid rgba(255, 255, 255, 0.75);
     background: rgba(20, 20, 18, 0.78);
     color: white;
     font-family: "Press Start 2P", monospace;
-    font-size: 7px;
+    font-size: 14px;
     line-height: 1.5;
     text-align: center;
     text-shadow: 1px 1px 0 black;

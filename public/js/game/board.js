@@ -18,13 +18,26 @@ let boardRows = 0;
 let boardCols = 0;
 let gameState;
 let currentUserId;
-let wardenDialogue;
-let currentWardenSaying = "";
+let characterDialogue = new Map();
+const activeDialogue = new Map();
 
-function chooseWardenSaying(group) {
-    const sayings = wardenDialogue?.[group] || [];
+function showCharacterDialogue(character, group) {
+    const sayings = characterDialogue.get(character)?.[group] || [];
     if (!sayings.length) return "";
-    return sayings[Math.floor(Math.random() * sayings.length)];
+    const existing = activeDialogue.get(character);
+    if (existing) window.clearTimeout(existing.timeout);
+
+    const entry = {
+        text: sayings[Math.floor(Math.random() * sayings.length)],
+        timeout: null
+    };
+    entry.timeout = window.setTimeout(() => {
+        if (activeDialogue.get(character) !== entry) return;
+        activeDialogue.delete(character);
+        renderPlayers();
+    }, 5000);
+    activeDialogue.set(character, entry);
+    return entry.text;
 }
 
 function squareAt(row, col) {
@@ -50,10 +63,11 @@ function renderPlayers() {
         sprite.title = `${entity.username} (${entity.character})`;
         sprite.setAttribute("role", "img");
         sprite.setAttribute("aria-label", sprite.title);
-        if (entity.username === "Warden" && currentWardenSaying) {
+        const dialogue = activeDialogue.get(entity.character)?.text;
+        if (dialogue) {
             const speech = document.createElement("span");
-            speech.className = "warden-speech";
-            speech.textContent = currentWardenSaying;
+            speech.className = "character-speech";
+            speech.textContent = dialogue;
             sprite.appendChild(speech);
         }
         square.appendChild(sprite);
@@ -256,7 +270,6 @@ Promise.all([
         if (!boardResponse.ok) throw new Error(boardData.error || "Unable to load the board.");
         if (!sayingsResponse.ok) throw new Error("Unable to load character sayings.");
         const sayingsData = await sayingsResponse.json();
-        const bonaparte = sayingsData.characters.find(character => character.character === "bonaparte");
 
         return {
             state: data.game.state,
@@ -264,14 +277,16 @@ Promise.all([
             rooms: boardData.rooms,
             spawnPoints: boardData.spawnPoints,
             secretPass: boardData.secretPass,
-            wardenDialogue: bonaparte?.dialogue
+            characterDialogue: sayingsData.characters
         };
     })
-    .then(({ state, currentUserId: loadedUserId, rooms, spawnPoints, secretPass, wardenDialogue: loadedDialogue }) => {
+    .then(({ state, currentUserId: loadedUserId, rooms, spawnPoints, secretPass, characterDialogue: loadedDialogue }) => {
         gameState = state;
         currentUserId = loadedUserId;
-        wardenDialogue = loadedDialogue;
-        currentWardenSaying = chooseWardenSaying("game-start");
+        characterDialogue = new Map(loadedDialogue.map(character => [character.character, character.dialogue]));
+        showCharacterDialogue("bonaparte", "game-start");
+        const startingPlayer = gameState.players[gameState.turn.playerIndex];
+        if (startingPlayer) showCharacterDialogue(startingPlayer.character, "start");
         const { rows, cols } = state.board;
 
         function getRoomAt(row, col) {
@@ -330,6 +345,7 @@ Promise.all([
                     ? { ...gameState.warden.position }
                     : null;
                 const previousWardenTurns = gameState.warden?.turnsTaken || 0;
+                const previousTurnPlayerId = gameState.turn?.playerId;
                 const response = await fetch(`/api/games/${gameId}/move`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
@@ -345,7 +361,11 @@ Promise.all([
                 }
                 gameState = data.state;
                 const wardenTookTurn = (gameState.warden?.turnsTaken || 0) > previousWardenTurns;
-                if (wardenTookTurn) currentWardenSaying = chooseWardenSaying("start");
+                if (wardenTookTurn) showCharacterDialogue("bonaparte", "start");
+                if (String(gameState.turn?.playerId) !== String(previousTurnPlayerId)) {
+                    const nextPlayer = gameState.players[gameState.turn.playerIndex];
+                    if (nextPlayer) showCharacterDialogue(nextPlayer.character, "start");
+                }
                 statusElement.textContent = `Moved ${data.cost} grid location${data.cost === 1 ? "" : "s"}.`;
                 renderGameState();
                 if (wardenTookTurn && previousWardenPosition && gameState.warden && (
