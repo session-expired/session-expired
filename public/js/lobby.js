@@ -22,7 +22,10 @@ function createCharacterSprite(character) {
 async function api(url, options) {
   const response = await fetch(url, {
     ...options,
-    headers: { "Content-Type": "application/json", ...(options?.headers || {}) }
+    headers: {
+      "Content-Type": "application/json",
+      ...(options?.headers || {}),
+    },
   });
   if (response.status === 401) {
     window.location.assign("/login");
@@ -30,10 +33,13 @@ async function api(url, options) {
   }
   const contentType = response.headers.get("content-type") || "";
   if (!contentType.includes("application/json")) {
-    throw new Error(`The server returned an unexpected response (${response.status}).`);
+    throw new Error(
+      `The server returned an unexpected response (${response.status}).`,
+    );
   }
   const data = await response.json();
-  if (!response.ok) throw new Error(data.error || "The request could not be completed.");
+  if (!response.ok)
+    throw new Error(data.error || "The request could not be completed.");
   return data;
 }
 
@@ -84,7 +90,10 @@ async function joinLobby() {
   if (!selectedLobbyId) return;
   joinButton.disabled = true;
   try {
-    await api(`/api/lobbies/${selectedLobbyId}/join`, { method: "POST", body: "{}" });
+    await api(`/api/lobbies/${selectedLobbyId}/join`, {
+      method: "POST",
+      body: "{}",
+    });
     showStatus("");
     await Promise.all([loadLobbies(), loadLobbyDetail()]);
   } catch (error) {
@@ -96,16 +105,22 @@ async function joinLobby() {
 async function loadLobbyDetail() {
   if (!selectedLobbyId) return;
   try {
-    const { lobby, players, currentUserId, minimumPlayers, characters } = await api(`/api/lobbies/${selectedLobbyId}`);
-    const charactersById = new Map(characters.map((character) => [character.id, character]));
-    const isMember = players.some((player) => String(player.id) === currentUserId);
+    const { lobby, players, currentUserId, minimumPlayers, characters } =
+      await api(`/api/lobbies/${selectedLobbyId}`);
+    const charactersById = new Map(
+      characters.map((character) => [character.id, character]),
+    );
+    const isMember = players.some(
+      (player) => String(player.id) === currentUserId,
+    );
     if (isMember && lobby.status === "started" && lobby.game_id) {
       window.location.assign(`/game/${lobby.game_id}`);
       return;
     }
     lobbyDetail.hidden = false;
     document.getElementById("detail-heading").textContent = lobby.name;
-    document.getElementById("lobby-meta").textContent = `${players.length}/${lobby.max_players} players`;
+    document.getElementById("lobby-meta").textContent =
+      `${players.length}/${lobby.max_players} players`;
     playerList.replaceChildren();
     for (const player of players) {
       const item = document.createElement("li");
@@ -113,14 +128,21 @@ async function loadLobbyDetail() {
       label.textContent = `${player.username}${String(player.id) === String(lobby.host_id) ? " (host)" : ""}`;
       item.appendChild(label);
       const selectedCharacter = charactersById.get(player.selected_character);
-      if (selectedCharacter) item.appendChild(createCharacterSprite(selectedCharacter));
+      if (selectedCharacter)
+        item.appendChild(createCharacterSprite(selectedCharacter));
       playerList.appendChild(item);
     }
     const isHost = String(lobby.host_id) === currentUserId;
     const isFull = players.length >= lobby.max_players;
-    const currentPlayer = players.find((player) => String(player.id) === currentUserId);
-    const chosenCharacters = new Set(players.map((player) => player.selected_character).filter(Boolean));
-    const allCharactersSelected = players.length > 0 && players.every((player) => player.selected_character);
+    const currentPlayer = players.find(
+      (player) => String(player.id) === currentUserId,
+    );
+    const chosenCharacters = new Set(
+      players.map((player) => player.selected_character).filter(Boolean),
+    );
+    const allCharactersSelected =
+      players.length > 0 &&
+      players.every((player) => player.selected_character);
     characterPicker.hidden = !isMember || lobby.status !== "waiting";
     characterOptions.replaceChildren();
     if (!characterPicker.hidden) {
@@ -128,8 +150,10 @@ async function loadLobbyDetail() {
         const option = document.createElement("button");
         option.type = "button";
         option.className = "character-option";
-        const selectedByCurrentPlayer = currentPlayer?.selected_character === character.id;
-        option.disabled = chosenCharacters.has(character.id) && !selectedByCurrentPlayer;
+        const selectedByCurrentPlayer =
+          currentPlayer?.selected_character === character.id;
+        option.disabled =
+          chosenCharacters.has(character.id) && !selectedByCurrentPlayer;
         option.classList.toggle("selected", selectedByCurrentPlayer);
         option.append(createCharacterSprite(character));
         const name = document.createElement("span");
@@ -142,20 +166,34 @@ async function loadLobbyDetail() {
     joinButton.hidden = isMember || lobby.status !== "waiting";
     joinButton.disabled = isFull;
     joinButton.textContent = isFull ? "Lobby Full" : "Join Lobby";
+    joinButton.hidden = isMember || lobby.status !== "waiting";
+    joinButton.disabled = isFull;
+    joinButton.textContent = isFull ? "Lobby Full" : "Join Lobby";
+
     leaveButton.hidden = !isMember || lobby.status !== "waiting";
     leaveButton.disabled = false;
     launchButton.hidden = !isHost;
-    launchButton.disabled = players.length < minimumPlayers || !allCharactersSelected;
+    launchButton.disabled =
+      players.length < minimumPlayers || !allCharactersSelected;
+
     deleteButton.hidden = !isHost || lobby.status !== "waiting";
-    document.getElementById("launch-help").textContent = lobby.status !== "waiting"
-      ? "This lobby has already started."
-      : !isMember
-        ? isFull ? "This lobby is currently full." : "View the players above, then join when you are ready."
-      : players.length < minimumPlayers
-        ? `At least ${minimumPlayers} players are needed to launch.`
-        : !allCharactersSelected
-          ? "Every player must choose a character before the game can launch."
-        : isHost ? "The game is ready to launch." : "Waiting for the host to launch the game.";
+    deleteButton.disabled = false;
+    deleteButton.hidden = !isHost || lobby.status !== "waiting";
+    
+    document.getElementById("launch-help").textContent =
+      lobby.status !== "waiting"
+        ? "This lobby has already started."
+        : !isMember
+          ? isFull
+            ? "This lobby is currently full."
+            : "View the players above, then join when you are ready."
+          : players.length < minimumPlayers
+            ? `At least ${minimumPlayers} players are needed to launch.`
+            : !allCharactersSelected
+              ? "Every player must choose a character before the game can launch."
+              : isHost
+                ? "The game is ready to launch."
+                : "Waiting for the host to launch the game.";
   } catch (error) {
     showStatus(error.message, true);
   }
@@ -166,7 +204,7 @@ async function selectCharacter(character) {
   try {
     await api(`/api/lobbies/${selectedLobbyId}/character`, {
       method: "POST",
-      body: JSON.stringify({ character })
+      body: JSON.stringify({ character }),
     });
     showStatus("");
     await loadLobbyDetail();
@@ -176,32 +214,45 @@ async function selectCharacter(character) {
   }
 }
 
-document.getElementById("create-lobby-form").addEventListener("submit", async (event) => {
-  event.preventDefault();
-  const input = document.getElementById("lobby-name");
-  try {
-    const { lobbyId } = await api("/api/lobbies", {
-      method: "POST",
-      body: JSON.stringify({ name: input.value })
-    });
-    input.value = "";
-    selectedLobbyId = lobbyId;
-    await Promise.all([loadLobbies(), loadLobbyDetail()]);
-  } catch (error) {
-    showStatus(error.message, true);
-  }
-});
+document
+  .getElementById("create-lobby-form")
+  .addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const input = document.getElementById("lobby-name");
+    try {
+      const { lobbyId } = await api("/api/lobbies", {
+        method: "POST",
+        body: JSON.stringify({ name: input.value }),
+      });
+      input.value = "";
+      selectedLobbyId = lobbyId;
+      await Promise.all([loadLobbies(), loadLobbyDetail()]);
+    } catch (error) {
+      showStatus(error.message, true);
+    }
+  });
 
 joinButton.addEventListener("click", joinLobby);
 
 leaveButton.addEventListener("click", async () => {
-  if (!selectedLobbyId || !window.confirm("Are you sure you want to leave this lobby?")) return;
+  if (
+    !selectedLobbyId ||
+    !window.confirm("Are you sure you want to leave this lobby?")
+  )
+    return;
   leaveButton.disabled = true;
   try {
-    const result = await api(`/api/lobbies/${selectedLobbyId}/leave`, { method: "POST", body: "{}" });
+    const result = await api(`/api/lobbies/${selectedLobbyId}/leave`, {
+      method: "POST",
+      body: "{}",
+    });
     selectedLobbyId = null;
     lobbyDetail.hidden = true;
-    showStatus(result.deletesInSeconds ? "Lobby left. The empty lobby will be removed in 5 seconds." : "Lobby left.");
+    showStatus(
+      result.deletesInSeconds
+        ? "Lobby left. The empty lobby will be removed in 5 seconds."
+        : "Lobby left.",
+    );
     await loadLobbies();
   } catch (error) {
     showStatus(error.message, true);
@@ -210,7 +261,11 @@ leaveButton.addEventListener("click", async () => {
 });
 
 deleteButton.addEventListener("click", async () => {
-  if (!selectedLobbyId || !window.confirm("Are you sure you want to delete this lobby?")) return;
+  if (
+    !selectedLobbyId ||
+    !window.confirm("Are you sure you want to delete this lobby?")
+  )
+    return;
   deleteButton.disabled = true;
   try {
     await api(`/api/lobbies/${selectedLobbyId}`, { method: "DELETE" });
@@ -227,7 +282,10 @@ deleteButton.addEventListener("click", async () => {
 launchButton.addEventListener("click", async () => {
   launchButton.disabled = true;
   try {
-    const { gameId } = await api(`/api/lobbies/${selectedLobbyId}/start`, { method: "POST", body: "{}" });
+    const { gameId } = await api(`/api/lobbies/${selectedLobbyId}/start`, {
+      method: "POST",
+      body: "{}",
+    });
     window.location.assign(`/game/${gameId}`);
   } catch (error) {
     showStatus(error.message, true);
@@ -245,4 +303,6 @@ const refreshTimer = window.setInterval(() => {
   loadLobbies();
   loadLobbyDetail();
 }, 3000);
-window.addEventListener("beforeunload", () => window.clearInterval(refreshTimer));
+window.addEventListener("beforeunload", () =>
+  window.clearInterval(refreshTimer),
+);
