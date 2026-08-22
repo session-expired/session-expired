@@ -20,6 +20,8 @@ async function playMusic() {
     updateToggleButton();
 }
 
+playMusic();
+
 toggleButton.addEventListener("click", () => {
     if (music.paused) {
         playMusic();
