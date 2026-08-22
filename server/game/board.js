@@ -64,4 +64,4 @@ function createInitialGameState(gamePlayers) {
     };
 }
 
-module.exports = { rooms, spawnPoints, createInitialGameState };
+module.exports = { rooms, spawnPoints, createInitialGameState, getSquareType };
