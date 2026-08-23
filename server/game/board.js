@@ -352,6 +352,10 @@ function movePlayer(state, playerId, destination, random = Math.random) {
     if (destination.col < player.position.col) player.facing = "left";
     else if (destination.col > player.position.col) player.facing = "right";
     player.position = { row: destination.row, col: destination.col };
+    if (entersDoor && destinationRoom.name !== "Wardens_office") {
+        player.dialogueEvent = "door_open";
+        player.dialogueEventId = (player.dialogueEventId || 0) + 1;
+    }
     useSecretPassage(state, player, destination, random);
     state.turn.movementRemaining -= cost;
     if (state.turn.movementRemaining === 0) advanceTurn(state, random);

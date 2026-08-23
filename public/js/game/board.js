@@ -423,7 +423,7 @@ Promise.all([
                     ? { ...gameState.warden.position }
                     : null;
                 const previousWardenTurns = gameState.warden?.turnsTaken || 0;
-                const previousTurnPlayerId = gameState.turn?.playerId;
+                const previousTurnNumber = gameState.turn?.number || 0;
                 const response = await fetch(`/api/games/${gameId}/move`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
@@ -439,7 +439,11 @@ Promise.all([
                 }
                 gameState = data.state;
                 const wardenTookTurn = (gameState.warden?.turnsTaken || 0) > previousWardenTurns;
-                if (String(gameState.turn?.playerId) !== String(previousTurnPlayerId)) {
+                if (wardenTookTurn) {
+                    showCharacterDialogue(gameState.warden.character, "turn_start");
+                }
+                if ((gameState.turn?.number || 0) > previousTurnNumber &&
+                    gameState.turn?.phase === "awaiting_roll") {
                     const nextPlayer = gameState.players[gameState.turn.playerIndex];
                     if (nextPlayer) showCharacterDialogue(nextPlayer.character, "turn_start");
                 }

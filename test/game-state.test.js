@@ -261,8 +261,21 @@ test("entering a door spends all remaining movement and ends the turn", () => {
 
   assert.equal(movePlayer(state, "1", { row: 7, col: 28 }), 6);
   assert.deepEqual(state.players[0].position, { row: 7, col: 28 });
+  assert.equal(state.players[0].dialogueEvent, "door_open");
+  assert.equal(state.players[0].dialogueEventId, 1);
   assert.equal(state.turn.playerId, "2");
   assert.equal(state.turn.phase, "awaiting_roll");
+});
+
+test("entering the Warden's office does not trigger door dialogue", () => {
+  const state = createInitialGameState([{ id: 1, username: "Player" }]);
+  state.players[0].position = { row: 12, col: 20 };
+  state.turn.phase = "moving";
+  state.turn.movementRemaining = 1;
+
+  assert.equal(movePlayer(state, "1", { row: 12, col: 19 }), 1);
+  assert.equal(state.players[0].dialogueEvent, null);
+  assert.equal(state.players[0].dialogueEventId, 0);
 });
 
 test("a player beginning a turn on a door can move into its room", () => {
