@@ -83,7 +83,10 @@ function createInitialGameState(gamePlayers, random = Math.random) {
         username: player.username,
         character: player.selected_character,
         position: availableSpawnPoints[index],
-        facing: "right"
+        facing: "right",
+        dialogueEvent: null,
+        dialogueEventId: 0,
+        secretPassageCooldown: null
     }));
 
     return {
@@ -154,6 +157,9 @@ function movementDistances(state, playerId) {
     }
 
     function isBlockedTile(row, col) {
+        if (player.secretPassageCooldown?.row === row && player.secretPassageCooldown?.col === col) {
+            return true;
+        }
         const room = roomAt(row, col);
         return room?.blockedTile?.some(tile => tile.row === row && tile.col === col) || false;
     }
@@ -261,11 +267,59 @@ function advanceTurn(state, random = Math.random) {
     const completedPlayerIndex = state.turn.playerIndex;
     state.turn.playerIndex = (completedPlayerIndex + 1) % state.players.length;
     if (completedPlayerIndex === state.players.length - 1) takeWardenTurn(state, random);
+    state.players[state.turn.playerIndex].secretPassageCooldown = null;
     state.turn.playerId = state.players[state.turn.playerIndex].id;
     state.turn.number += 1;
     state.turn.phase = "awaiting_roll";
     state.turn.die = { sides: 8, roll: null };
     state.turn.movementRemaining = 0;
+}
+
+function useSecretPassage(state, player, entry, random = Math.random) {
+    if (!secretPass.some(tile => tile.row === entry.row && tile.col === entry.col)) return false;
+    const destinations = secretPass.filter(tile => tile.row !== entry.row || tile.col !== entry.col);
+    const destination = destinations[Math.floor(random() * destinations.length)];
+    const occupied = new Set(state.players
+        .filter(candidate => String(candidate.id) !== String(player.id))
+        .map(candidate => `${candidate.position.row},${candidate.position.col}`));
+    if (state.warden?.position) occupied.add(`${state.warden.position.row},${state.warden.position.col}`);
+    const stateRooms = state.board.rooms || rooms;
+    const destinationRoom = stateRooms.find(room =>
+        destination.row >= room.rows.start && destination.row <= room.rows.end &&
+        destination.col >= room.cols.start && destination.col <= room.cols.end
+    );
+    const blockedByArt = tile => destinationRoom?.blockedTile?.some(blocked =>
+        blocked.row === tile.row && blocked.col === tile.col
+    );
+    const isAvailable = tile =>
+        tile.row >= 1 && tile.row <= state.board.rows &&
+        tile.col >= 1 && tile.col <= state.board.cols &&
+        (!destinationRoom || (
+            tile.row >= destinationRoom.rows.start && tile.row <= destinationRoom.rows.end &&
+            tile.col >= destinationRoom.cols.start && tile.col <= destinationRoom.cols.end
+        )) &&
+        !occupied.has(`${tile.row},${tile.col}`) &&
+        !blockedByArt(tile);
+
+    let arrival = destination;
+    if (!isAvailable(arrival)) {
+        const adjacent = [];
+        for (let rowOffset = -1; rowOffset <= 1; rowOffset++) {
+            for (let colOffset = -1; colOffset <= 1; colOffset++) {
+                if (rowOffset === 0 && colOffset === 0) continue;
+                const tile = { row: destination.row + rowOffset, col: destination.col + colOffset };
+                if (isAvailable(tile)) adjacent.push(tile);
+            }
+        }
+        if (!adjacent.length) return false;
+        arrival = adjacent[Math.floor(random() * adjacent.length)];
+    }
+
+    player.position = { ...arrival };
+    player.secretPassageCooldown = { ...destination };
+    player.dialogueEvent = "secret_passage_entry";
+    player.dialogueEventId = (player.dialogueEventId || 0) + 1;
+    return true;
 }
 
 function movePlayer(state, playerId, destination, random = Math.random) {
@@ -298,6 +352,7 @@ function movePlayer(state, playerId, destination, random = Math.random) {
     if (destination.col < player.position.col) player.facing = "left";
     else if (destination.col > player.position.col) player.facing = "right";
     player.position = { row: destination.row, col: destination.col };
+    useSecretPassage(state, player, destination, random);
     state.turn.movementRemaining -= cost;
     if (state.turn.movementRemaining === 0) advanceTurn(state, random);
     return cost;

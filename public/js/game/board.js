@@ -178,6 +178,7 @@ function renderMovementRange() {
             const key = `${row},${col}`;
             if (row < 1 || row > gameState.board.rows || col < 1 || col > gameState.board.cols) continue;
             if (blocked.has(key) || distances.has(key)) continue;
+            if (player.secretPassageCooldown?.row === row && player.secretPassageCooldown?.col === col) continue;
             if (squareAt(row, col)?.dataset.blocked === "true") continue;
             if (!canCrossRoomBoundary(current, { row, col })) continue;
             distances.set(key, distance + 1);
@@ -386,6 +387,7 @@ Promise.all([
             if (square.classList.contains("movement-range")) {
                 const movingPlayer = gameState.players.find(player => String(player.id) === currentUserId);
                 const previousPlayerPosition = movingPlayer?.position ? { ...movingPlayer.position } : null;
+                const previousDialogueEventId = movingPlayer?.dialogueEventId || 0;
                 const previousWardenPosition = gameState.warden?.position
                     ? { ...gameState.warden.position }
                     : null;
@@ -414,6 +416,10 @@ Promise.all([
                 statusElement.textContent = `Moved ${data.cost} grid location${data.cost === 1 ? "" : "s"}.`;
                 renderGameState();
                 const movedPlayer = gameState.players.find(player => String(player.id) === currentUserId);
+                if ((movedPlayer?.dialogueEventId || 0) > previousDialogueEventId && movedPlayer.dialogueEvent) {
+                    showCharacterDialogue(movedPlayer.character, movedPlayer.dialogueEvent);
+                    renderPlayers();
+                }
                 if (previousPlayerPosition && movedPlayer) {
                     animateCharacterMove(
                         boardElement.querySelector(`.player-sprite[data-entity-id="${currentUserId}"]`),

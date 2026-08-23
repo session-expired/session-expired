@@ -281,9 +281,11 @@ test("the server rejects a direct move through a room wall", () => {
   assert.throws(() => movePlayer(state, "1", { row: 7, col: 27 }), /outside/i);
 });
 
-test("rooms expose an empty blockedTile list for future art obstacles", () => {
+test("rooms expose a blockedTile list for art obstacles", () => {
   assert.ok(rooms.every(room => Array.isArray(room.blockedTile)));
-  assert.ok(rooms.every(room => room.blockedTile.length === 0));
+  assert.ok(rooms.every(room => room.blockedTile.every(tile =>
+    Number.isInteger(tile.row) && Number.isInteger(tile.col)
+  )));
 });
 
 test("blocked room tiles are excluded from legal movement and cannot be crossed", () => {
@@ -300,4 +302,62 @@ test("blocked room tiles are excluded from legal movement and cannot be crossed"
   assert.throws(() => movePlayer(state, "1", { row: 6, col: 27 }), /outside/i);
   assert.equal(range.has("6,26"), false);
   assert.equal(range.get("5,27"), 2);
+});
+
+test("entering a secret passage teleports to another passage and triggers dialogue", () => {
+  const state = createInitialGameState([{ id: 1, username: "Player", selected_character: "curie" }]);
+  state.players[0].position = { row: 2, col: 24 };
+  state.turn.phase = "moving";
+  state.turn.movementRemaining = 3;
+
+  movePlayer(state, "1", { row: 2, col: 23 }, () => 0);
+  assert.deepEqual(state.players[0].position, { row: 23, col: 3 });
+  assert.equal(state.players[0].dialogueEvent, "secret_passage_entry");
+  assert.equal(state.players[0].dialogueEventId, 1);
+  assert.equal(state.turn.movementRemaining, 2);
+});
+
+test("an occupied secret passage uses an available adjacent tile, including diagonals", () => {
+  const state = createInitialGameState([
+    { id: 1, username: "One", selected_character: "curie" },
+    { id: 2, username: "Two", selected_character: "rasputin" }
+  ]);
+  state.players[0].position = { row: 2, col: 24 };
+  state.players[1].position = { row: 23, col: 3 };
+  state.turn.phase = "moving";
+  state.turn.movementRemaining = 3;
+
+  movePlayer(state, "1", { row: 2, col: 23 }, () => 0);
+  assert.deepEqual(state.players[0].position, { row: 22, col: 2 });
+  assert.notDeepEqual(state.players[0].position, state.players[1].position);
+});
+
+test("a player cannot re-enter the secret passage they emerged from during the same turn", () => {
+  const state = createInitialGameState([{ id: 1, username: "Player", selected_character: "curie" }]);
+  state.players[0].position = { row: 2, col: 24 };
+  state.turn.phase = "moving";
+  state.turn.movementRemaining = 4;
+
+  movePlayer(state, "1", { row: 2, col: 23 }, () => 0);
+  assert.deepEqual(state.players[0].secretPassageCooldown, { row: 23, col: 3 });
+  movePlayer(state, "1", { row: 22, col: 3 }, () => 0);
+  assert.equal(movementDistances(state, "1").has("23,3"), false);
+  assert.throws(() => movePlayer(state, "1", { row: 23, col: 3 }), /outside/i);
+});
+
+test("a secret passage can be entered again on the player's next turn", () => {
+  const state = createInitialGameState([
+    { id: 1, username: "One" },
+    { id: 2, username: "Two" }
+  ]);
+  state.players[0].secretPassageCooldown = { row: 23, col: 3 };
+  state.players[1].position = { row: 10, col: 10 };
+  state.turn.playerIndex = 1;
+  state.turn.playerId = "2";
+  state.turn.phase = "moving";
+  state.turn.movementRemaining = 1;
+
+  movePlayer(state, "2", { row: 11, col: 10 }, () => 0);
+  assert.equal(state.turn.playerId, "1");
+  assert.equal(state.players[0].secretPassageCooldown, null);
 });
