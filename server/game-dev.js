@@ -2,7 +2,15 @@ const path = require("path");
 const express = require("express");
 const http = require("http");
 const { Server } = require("socket.io");
-const { createInitialGameState, rooms, spawnPoints, secretPass, rollMovementDie, movePlayer } = require("./game/board");
+const {
+  createInitialGameState,
+  rooms,
+  spawnPoints,
+  secretPass,
+  rollMovementDie,
+  movementPath,
+  movePlayer
+} = require("./game/board");
 
 const app = express();
 const server = http.createServer(app);
@@ -50,8 +58,9 @@ app.post(`/api/games/${gameId}/roll`, (request, response) => {
 });
 app.post(`/api/games/${gameId}/move`, (request, response) => {
   try {
+    const path = movementPath(state, user.id, request.body);
     const cost = movePlayer(state, user.id, request.body);
-    response.json({ cost, state });
+    response.json({ cost, distance: path.length, path, state });
   } catch (error) {
     response.status(409).json({ error: error.message });
   }

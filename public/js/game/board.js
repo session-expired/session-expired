@@ -85,8 +85,13 @@ function renderPlayers() {
         const sprite = document.createElement("div");
         sprite.className = "player-sprite";
         if (entity.username === "Warden") sprite.classList.add("warden-sprite");
-        sprite.style.backgroundImage =
+        if (entity.id) sprite.dataset.entityId = String(entity.id);
+        const spriteArt = document.createElement("div");
+        spriteArt.className = "sprite-art";
+        spriteArt.style.backgroundImage =
             `url("/assets/images/chars/${encodeURIComponent(entity.character)}/${encodeURIComponent(entity.character)}.png")`;
+        if (entity.facing === "left") spriteArt.classList.add("facing-left");
+        sprite.appendChild(spriteArt);
         sprite.title = `${entity.username} (${entity.character})`;
         sprite.setAttribute("role", "img");
         sprite.setAttribute("aria-label", sprite.title);
@@ -102,26 +107,35 @@ function renderPlayers() {
     window.requestAnimationFrame(positionSpeechBubbles);
 }
 
-function animateWardenMove(previousPosition) {
-    const sprite = boardElement.querySelector(".warden-sprite");
-    if (!sprite || !gameState.warden?.lastPath?.length) return;
-    const duration = Math.max(400, gameState.warden.lastPath.length * 180);
+function animateCharacterMove(sprite, previousPosition, currentPosition, path) {
+    if (!sprite || !path?.length) return;
+    const duration = Math.max(400, path.length * 180);
     const cellSize = fittedCellSize * zoomLevel;
-    const horizontalOffset = (previousPosition.col - gameState.warden.position.col) * cellSize;
-    const verticalOffset = (previousPosition.row - gameState.warden.position.row) * cellSize;
-    sprite.animate([
-        { transform: `translate(calc(-50% + ${horizontalOffset}px), ${verticalOffset}px)` },
-        { transform: "translateX(-50%)" }
-    ], { duration, easing: "linear" });
+    const animationTiles = [previousPosition, ...path];
+    const keyframes = animationTiles.map((tile, index) => ({
+        offset: index / (animationTiles.length - 1),
+        transform: `translate(calc(-50% + ${(tile.col - currentPosition.col) * cellSize}px), ${(tile.row - currentPosition.row) * cellSize}px)`
+    }));
+    sprite.animate(keyframes, { duration, easing: "linear" });
     let frame = 1;
+    const spriteArt = sprite.querySelector(".sprite-art");
     const animation = window.setInterval(() => {
-        sprite.style.backgroundPosition = `${(frame / 7) * 100}% top`;
+        spriteArt.style.backgroundPosition = `${(frame / 7) * 100}% top`;
         frame = frame === 6 ? 1 : frame + 1;
     }, 100);
     window.setTimeout(() => {
         window.clearInterval(animation);
-        sprite.style.backgroundPosition = "left top";
+        spriteArt.style.backgroundPosition = "left top";
     }, duration);
+}
+
+function animateWardenMove(previousPosition) {
+    animateCharacterMove(
+        boardElement.querySelector(".warden-sprite"),
+        previousPosition,
+        gameState.warden.position,
+        gameState.warden.lastPath
+    );
 }
 
 function renderMovementRange() {
@@ -370,6 +384,8 @@ Promise.all([
             if (!square?.dataset.type) return;
 
             if (square.classList.contains("movement-range")) {
+                const movingPlayer = gameState.players.find(player => String(player.id) === currentUserId);
+                const previousPlayerPosition = movingPlayer?.position ? { ...movingPlayer.position } : null;
                 const previousWardenPosition = gameState.warden?.position
                     ? { ...gameState.warden.position }
                     : null;
@@ -397,6 +413,15 @@ Promise.all([
                 }
                 statusElement.textContent = `Moved ${data.cost} grid location${data.cost === 1 ? "" : "s"}.`;
                 renderGameState();
+                const movedPlayer = gameState.players.find(player => String(player.id) === currentUserId);
+                if (previousPlayerPosition && movedPlayer) {
+                    animateCharacterMove(
+                        boardElement.querySelector(`.player-sprite[data-entity-id="${currentUserId}"]`),
+                        previousPlayerPosition,
+                        movedPlayer.position,
+                        data.path
+                    );
+                }
                 if (wardenTookTurn && previousWardenPosition && gameState.warden && (
                     previousWardenPosition.row !== gameState.warden.position.row ||
                     previousWardenPosition.col !== gameState.warden.position.col

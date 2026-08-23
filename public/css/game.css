@@ -185,12 +185,22 @@
     width: 100%;
     aspect-ratio: 32 / 57;
     border: 0;
+    pointer-events: none;
+    transform: translateX(-50%);
+}
+
+#board .sprite-art {
+    position: absolute;
+    inset: 0;
+    border: 0;
     background-repeat: no-repeat;
     background-position: left top;
     background-size: 800% 100%;
     image-rendering: pixelated;
-    pointer-events: none;
-    transform: translateX(-50%);
+}
+
+#board .sprite-art.facing-left {
+    transform: scaleX(-1);
 }
 
 #board .character-speech {

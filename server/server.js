@@ -32,7 +32,7 @@ const secureCookies = process.env.COOKIE_SECURE
 const publicDirectory = path.join(__dirname, "..", "public");
 const pageDirectory = path.join(__dirname, "pages");
 const publicPageDirectory = path.join(publicDirectory, "pages");
-const { rooms, spawnPoints, secretPass, rollMovementDie, movePlayer } = require("./game/board");
+const { rooms, spawnPoints, secretPass, rollMovementDie, movementPath, movePlayer } = require("./game/board");
 const minimumLobbyPlayers = process.env.SESSION_EXPIRED_DEV_RUNNER === "true" ? 1 : 2;
 
 
@@ -305,7 +305,9 @@ app.post("/api/games/:gameId/move", requireAuthentication, async (request, respo
 
     const state = result.rows[0].state;
     let cost;
+    let path;
     try {
+      path = movementPath(state, request.session.userId, request.body);
       cost = movePlayer(state, request.session.userId, request.body);
     } catch (error) {
       await client.query("ROLLBACK");
@@ -313,7 +315,7 @@ app.post("/api/games/:gameId/move", requireAuthentication, async (request, respo
     }
     await client.query("UPDATE games SET state = $1::jsonb WHERE id = $2", [JSON.stringify(state), request.params.gameId]);
     await client.query("COMMIT");
-    response.json({ cost, state });
+    response.json({ cost, distance: path.length, path, state });
   } catch (error) {
     if (client) await client.query("ROLLBACK");
     next(error);

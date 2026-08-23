@@ -6,6 +6,7 @@ const {
   spawnPoints,
   rollMovementDie,
   movementDistances,
+  movementPath,
   movePlayer,
   takeWardenTurn
 } = require("../server/game/board");
@@ -68,7 +69,8 @@ test("the Warden starts at tile 13,13 using Bonaparte's standing sprite", () => 
     previousPosition: null,
     lastRoll: null,
     lastPath: [],
-    turnsTaken: 0
+    turnsTaken: 0,
+    facing: "right"
   });
 });
 
@@ -174,6 +176,37 @@ test("moving costs one point per grid location and retains unused movement", () 
   assert.deepEqual(state.players[0].position, { row: 12, col: 10 });
   assert.equal(state.turn.movementRemaining, 3);
   assert.equal(state.turn.phase, "moving");
+});
+
+test("movement animation paths contain only legal orthogonal steps", () => {
+  const state = createInitialGameState([
+    { id: 1, username: "One" },
+    { id: 2, username: "Two" }
+  ]);
+  state.players[0].position = { row: 10, col: 9 };
+  state.players[1].position = { row: 10, col: 10 };
+  state.turn.movementRemaining = 4;
+
+  const path = movementPath(state, "1", { row: 10, col: 11 });
+  const completePath = [state.players[0].position, ...path];
+  assert.equal(path.length, 4);
+  assert.ok(path.every(tile => tile.row !== 10 || tile.col !== 10));
+  assert.ok(completePath.slice(1).every((tile, index) => {
+    const previousTile = completePath[index];
+    return Math.abs(tile.row - previousTile.row) + Math.abs(tile.col - previousTile.col) === 1;
+  }));
+});
+
+test("characters face left for lower columns and reset right for higher columns", () => {
+  const state = createInitialGameState([{ id: 1, username: "Player" }]);
+  state.players[0].position = { row: 10, col: 10 };
+  state.turn.phase = "moving";
+  state.turn.movementRemaining = 4;
+
+  movePlayer(state, "1", { row: 10, col: 9 });
+  assert.equal(state.players[0].facing, "left");
+  movePlayer(state, "1", { row: 10, col: 11 });
+  assert.equal(state.players[0].facing, "right");
 });
 
 test("using all movement advances to the next player's roll phase", () => {

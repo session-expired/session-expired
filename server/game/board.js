@@ -11,7 +11,7 @@ class Room {
 
 //Array for the spawn locations
 const spawnPoints = [
-    {row: 1, col: 10}, {row: 1, col: 21},
+    {row: 2, col: 10}, {row: 2, col: 21},
     {row: 24, col: 10}, {row: 24, col: 21},
     {row: 9, col: 1}, {row: 9, col: 30},
     {row: 15, col: 1}, {row: 15, col: 30}
@@ -25,7 +25,13 @@ const secretPass = [
 //Initializing all rooms
 let wardensOffice = new Room("Wardens_office", {start: 12, end: 19}, {start: 8, end: 17}, {col: 19, row: 12});
 let paddedCells = new Room("Padded Cells", {start: 1, end: 9}, {start: 17, end: 24}, {col: 4, row: 17});
-let cafeteria = new Room("Cafeteria", {start: 22, end: 30}, {start: 1, end: 7}, {col: 28, row: 7});
+let cafeteria = new Room("Cafeteria", {start: 22, end: 30}, 
+    {start: 1, end: 7}, 
+    {col: 28, row: 7},
+[
+    {row: 6, col: 23},
+    {row: 7, col: 24}
+]);
 let operatingTheater = new Room("Operating Theater", {start: 22, end: 30}, {start: 17, end: 24}, {col: 25, row: 17});
 let recRoom = new Room("Rec Room", {start: 1, end: 9}, {start: 1, end: 7}, {col: 7, row: 7});
 let showers = new Room("Solitary Confinement", {start: 12, end: 19}, {start: 1, end: 5}, {col: 16, row: 5});
@@ -76,7 +82,8 @@ function createInitialGameState(gamePlayers, random = Math.random) {
         id: String(player.id),
         username: player.username,
         character: player.selected_character,
-        position: availableSpawnPoints[index]
+        position: availableSpawnPoints[index],
+        facing: "right"
     }));
 
     return {
@@ -93,7 +100,8 @@ function createInitialGameState(gamePlayers, random = Math.random) {
             previousPosition: null,
             lastRoll: null,
             lastPath: [],
-            turnsTaken: 0
+            turnsTaken: 0,
+            facing: "right"
         },
         turn: {
             number: 1,
@@ -133,6 +141,7 @@ function movementDistances(state, playerId) {
     }
     const startKey = `${player.position.row},${player.position.col}`;
     const distances = new Map([[startKey, 0]]);
+    const previous = new Map();
     const queue = [{ ...player.position }];
 
     const stateRooms = state.board.rooms || rooms;
@@ -180,12 +189,30 @@ function movementDistances(state, playerId) {
             if (isBlockedTile(row, col)) continue;
             if (!canCrossRoomBoundary(current, { row, col })) continue;
             distances.set(key, distance + 1);
+            previous.set(key, { ...current });
             if (!entersDoorFromHallway(current, { row, col })) queue.push({ row, col });
         }
     }
 
     distances.delete(startKey);
+    distances.previous = previous;
     return distances;
+}
+
+function movementPath(state, playerId, destination) {
+    const destinationKey = `${destination?.row},${destination?.col}`;
+    const distances = movementDistances(state, playerId);
+    if (!distances.has(destinationKey)) return [];
+
+    const path = [];
+    let current = { row: destination.row, col: destination.col };
+    while (current) {
+        path.push(current);
+        current = distances.previous.get(`${current.row},${current.col}`);
+    }
+    path.reverse();
+    path.shift();
+    return path;
 }
 
 function takeWardenTurn(state, random = Math.random) {
@@ -222,6 +249,8 @@ function takeWardenTurn(state, random = Math.random) {
 
     state.warden.previousPosition = start;
     state.warden.position = path.length ? { ...path[path.length - 1] } : start;
+    if (state.warden.position.col < start.col) state.warden.facing = "left";
+    else if (state.warden.position.col > start.col) state.warden.facing = "right";
     state.warden.lastRoll = roll;
     state.warden.lastPath = path;
     state.warden.turnsTaken = (state.warden.turnsTaken || 0) + 1;
@@ -266,6 +295,8 @@ function movePlayer(state, playerId, destination, random = Math.random) {
         destination.row === destinationRoom.doors.row && destination.col === destinationRoom.doors.col;
     const cost = entersDoor ? state.turn.movementRemaining : distance;
 
+    if (destination.col < player.position.col) player.facing = "left";
+    else if (destination.col > player.position.col) player.facing = "right";
     player.position = { row: destination.row, col: destination.col };
     state.turn.movementRemaining -= cost;
     if (state.turn.movementRemaining === 0) advanceTurn(state, random);
@@ -279,6 +310,7 @@ module.exports = {
     createInitialGameState,
     rollMovementDie,
     movementDistances,
+    movementPath,
     movePlayer,
     takeWardenTurn
 };
