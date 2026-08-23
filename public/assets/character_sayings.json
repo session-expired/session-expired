@@ -4,7 +4,7 @@
       "character": "rasputin",
       "role": "player",
       "dialogue": {
-        "start": [
+        "game_start": [
           "I have foreseen this. Unfortunately, I forgot what happens next.",
           "Do not fear. I have survived worse parties than this.",
           "God has brought us together. Or perhaps poor security.",
@@ -12,6 +12,34 @@
           "They called me mad in Petrograd. They called me other things too.",
           "I have advised emperors. Surely I can handle this.",
           "Stay near me. My survival record is statistically improbable."
+        ],
+
+        "turn_start": [
+          "Another day. Regrettably.",
+          "I was enjoying the silence.",
+          "Who invited the living?",
+          "Try not to die immediately.",
+          "Death seems busy today.",
+          "I sense poor decisions.",
+          "Ah, fresh victims.",
+          "This should end badly.",
+          "I have survived worse.",
+          "Someone will regret this.",
+          "The walls seem hungry.",
+          "I smell fear. Or cabbage.",
+          "Let the suffering begin.",
+          "What could possibly go right?",
+          "I expected more screaming.",
+          "Even death looks bored.",
+          "I blame the doctors.",
+          "Time for terrible choices.",
+          "The dead have better manners.",
+          "I have a bad feeling. Excellent.",
+          "Someone hide the electrodes.",
+          "Napoleon seems cranky today.",
+          "Perhaps today I stay dead.",
+          "Another perfectly normal nightmare.",
+          "I recommend blaming someone else."
         ],
 
         "door_open": [
@@ -95,7 +123,7 @@
       "character": "brahe",
       "role": "player",
       "dialogue": {
-        "start": [
+        "game_start": [
           "Excellent. Surrounded by lunatics. At least the company has improved.",
           "I have charted the heavens. This building seems considerably less orderly.",
           "Before anyone asks: yes, the nose is real. No, you may not touch it.",
@@ -104,7 +132,33 @@
           "I once owned an island. This is a considerable downgrade.",
           "Let us establish one thing immediately: I am probably the most qualified person here."
         ],
-
+"turn_start": [
+  "My nose detects treachery.",
+  "The stars predict incompetence.",
+  "Someone is going to die.",
+  "Again with the murder.",
+  "Mars looks particularly guilty.",
+  "The heavens demand evidence.",
+  "I blame poor alignment.",
+  "Venus warned me about this.",
+  "My calculations say we're doomed.",
+  "The stars are rarely this rude.",
+  "Something smells suspicious.",
+  "No, it is not the nose.",
+  "Astronomy prepared me for none of this.",
+  "I have charted worse disasters.",
+  "The planets refuse to cooperate.",
+  "Someone has upset Saturn.",
+  "Mercury suggests we panic.",
+  "The moon knows something.",
+  "I distrust tonight's sky.",
+  "My instruments predict screaming.",
+  "This is scientifically unfortunate.",
+  "The cosmos has terrible timing.",
+  "I foresee several bad decisions.",
+  "Even the stars look nervous.",
+  "Perhaps we blame the comet."
+],
         "door_open": [
           "At last. An observable result.",
           "The mechanism performs exactly as predicted.",
@@ -199,7 +253,7 @@
       "character": "lovelace",
       "role": "player",
       "dialogue": {
-        "start": [
+        "game_start": [
           "Very well. Let us determine the rules of this place.",
           "Every system has a pattern. Even this one.",
           "I suspect this will require considerably more than arithmetic.",
@@ -208,7 +262,33 @@
           "Let us proceed methodically. Or recklessly, if method fails.",
           "I have several ideas. Some of them may even work."
         ],
-
+"turn_start": [
+  "The numbers are behaving suspiciously.",
+  "Someone has corrupted the inputs.",
+  "I dislike unsolved variables.",
+  "Murder is terribly inefficient.",
+  "There is a pattern here.",
+  "Someone has miscalculated badly.",
+  "The logic remains unpleasant.",
+  "I require better data.",
+  "Another charming little catastrophe.",
+  "The variables keep dying.",
+  "This outcome seems suboptimal.",
+  "Someone neglected error handling.",
+  "I predicted fewer corpses.",
+  "The machine would do this faster.",
+  "People are dreadful algorithms.",
+  "The evidence lacks elegance.",
+  "Someone introduced a fatal bug.",
+  "I refuse to blame arithmetic.",
+  "This place needs documentation.",
+  "The pattern is almost insulting.",
+  "Probability favors another disaster.",
+  "The numbers suggest betrayal.",
+  "Humans remain difficult to debug.",
+  "I should have stayed with mathematics.",
+  "At least machines fail predictably."
+],
         "door_open": [
           "Excellent. The instruction produced the desired result.",
           "A predictable output. How refreshing.",
@@ -308,7 +388,7 @@
       "character": "crowley",
       "role": "player",
       "dialogue": {
-        "start": [
+        "game_start": [
           "Do what thou wilt. Though preferably somewhere else.",
           "At last, accommodations appropriate to my reputation.",
           "An asylum? How conventional.",
@@ -318,6 +398,33 @@
           "Try not to bore me. It is among the few sins I cannot forgive.",
           "Well. Who among you is interesting enough to corrupt?"
         ],
+        "turn_start": [
+  "The spirits seem judgmental.",
+  "Someone has angered something.",
+  "Wonderful. More consequences.",
+  "I deny everything preemptively.",
+  "The darkness feels ambitious today.",
+  "Someone fetch a goat.",
+  "No, not that goat.",
+  "I expected better from evil.",
+  "The ritual was mostly correct.",
+  "Something followed us home.",
+  "That blood was already there.",
+  "I blame the moon.",
+  "The abyss seems cheerful.",
+  "Someone summon a lawyer.",
+  "Demons have better manners.",
+  "I specifically warned everyone.",
+  "This feels unnecessarily ominous.",
+  "The candles know too much.",
+  "I hear screaming. Promising.",
+  "Hell has lower standards.",
+  "The dead remain uncooperative.",
+  "Someone has disturbed the vibes.",
+  "That was not my pentagram.",
+  "I regret nothing relevant.",
+  "Even I find this excessive."
+],
 
         "door_open": [
           "Behold. The ancient mystery of the doorknob.",
@@ -432,7 +539,7 @@
       "character": "curie",
       "role": "player",
       "dialogue": {
-        "start": [
+        "game_start": [
           "Very well. Let us approach this scientifically.",
           "I have worked in worse laboratories.",
           "Before we begin: do not touch anything in my pockets.",
@@ -441,7 +548,33 @@
           "Everyone remain calm. Especially the bearded ones.",
           "I have survived academia. I am prepared."
         ],
-
+"turn_start": [
+  "Something is glowing again.",
+  "That probably should not glow.",
+  "Excellent. More exposure.",
+  "I blame the laboratory.",
+  "Someone fetch the lead apron.",
+  "The instruments seem concerned.",
+  "I appear to be luminous.",
+  "Science demands terrible hobbies.",
+  "That clicking seems faster.",
+  "Please stop touching everything.",
+  "The walls may be radioactive.",
+  "Another perfectly safe experiment.",
+  "This dosage feels ambitious.",
+  "Someone misplaced the shielding.",
+  "I smell ozone and regret.",
+  "The evidence is slightly irradiated.",
+  "At least the corpse is sterile.",
+  "Perhaps don't lick anything.",
+  "My samples are behaving badly.",
+  "The glow is probably harmless.",
+  "Someone has contaminated something.",
+  "Death is remarkably measurable.",
+  "The laboratory wants another victim.",
+  "I recommend standing farther away.",
+  "Good news. It is only radiation."
+],
         "door_open": [
           "Good. A reproducible result.",
           "The mechanism functions. Proceed.",
@@ -554,7 +687,7 @@
       "character": "mallon",
       "role": "player",
       "dialogue": {
-        "start": [
+        "game_start": [
           "Mary Mallon. Cook. And don't you start.",
           "If anyone asks, I am perfectly healthy.",
           "I've been locked up before. I didn't care for it then either.",
@@ -564,7 +697,33 @@
           "I hope this place has a proper kitchen.",
           "Nobody panic. That's how rumors start."
         ],
-
+"turn_start": [
+  "Anyone hungry?",
+  "Soup's probably still good.",
+  "Everyone looks pale.",
+  "I washed my hands. Mostly.",
+  "Someone blame the plumbing.",
+  "Dinner smells suspicious.",
+  "I wouldn't eat that.",
+  "Actually, I might.",
+  "The kitchen denies everything.",
+  "Another stomachache? Curious.",
+  "Nobody appreciates good cooking.",
+  "The soup needs something.",
+  "Don't look at me.",
+  "I feel perfectly healthy.",
+  "Someone check the potatoes.",
+  "Perhaps skip lunch today.",
+  "The flies seem energetic.",
+  "That chicken looked fine.",
+  "Boiling fixes most things.",
+  "Everyone's suddenly a doctor.",
+  "I blame the milk.",
+  "The kitchen builds character.",
+  "Who ordered the quarantine?",
+  "Waste not, want not.",
+  "Fine. I'll eat it."
+],
         "door_open": [
           "Finally. I was beginning to feel quarantined.",
           "Good. I've had enough confinement for one lifetime.",
@@ -690,7 +849,7 @@
       "character": "bonaparte",
       "role": "warden",
       "dialogue": {
-        "game-start": [
+        "game_start": [
           "Attention. Someone in this institution is causing trouble. I would solve it myself, but apparently I am expected to do everything.",
           "We have a problem. One of the residents is responsible. Find out who before I am forced to leave this office.",
           "There is a culprit somewhere in my asylum. Investigate, gather evidence, and bring me a name. Preferably the correct one.",
@@ -708,7 +867,7 @@
           "I need facts, not rumors. I already have rumors. They breed in the corridors.",
           "Go. Observe. Question. Deduce. Then return to me with the culprit. It is essentially warfare, except everyone is indoors and somehow less organized."
         ],
-        "start": [
+        "turn_start": [
           "Where is everyone?",
           "Someone had better be investigating.",
           "I should have conquered a quieter institution.",

@@ -5,6 +5,7 @@
     height: 100vh;
     height: 100dvh;
     min-height: 0;
+    padding-bottom: 0;
     overflow: hidden;
 }
 
@@ -217,6 +218,8 @@
     font-family: "Press Start 2P", monospace;
     font-size: 14px;
     line-height: 1.5;
+    overflow: auto;
+    overflow-wrap: anywhere;
     text-align: center;
     text-shadow: 1px 1px 0 black;
     transform: translateX(-50%);

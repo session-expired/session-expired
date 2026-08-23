@@ -20,6 +20,8 @@ let gameState;
 let currentUserId;
 let characterDialogue = new Map();
 const activeDialogue = new Map();
+const movingCharacterAnimations = new Set();
+let speechPositionFrame = null;
 
 function showCharacterDialogue(character, group) {
     const sayings = characterDialogue.get(character)?.[group] || [];
@@ -50,6 +52,7 @@ function positionSpeechBubbles() {
 
     boardElement.querySelectorAll(".character-speech").forEach(speech => {
         speech.style.maxWidth = `${Math.max(0, boardBounds.width - 4)}px`;
+        speech.style.maxHeight = `${Math.max(0, boardBounds.height - 4)}px`;
         speech.style.transform = "translateX(-50%)";
         const bubbleBounds = speech.getBoundingClientRect();
         let horizontalShift = 0;
@@ -69,6 +72,28 @@ function positionSpeechBubbles() {
         speech.style.transform =
             `translate(calc(-50% + ${horizontalShift}px), ${verticalShift}px)`;
     });
+}
+
+function positionMovingSpeechBubbles() {
+    positionSpeechBubbles();
+    if (movingCharacterAnimations.size) {
+        speechPositionFrame = window.requestAnimationFrame(positionMovingSpeechBubbles);
+    } else {
+        speechPositionFrame = null;
+    }
+}
+
+function trackMovingSpeechBubbles(movementAnimation) {
+    movingCharacterAnimations.add(movementAnimation);
+    if (speechPositionFrame === null) {
+        speechPositionFrame = window.requestAnimationFrame(positionMovingSpeechBubbles);
+    }
+
+    const stopTracking = () => {
+        movingCharacterAnimations.delete(movementAnimation);
+        positionSpeechBubbles();
+    };
+    movementAnimation.finished.then(stopTracking, stopTracking);
 }
 
 function renderPlayers() {
@@ -107,6 +132,11 @@ function renderPlayers() {
     window.requestAnimationFrame(positionSpeechBubbles);
 }
 
+if ("ResizeObserver" in window) {
+    new ResizeObserver(positionSpeechBubbles).observe(boardElement);
+}
+document.fonts?.ready.then(positionSpeechBubbles);
+
 function animateCharacterMove(sprite, previousPosition, currentPosition, path) {
     if (!sprite || !path?.length) return;
     const duration = Math.max(400, path.length * 180);
@@ -116,7 +146,8 @@ function animateCharacterMove(sprite, previousPosition, currentPosition, path) {
         offset: index / (animationTiles.length - 1),
         transform: `translate(calc(-50% + ${(tile.col - currentPosition.col) * cellSize}px), ${(tile.row - currentPosition.row) * cellSize}px)`
     }));
-    sprite.animate(keyframes, { duration, easing: "linear" });
+    const movementAnimation = sprite.animate(keyframes, { duration, easing: "linear" });
+    trackMovingSpeechBubbles(movementAnimation);
     let frame = 1;
     const spriteArt = sprite.querySelector(".sprite-art");
     const animation = window.setInterval(() => {
@@ -328,9 +359,9 @@ Promise.all([
         gameState = state;
         currentUserId = loadedUserId;
         characterDialogue = new Map(loadedDialogue.map(character => [character.character, character.dialogue]));
-        showCharacterDialogue("bonaparte", "game-start");
-        const startingPlayer = gameState.players[gameState.turn.playerIndex];
-        if (startingPlayer) showCharacterDialogue(startingPlayer.character, "start");
+        [...gameState.players, gameState.warden]
+            .filter(entity => entity?.character)
+            .forEach(entity => showCharacterDialogue(entity.character, "game_start"));
         const { rows, cols } = state.board;
 
         function getRoomAt(row, col) {
@@ -408,10 +439,9 @@ Promise.all([
                 }
                 gameState = data.state;
                 const wardenTookTurn = (gameState.warden?.turnsTaken || 0) > previousWardenTurns;
-                if (wardenTookTurn) showCharacterDialogue("bonaparte", "start");
                 if (String(gameState.turn?.playerId) !== String(previousTurnPlayerId)) {
                     const nextPlayer = gameState.players[gameState.turn.playerIndex];
-                    if (nextPlayer) showCharacterDialogue(nextPlayer.character, "start");
+                    if (nextPlayer) showCharacterDialogue(nextPlayer.character, "turn_start");
                 }
                 statusElement.textContent = `Moved ${data.cost} grid location${data.cost === 1 ? "" : "s"}.`;
                 renderGameState();
