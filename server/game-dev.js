@@ -2,6 +2,7 @@ const path = require("path");
 const express = require("express");
 const http = require("http");
 const { Server } = require("socket.io");
+const { characters } = require("./lobby/characters");
 const {
   createInitialGameState,
   rooms,
@@ -20,10 +21,11 @@ const hostname = process.env.HOST || "127.0.0.1";
 const publicDirectory = path.join(__dirname, "..", "public");
 const gameId = "1";
 const user = { id: "1", username: "user1" };
+const selectedCharacter = characters[Math.floor(Math.random() * characters.length)];
 const state = createInitialGameState([{
   id: user.id,
   username: user.username,
-  selected_character: "rasputin"
+  selected_character: selectedCharacter.id
 }]);
 
 app.disable("x-powered-by");
@@ -108,7 +110,7 @@ io.on("connection", (socket) => {
 function startGameDevServer() {
   server.listen(port, hostname, () => {
     console.log(`Game dev route: http://${hostname}:${port}/game/${gameId}`);
-    console.log("Signed in as user1 · character: rasputin");
+    console.log(`Signed in as user1 · character: ${selectedCharacter.id}`);
   });
 }
 
