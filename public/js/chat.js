@@ -1,18 +1,20 @@
 (() => {
+  const isGamePage = document.body.classList.contains("game-page");
   let footer = document.querySelector("footer");
-  if (!footer) {
+  if (!footer && !isGamePage) {
     footer = document.createElement("footer");
     footer.innerHTML = '<div id="copy">&copy; 2026 Session Expired</div>';
     document.body.appendChild(footer);
   }
 
   const syncFooterHeight = () => {
-    document.documentElement.style.setProperty("--footer-height", `${footer.getBoundingClientRect().height}px`);
+    const footerHeight = footer ? footer.getBoundingClientRect().height : 0;
+    document.documentElement.style.setProperty("--footer-height", `${footerHeight}px`);
   };
   syncFooterHeight();
   window.addEventListener("load", syncFooterHeight);
   window.addEventListener("resize", syncFooterHeight);
-  if ("ResizeObserver" in window) new ResizeObserver(syncFooterHeight).observe(footer);
+  if (footer && "ResizeObserver" in window) new ResizeObserver(syncFooterHeight).observe(footer);
 
   const panel = document.createElement("aside");
   panel.className = "chat-panel";

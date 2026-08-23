@@ -2,10 +2,12 @@
   "scripts": {
     "setup": "npm run migrate",
     "migrate": "node server/database/migrate.js",
-    "start": "node server/server.js",
+    "reset": "node server/database/remove-dev-users.js",
+    "start": "node server/start.js",
     "assets": "node server/assets.js",
     "predev": "kill-port 3000 || true",
     "dev": "node server/dev.js",
+    "game": "node server/game-dev.js",
     "test": "node --test"
   },
   "dependencies": {
