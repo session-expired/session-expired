@@ -268,13 +268,16 @@ function setZoom(nextZoom) {
 function sizeBoard(rows, cols) {
     const gameStyles = window.getComputedStyle(gameElement);
     const horizontalPadding = parseFloat(gameStyles.paddingLeft) + parseFloat(gameStyles.paddingRight);
+    const verticalPadding = parseFloat(gameStyles.paddingTop) + parseFloat(gameStyles.paddingBottom);
     const availableWidth = gameElement.clientWidth - horizontalPadding;
-
-    // Match the vertical space reserved for the board in game.css.
-    const rootStyles = window.getComputedStyle(document.documentElement);
-    const footerHeight = parseFloat(rootStyles.getPropertyValue("--footer-height")) || 0;
-    const chatDeadHeight = parseFloat(rootStyles.getPropertyValue("--chat-dead-height")) || 0;
-    const availableHeight = window.innerHeight - 52 - footerHeight - chatDeadHeight - 120;
+    const reservedHeight = [...gameElement.children]
+        .filter(element => element !== boardViewport)
+        .reduce((total, element) => {
+            const styles = window.getComputedStyle(element);
+            return total + element.offsetHeight +
+                parseFloat(styles.marginTop) + parseFloat(styles.marginBottom);
+        }, verticalPadding);
+    const availableHeight = Math.max(1, gameElement.clientHeight - reservedHeight);
 
     // Whole-pixel cells keep every horizontal and vertical interval identical.
     fittedCellSize = Math.max(1, Math.floor(Math.min(1150 / cols, availableWidth / cols, availableHeight / rows)));
@@ -423,6 +426,7 @@ Promise.all([
                     ? { ...gameState.warden.position }
                     : null;
                 const previousWardenTurns = gameState.warden?.turnsTaken || 0;
+                const previousWardenDialogueEventId = gameState.warden?.dialogueEventId || 0;
                 const previousTurnNumber = gameState.turn?.number || 0;
                 const response = await fetch(`/api/games/${gameId}/move`, {
                     method: "POST",
@@ -450,6 +454,11 @@ Promise.all([
                 statusElement.textContent = `Moved ${data.cost} grid location${data.cost === 1 ? "" : "s"}.`;
                 renderGameState();
                 const movedPlayer = gameState.players.find(player => String(player.id) === currentUserId);
+                if ((gameState.warden?.dialogueEventId || 0) > previousWardenDialogueEventId &&
+                    gameState.warden.dialogueEvent) {
+                    showCharacterDialogue(gameState.warden.character, gameState.warden.dialogueEvent);
+                    renderPlayers();
+                }
                 if ((movedPlayer?.dialogueEventId || 0) > previousDialogueEventId && movedPlayer.dialogueEvent) {
                     showCharacterDialogue(movedPlayer.character, movedPlayer.dialogueEvent);
                     renderPlayers();

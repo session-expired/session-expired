@@ -18,7 +18,7 @@ const spawnPoints = [
 ];
 
 const secretPass = [
-    {row:2, col: 23}, {row:23, col: 3},
+    {row:3, col: 23}, {row:23, col: 3},
     {row:2, col: 7}, {row:23, col: 28},
 ]
 
@@ -34,10 +34,12 @@ let cafeteria = new Room("Cafeteria", {start: 22, end: 30},
 ]);
 let operatingTheater = new Room("Operating Theater", {start: 22, end: 30}, {start: 17, end: 24}, {col: 25, row: 17});
 let recRoom = new Room("Rec Room", {start: 1, end: 9}, {start: 1, end: 7}, {col: 7, row: 7});
-let showers = new Room("Solitary Confinement", {start: 12, end: 19}, {start: 1, end: 5}, {col: 16, row: 5});
-let solitaryConfinement = new Room("Showers", {start: 12, end: 19}, {start: 19, end: 24}, {col: 15, row: 20});
-let hydrotherapy = new Room("Electrotherapy", {start: 1, end: 8}, {start: 10, end: 14}, {col: 7, row: 14});
-let electrotherapy = new Room("Hydrotherapy", {start: 23, end: 30}, {start: 10, end: 14}, {col: 25, row: 10});
+let showers = new Room("Showers", {start: 12, end: 19}, {start: 20, end: 24}, {col: 15, row: 20});
+let solitaryConfinement = new Room("Solitary Confinement", {start: 12, end: 19}, {start: 1, end: 5}, {col: 16, row: 5});
+let hydrotherapy = new Room("Hydrotherapy", {start: 23, end: 30}, {start: 10, end: 14}, {col: 25, row: 10});
+let electrotherapy = new Room("Electrotherapy", {start: 1, end: 8}, {start: 10, end: 14}, {col: 7, row: 14});
+
+
 
 //Array of rooms to easily access their dimensions
 const rooms = [wardensOffice, paddedCells, cafeteria, operatingTheater, recRoom, showers,
@@ -104,6 +106,8 @@ function createInitialGameState(gamePlayers, random = Math.random) {
             lastRoll: null,
             lastPath: [],
             turnsTaken: 0,
+            dialogueEvent: null,
+            dialogueEventId: 0,
             facing: "right"
         },
         turn: {
@@ -352,9 +356,14 @@ function movePlayer(state, playerId, destination, random = Math.random) {
     if (destination.col < player.position.col) player.facing = "left";
     else if (destination.col > player.position.col) player.facing = "right";
     player.position = { row: destination.row, col: destination.col };
-    if (entersDoor && destinationRoom.name !== "Wardens_office") {
-        player.dialogueEvent = "door_open";
-        player.dialogueEventId = (player.dialogueEventId || 0) + 1;
+    if (entersDoor) {
+        if (destinationRoom.name === "Wardens_office") {
+            state.warden.dialogueEvent = "enter";
+            state.warden.dialogueEventId = (state.warden.dialogueEventId || 0) + 1;
+        } else {
+            player.dialogueEvent = "door_open";
+            player.dialogueEventId = (player.dialogueEventId || 0) + 1;
+        }
     }
     useSecretPassage(state, player, destination, random);
     state.turn.movementRemaining -= cost;

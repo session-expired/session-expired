@@ -70,6 +70,8 @@ test("the Warden starts at tile 13,13 using Bonaparte's standing sprite", () => 
     lastRoll: null,
     lastPath: [],
     turnsTaken: 0,
+    dialogueEvent: null,
+    dialogueEventId: 0,
     facing: "right"
   });
 });
@@ -267,7 +269,7 @@ test("entering a door spends all remaining movement and ends the turn", () => {
   assert.equal(state.turn.phase, "awaiting_roll");
 });
 
-test("entering the Warden's office does not trigger door dialogue", () => {
+test("entering the Warden's office triggers Bonaparte's enter dialogue", () => {
   const state = createInitialGameState([{ id: 1, username: "Player" }]);
   state.players[0].position = { row: 12, col: 20 };
   state.turn.phase = "moving";
@@ -276,6 +278,8 @@ test("entering the Warden's office does not trigger door dialogue", () => {
   assert.equal(movePlayer(state, "1", { row: 12, col: 19 }), 1);
   assert.equal(state.players[0].dialogueEvent, null);
   assert.equal(state.players[0].dialogueEventId, 0);
+  assert.equal(state.warden.dialogueEvent, "enter");
+  assert.equal(state.warden.dialogueEventId, 1);
 });
 
 test("a player beginning a turn on a door can move into its room", () => {
