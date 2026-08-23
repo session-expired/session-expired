@@ -1,250 +1,251 @@
 .game-page {
-    box-sizing: border-box;
-    width: 100%;
-    max-width: 100vw;
-    height: 100vh;
-    height: 100dvh;
-    min-height: 0;
-    padding-bottom: 0;
-    overflow: hidden;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  min-height: 0;
+  padding-bottom: 0;
+  overflow: hidden;
 }
 
 .game-header {
-    display: flex;
-    box-sizing: border-box;
-    height: 52px;
-    padding: 7px 12px;
-    align-items: center;
-    justify-content: space-between;
-    gap: 16px;
-    border-bottom: 2px solid #171713;
-    background: #4a4a42;
+  display: flex;
+  box-sizing: border-box;
+  height: 52px;
+  padding: 7px 12px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  border-bottom: 2px solid #171713;
+  background: #4a4a42;
 }
 
 #quit-game,
 #music-toggle {
-    padding: 10px 14px;
-    border: 2px solid #171713;
-    color: #e8e2c8;
-    font-family: "Press Start 2P", monospace;
-    font-size: 10px;
-    cursor: pointer;
+  padding: 10px 14px;
+  border: 2px solid #171713;
+  color: #e8e2c8;
+  font-family: "Press Start 2P", monospace;
+  font-size: 10px;
+  cursor: pointer;
 }
 
 #quit-game {
-    background: #8b1e1e;
+  background: #8b1e1e;
 }
 
 .music-controls {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-family: "Press Start 2P", monospace;
-    font-size: 9px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: "Press Start 2P", monospace;
+  font-size: 9px;
+  margin-right: 3%;
 }
 
 #music-toggle {
-    min-width: 124px;
-    background: #6e6101;
+  min-width: 124px;
+  background: #6e6101;
 }
 
 #music-volume {
-    width: 120px;
-    accent-color: #8b1e1e;
-    cursor: pointer;
+  width: 120px;
+  accent-color: #8b1e1e;
+  cursor: pointer;
 }
 
 #quit-game:hover,
 #quit-game:focus-visible,
 #music-toggle:hover,
 #music-toggle:focus-visible {
-    background: white;
-    color: #8b1e1e;
-    outline: none;
+  background: white;
+  color: #8b1e1e;
+  outline: none;
 }
 
 #quit-game:disabled {
-    cursor: wait;
-    opacity: 0.55;
+  cursor: wait;
+  opacity: 0.55;
 }
 
 #game {
-    display: flex;
-    box-sizing: border-box;
-    height: calc(100dvh - 52px - var(--chat-dead-height, 0px));
-    min-height: 0;
-    padding: 20px 20px 32px;
-    flex-direction: column;
-    align-items: center;
-    justify-content: flex-start;
-    overflow: hidden;
+  display: flex;
+  box-sizing: border-box;
+  height: calc(100dvh - 52px - var(--chat-dead-height, 0px));
+  min-height: 0;
+  padding: 20px 20px 32px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  overflow: hidden;
 }
 
 #game-status,
 #clickOutput {
-    flex: 0 0 auto;
+  flex: 0 0 auto;
 }
 
 #clickOutput {
-    min-height: 36px;
-    margin: 10px 0 0;
-    line-height: 1.4;
-    text-align: center;
-    white-space: pre-line;
+  min-height: 36px;
+  margin: 10px 0 0;
+  line-height: 1.4;
+  text-align: center;
+  white-space: pre-line;
 }
 
 #board-viewport {
-    max-width: 100%;
-    max-height: 100%;
-    overflow: auto;
-    flex: 0 0 auto;
+  max-width: 100%;
+  max-height: 100%;
+  overflow: auto;
+  flex: 0 0 auto;
 }
 
 #board {
-    display: grid;
-    grid-template-columns: repeat(30, 1fr);
-    grid-template-rows: repeat(24, 1fr);
-    flex: 0 0 auto;
-    background-image: url("/assets/images/board/board.png");
-    background-repeat: no-repeat;
-    background-position: center;
-    background-size: 100% 100%;
+  display: grid;
+  grid-template-columns: repeat(30, 1fr);
+  grid-template-rows: repeat(24, 1fr);
+  flex: 0 0 auto;
+  background-image: url("/assets/images/board/board.png");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 100% 100%;
 }
 
 .board-controls {
-    display: flex;
-    margin-bottom: 8px;
-    gap: 6px;
+  display: flex;
+  margin-bottom: 8px;
+  gap: 6px;
 }
 
 .board-controls button {
-    min-width: 42px;
-    padding: 7px 9px;
-    border: 2px solid #171713;
-    background: #6e6101;
-    color: #e8e2c8;
-    font-family: "Press Start 2P", monospace;
-    font-size: 10px;
-    cursor: pointer;
+  min-width: 42px;
+  padding: 7px 9px;
+  border: 2px solid #171713;
+  background: #6e6101;
+  color: #e8e2c8;
+  font-family: "Press Start 2P", monospace;
+  font-size: 10px;
+  cursor: pointer;
 }
 
 .board-controls button:hover:not(:disabled),
 .board-controls button:focus-visible {
-    background: white;
-    color: #8b1e1e;
-    outline: none;
+  background: white;
+  color: #8b1e1e;
+  outline: none;
 }
 
 .board-controls button:disabled {
-    cursor: default;
-    opacity: 0.45;
+  cursor: default;
+  opacity: 0.45;
 }
 
 #zoom-reset {
-    min-width: 68px;
+  min-width: 68px;
 }
 
 #board div {
-    box-sizing: border-box;
-    min-width: 0;
-    min-height: 0;
-    border: 1px solid rgba(0, 0, 0, 0.45);
+  box-sizing: border-box;
+  min-width: 0;
+  min-height: 0;
+  border: 1px solid rgba(0, 0, 0, 0.45);
 }
 
 .turn-controls {
-    display: flex;
-    min-height: 32px;
-    align-items: center;
-    gap: 10px;
-    font-family: "Press Start 2P", monospace;
-    font-size: 9px;
+  display: flex;
+  min-height: 32px;
+  align-items: center;
+  gap: 10px;
+  font-family: "Press Start 2P", monospace;
+  font-size: 9px;
 }
 
 #roll-movement {
-    padding: 7px 9px;
-    border: 2px solid #171713;
-    background: #8b1e1e;
-    color: #e8e2c8;
-    font: inherit;
-    cursor: pointer;
+  padding: 7px 9px;
+  border: 2px solid #171713;
+  background: #8b1e1e;
+  color: #e8e2c8;
+  font: inherit;
+  cursor: pointer;
 }
 
 #board > div {
-    position: relative;
+  position: relative;
 }
 
 #board > .movement-range {
-    background: rgba(65, 190, 80, 0.3);
-    box-shadow: inset 0 0 8px rgba(75, 255, 95, 0.8);
-    cursor: pointer;
+  background: rgba(65, 190, 80, 0.3);
+  box-shadow: inset 0 0 8px rgba(75, 255, 95, 0.8);
+  cursor: pointer;
 }
 
 #board > .movement-range:hover {
-    background: rgba(75, 225, 90, 0.48);
+  background: rgba(75, 225, 90, 0.48);
 }
 
 #board .player-sprite {
-    position: absolute;
-    z-index: 2;
-    left: 50%;
-    bottom: 10%;
-    width: 100%;
-    aspect-ratio: 32 / 57;
-    border: 0;
-    pointer-events: none;
-    transform: translateX(-50%);
+  position: absolute;
+  z-index: 2;
+  left: 50%;
+  bottom: 10%;
+  width: 100%;
+  aspect-ratio: 32 / 57;
+  border: 0;
+  pointer-events: none;
+  transform: translateX(-50%);
 }
 
 #board .sprite-art {
-    position: absolute;
-    inset: 0;
-    border: 0;
-    background-repeat: no-repeat;
-    background-position: left top;
-    background-size: 800% 100%;
-    image-rendering: pixelated;
+  position: absolute;
+  inset: 0;
+  border: 0;
+  background-repeat: no-repeat;
+  background-position: left top;
+  background-size: 800% 100%;
+  image-rendering: pixelated;
 }
 
 #board .sprite-art.facing-left {
-    transform: scaleX(-1);
+  transform: scaleX(-1);
 }
 
 #board .character-speech {
-    position: absolute;
-    z-index: 4;
-    left: 50%;
-    bottom: calc(100% + 5px);
-    width: 300px;
-    box-sizing: border-box;
-    padding: 5px 7px;
-    border: 1px solid rgba(255, 255, 255, 0.75);
-    background: rgba(20, 20, 18, 0.78);
-    color: white;
-    font-family: "Press Start 2P", monospace;
-    font-size: 14px;
-    line-height: 1.5;
-    overflow: auto;
-    overflow-wrap: anywhere;
-    text-align: center;
-    text-shadow: 1px 1px 0 black;
-    transform: translateX(-50%);
+  position: absolute;
+  z-index: 4;
+  left: 50%;
+  bottom: calc(100% + 5px);
+  width: 300px;
+  box-sizing: border-box;
+  padding: 5px 7px;
+  border: 1px solid rgba(255, 255, 255, 0.75);
+  background: rgba(20, 20, 18, 0.78);
+  color: white;
+  font-family: "Press Start 2P", monospace;
+  font-size: 14px;
+  line-height: 1.5;
+  overflow: auto;
+  overflow-wrap: anywhere;
+  text-align: center;
+  text-shadow: 1px 1px 0 black;
+  transform: translateX(-50%);
 }
 
 @media (max-width: 560px) {
-    .music-controls label {
-        position: absolute;
-        width: 1px;
-        height: 1px;
-        overflow: hidden;
-        clip: rect(0, 0, 0, 0);
-    }
+  .music-controls label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+  }
 
-    #music-toggle {
-        min-width: 108px;
-        padding-inline: 8px;
-    }
+  #music-toggle {
+    min-width: 108px;
+    padding-inline: 8px;
+  }
 
-    #music-volume {
-        width: 72px;
-    }
+  #music-volume {
+    width: 72px;
+  }
 }
