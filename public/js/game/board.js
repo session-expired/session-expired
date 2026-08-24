@@ -1,55 +1,29 @@
+import { elements } from "./board-dom.js";
+import { endTurn, loadGameResources, movePlayer, quitGame, rollMovement } from "./board-api.js";
+import { createBoardLayout } from "./board-layout.js";
+import { createAccusationControls } from "./accusation-controls.js";
+
 const gameId = window.location.pathname.split("/").filter(Boolean).at(-1);
-const statusElement = document.getElementById("game-status");
-const quitButton = document.getElementById("quit-game");
-const gameElement = document.getElementById("game");
-const boardElement = document.getElementById("board");
-const boardViewport = document.getElementById("board-viewport");
-const zoomOutButton = document.getElementById("zoom-out");
-const zoomResetButton = document.getElementById("zoom-reset");
-const zoomInButton = document.getElementById("zoom-in");
-const turnStatusElement = document.getElementById("turn-status");
-const rollMovementButton = document.getElementById("roll-movement");
-const endTurnButton = document.getElementById("end-turn");
-const accusationForm = document.getElementById("accusation-form");
-const accusationStatus = document.getElementById("accusation-status");
-const accuseButton = accusationForm?.querySelector('button[type="submit"]');
-const MIN_ZOOM = 1;
-const MAX_ZOOM = 2.5;
-const ZOOM_STEP = 0.25;
-let zoomLevel = 1;
-let fittedCellSize = 1;
-let boardRows = 0;
-let boardCols = 0;
+const statusElement = elements.status;
+const quitButton = elements.quitButton;
+const gameElement = elements.game;
+const boardElement = elements.board;
+const turnStatusElement = elements.turnStatus;
+const rollMovementButton = elements.rollMovementButton;
+const endTurnButton = elements.endTurnButton;
 let gameState;
 let currentUserId;
 let characterDialogue = new Map();
 const activeDialogue = new Map();
 const movingCharacterAnimations = new Set();
 let speechPositionFrame = null;
-let accusationOptionsLoaded = false;
-
-if (accusationForm) {
-    Promise.all([
-        fetch("/assets/murderers.json").then(response => response.json()),
-        fetch("/assets/victims.json").then(response => response.json()),
-        fetch("/assets/rooms.json").then(response => response.json()),
-        fetch("/assets/methods.json").then(response => response.json())
-    ]).then(([killerData, victimData, roomData, methodData]) => {
-        const populate = (name, options) => {
-            const select = accusationForm.elements.namedItem(name);
-            select.replaceChildren(...options.map(item => new Option(item.name, item.id)));
-        };
-        populate("killer", killerData.murderers);
-        populate("victim", victimData.victims);
-        populate("room", roomData.rooms.filter(room => room.canBeMurderScene));
-        populate("method", methodData.methods);
-        accusationOptionsLoaded = true;
-        if (gameState) renderTurn();
-    }).catch(() => {
-        accusationStatus.textContent = "Accusation options could not be loaded.";
-        accuseButton.disabled = true;
-    });
-}
+const boardLayout = createBoardLayout(elements, positionSpeechBubbles);
+const accusationControls = createAccusationControls(elements, gameId, {
+    onState: applyAuthoritativeState,
+    onStatus: message => { statusElement.textContent = message; },
+    onEligibilityChanged: () => { if (gameState) renderTurn(); }
+});
+accusationControls.initialize();
 
 function showCharacterDialogue(character, group) {
     const sayings = characterDialogue.get(character)?.[group] || [];
@@ -72,7 +46,7 @@ function showCharacterDialogue(character, group) {
 }
 
 function squareAt(row, col) {
-    return boardElement.querySelector(`[data-row="${row}"][data-col="${col}"]`);
+    return boardLayout.squareAt(row, col);
 }
 
 function positionSpeechBubbles() {
@@ -169,7 +143,7 @@ document.fonts?.ready.then(positionSpeechBubbles);
 function animateCharacterMove(sprite, previousPosition, currentPosition, path) {
     if (!sprite || !path?.length) return;
     const duration = Math.max(400, path.length * 180);
-    const cellSize = fittedCellSize * zoomLevel;
+    const cellSize = boardLayout.cellSize;
     const animationTiles = [previousPosition, ...path];
     const keyframes = animationTiles.map((tile, index) => ({
         offset: index / (animationTiles.length - 1),
@@ -291,26 +265,13 @@ function renderTurn() {
     else turnStatusElement.textContent = `Waiting for ${player?.username || "the next player"}…`;
     rollMovementButton.hidden = turn.phase !== "awaiting_roll" || String(turn.playerId) !== currentUserId;
     endTurnButton.hidden = !isMine || turn.phase !== "awaiting_end";
-    if (accusationForm) {
-        const localPlayer = gameState.players.find(candidate => String(candidate.id) === currentUserId);
-        const adjacent = localPlayer?.position && gameState.warden?.position &&
-            Math.abs(localPlayer.position.row - gameState.warden.position.row) +
-            Math.abs(localPlayer.position.col - gameState.warden.position.col) === 1;
-        const eligible = accusationOptionsLoaded && gameState.status === "active" && isMine && adjacent && localPlayer?.canAccuse;
-        accuseButton.disabled = !eligible;
-        accusationStatus.textContent = eligible ? "You are adjacent to the Warden." :
-            !isMine ? "You may only accuse during your turn." :
-                !adjacent ? "You must reach the Warden to make an accusation." :
-                    "You cannot make another accusation.";
-    }
+    accusationControls.render(gameState, currentUserId);
 }
 
 rollMovementButton.addEventListener("click", async () => {
     rollMovementButton.disabled = true;
     try {
-        const response = await fetch(`/api/games/${gameId}/roll`, { method: "POST" });
-        const data = await response.json();
-        if (!response.ok) throw new Error(data.error || "Unable to roll the movement die.");
+        const data = await rollMovement(gameId);
         applyAuthoritativeState(data.state);
     } catch (error) {
         statusElement.textContent = error.message;
@@ -322,9 +283,7 @@ rollMovementButton.addEventListener("click", async () => {
 endTurnButton.addEventListener("click", async () => {
     endTurnButton.disabled = true;
     try {
-        const response = await fetch(`/api/games/${gameId}/end-turn`, { method: "POST" });
-        const data = await response.json();
-        if (!response.ok) throw new Error(data.error || "Unable to end the turn.");
+        const data = await endTurn(gameId);
         applyAuthoritativeState(data.state);
     } catch (error) {
         statusElement.textContent = error.message;
@@ -344,86 +303,11 @@ window.addEventListener("game-perspective", event => {
     if (gameState) renderGameState();
 });
 
-accusationForm?.addEventListener("submit", async event => {
-    event.preventDefault();
-    accuseButton.disabled = true;
-    try {
-        const response = await fetch(`/api/games/${gameId}/accuse`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(Object.fromEntries(new FormData(accusationForm)))
-        });
-        const data = await response.json();
-        if (!response.ok) throw new Error(data.error || "Unable to make that accusation.");
-        statusElement.textContent = data.correct
-            ? "Correct accusation — game finished."
-            : "Incorrect accusation — your turn has ended.";
-        applyAuthoritativeState(data.state);
-    } catch (error) {
-        statusElement.textContent = error.message;
-        renderTurn();
-    }
-});
-
-function applyBoardZoom() {
-    const cellSize = fittedCellSize * zoomLevel;
-    boardElement.style.width = `${cellSize * boardCols}px`;
-    boardElement.style.height = `${cellSize * boardRows}px`;
-    zoomResetButton.textContent = `${Math.round(zoomLevel * 100)}%`;
-    zoomOutButton.disabled = zoomLevel <= MIN_ZOOM;
-    zoomInButton.disabled = zoomLevel >= MAX_ZOOM;
-    window.requestAnimationFrame(positionSpeechBubbles);
-}
-
-function setZoom(nextZoom) {
-    zoomLevel = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, nextZoom));
-    applyBoardZoom();
-}
-
-function sizeBoard(rows, cols) {
-    const gameStyles = window.getComputedStyle(gameElement);
-    const horizontalPadding = parseFloat(gameStyles.paddingLeft) + parseFloat(gameStyles.paddingRight);
-    const verticalPadding = parseFloat(gameStyles.paddingTop) + parseFloat(gameStyles.paddingBottom);
-    const availableWidth = gameElement.clientWidth - horizontalPadding;
-    const reservedHeight = [...gameElement.children]
-        .filter(element => element !== boardViewport)
-        .reduce((total, element) => {
-            const styles = window.getComputedStyle(element);
-            return total + element.offsetHeight +
-                parseFloat(styles.marginTop) + parseFloat(styles.marginBottom);
-        }, verticalPadding);
-    const availableHeight = Math.max(1, gameElement.clientHeight - reservedHeight);
-
-    // Whole-pixel cells keep every horizontal and vertical interval identical.
-    fittedCellSize = Math.max(1, Math.floor(Math.min(1150 / cols, availableWidth / cols, availableHeight / rows)));
-    boardRows = rows;
-    boardCols = cols;
-    boardViewport.style.width = `${fittedCellSize * cols}px`;
-    boardViewport.style.height = `${fittedCellSize * rows}px`;
-    boardElement.style.aspectRatio = `${cols} / ${rows}`;
-    applyBoardZoom();
-}
-
-zoomOutButton.addEventListener("click", () => setZoom(zoomLevel - ZOOM_STEP));
-zoomInButton.addEventListener("click", () => setZoom(zoomLevel + ZOOM_STEP));
-zoomResetButton.addEventListener("click", () => setZoom(1));
-
 quitButton.addEventListener("click", async () => {
     if (!window.confirm("Are you sure you want to leave this game? You will not be able to rejoin.")) return;
     quitButton.disabled = true;
     try {
-        const response = await fetch(`/api/games/${gameId}/quit`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: "{}"
-        });
-        if (response.status === 401) {
-            window.location.assign("/login");
-            return;
-        }
-        const contentType = response.headers.get("content-type") || "";
-        const data = contentType.includes("application/json") ? await response.json() : {};
-        if (!response.ok) throw new Error(data.error || "Unable to quit the game.");
+        await quitGame(gameId);
         window.location.assign("/");
     } catch (error) {
         statusElement.textContent = error.message;
@@ -431,39 +315,8 @@ quitButton.addEventListener("click", async () => {
     }
 });
 
-Promise.all([
-    fetch(`/api/games/${gameId}`),
-    // This endpoint reads server/game/board.js, so the inspection aid always
-    // uses the current room placement instead of the game's saved snapshot.
-    fetch("/api/board"),
-    fetch("/assets/character_sayings.json")
-])
-    .then(async ([gameResponse, boardResponse, sayingsResponse]) => {
-        const response = gameResponse;
-        if (response.status === 401) {
-            window.location.assign("/login");
-            throw new Error("Your session has expired. Redirecting to login.");
-        }
-        const contentType = response.headers.get("content-type") || "";
-        if (!contentType.includes("application/json")) {
-            throw new Error(`The server returned an unexpected response (${response.status}).`);
-        }
-        const data = await response.json();
-        if (!response.ok) throw new Error(data.error || "Unable to load this game.");
-
-        if (boardResponse.status === 401) {
-            window.location.assign("/login");
-            throw new Error("Your session has expired. Redirecting to login.");
-        }
-        const boardContentType = boardResponse.headers.get("content-type") || "";
-        if (!boardContentType.includes("application/json")) {
-            throw new Error(`The server returned an unexpected response (${boardResponse.status}).`);
-        }
-        const boardData = await boardResponse.json();
-        if (!boardResponse.ok) throw new Error(boardData.error || "Unable to load the board.");
-        if (!sayingsResponse.ok) throw new Error("Unable to load character sayings.");
-        const sayingsData = await sayingsResponse.json();
-
+loadGameResources(gameId)
+    .then(({ game: data, board: boardData, sayings: sayingsData }) => {
         return {
             state: data.game.state,
             currentUserId: String(data.currentUserId),
@@ -486,48 +339,11 @@ Promise.all([
         }
         const { rows, cols } = state.board;
 
-        function getRoomAt(row, col) {
-            return rooms.find(room => {
-                const inRows = row >= room.rows.start && row <= room.rows.end;
-                const inCols = col >= room.cols.start && col <= room.cols.end;
-                return inRows && inCols;
-            });
-        }
-
-        //This loop creates the board
-
-        let container = boardElement;
-
-        container.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
-        container.style.gridTemplateRows = `repeat(${rows}, 1fr)`;
-        sizeBoard(rows, cols);
-        window.addEventListener("resize", () => sizeBoard(rows, cols));
+        const container = boardElement;
+        boardLayout.build({ rows, cols, rooms, spawnPoints, secretPass });
+        window.addEventListener("resize", () => boardLayout.size(rows, cols));
         if (window.ResizeObserver) {
-            new ResizeObserver(() => sizeBoard(rows, cols)).observe(gameElement);
-        }
-        for (let row = 1; row <= rows; row++) {
-            for (let col = 1; col <= cols; col++) {
-                let square = document.createElement("div");
-                const room = getRoomAt(row, col);
-                const isDoor = room && row === room.doors.row && col === room.doors.col;
-                const isSpawnPoint = spawnPoints.some(point => row === point.row && col === point.col);
-                const isSecretPass = secretPass.some(point => row === point.row && col === point.col);
-                const isBlockedTile = room?.blockedTile?.some(tile => row === tile.row && col === tile.col);
-                square.dataset.type = isSecretPass
-                    ? "secret passage"
-                    : isDoor
-                        ? "door"
-                        : room
-                            ? "room"
-                            : isSpawnPoint
-                                ? "spawn point"
-                                : "hallway";
-                if (room) square.dataset.roomName = room.name;
-                if (isBlockedTile) square.dataset.blocked = "true";
-                square.dataset.row = row;
-                square.dataset.col = col;
-                container.appendChild(square);
-            }
+            new ResizeObserver(() => boardLayout.size(rows, cols)).observe(gameElement);
         }
 
         statusElement.textContent = `Game loaded · ${state.players.length} players`;
@@ -547,17 +363,14 @@ Promise.all([
                 const previousWardenTurns = gameState.warden?.turnsTaken || 0;
                 const previousWardenDialogueEventId = gameState.warden?.dialogueEventId || 0;
                 const previousTurnNumber = gameState.turn?.number || 0;
-                const response = await fetch(`/api/games/${gameId}/move`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
+                let data;
+                try {
+                    data = await movePlayer(gameId, {
                         row: Number(square.dataset.row),
                         col: Number(square.dataset.col)
-                    })
-                });
-                const data = await response.json();
-                if (!response.ok) {
-                    statusElement.textContent = data.error || "Unable to move there.";
+                    });
+                } catch (error) {
+                    statusElement.textContent = error.message;
                     return;
                 }
                 gameState = data.state;
@@ -599,7 +412,7 @@ Promise.all([
             const tileLabel = ["door", "secret passage"].includes(square.dataset.type)
                 ? [square.dataset.type, square.dataset.roomName].filter(Boolean).join(", ")
                 : square.dataset.roomName || square.dataset.type;
-            document.getElementById("clickOutput").textContent =
+            elements.clickOutput.textContent =
                 `${tileLabel}\ncol ${square.dataset.col}, row ${square.dataset.row}`;
         });
     })

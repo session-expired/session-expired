@@ -1,11 +1,27 @@
 {
   "rooms": [
-    { "id": "wardens_office", "name": "Warden's Office", "canBeMurderScene": false },
+    {
+      "id": "wardens_office",
+      "name": "Warden's Office",
+      "canBeMurderScene": false
+    },
     { "id": "hydrotherapy", "name": "Hydrotherapy", "canBeMurderScene": true },
-    { "id": "operating_theater", "name": "Operating Theater", "canBeMurderScene": true },
+    {
+      "id": "operating_theater",
+      "name": "Operating Theater",
+      "canBeMurderScene": true
+    },
     { "id": "padded_cells", "name": "Padded Cells", "canBeMurderScene": true },
-    { "id": "solitary_confinement", "name": "Solitary Confinement", "canBeMurderScene": true },
-    { "id": "electrotherapy", "name": "Electrotherapy", "canBeMurderScene": true },
+    {
+      "id": "solitary_confinement",
+      "name": "Solitary Confinement",
+      "canBeMurderScene": true
+    },
+    {
+      "id": "electrotherapy",
+      "name": "Electrotherapy",
+      "canBeMurderScene": true
+    },
     { "id": "showers", "name": "Showers", "canBeMurderScene": true },
     { "id": "cafeteria", "name": "Cafeteria", "canBeMurderScene": true },
     { "id": "rec_room", "name": "Rec Room", "canBeMurderScene": true }
