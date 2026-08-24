@@ -32,13 +32,15 @@ test("shared accusation logic records the discovering player and finishes the ga
   assert.deepEqual(state.winner, { id: "test-player-2", username: "Player 2", character: "lovelace" });
 });
 
-test("a wrong accusation removes only that player's accusation eligibility", () => {
+test("a wrong accusation relocates that player and marks one turn to skip", () => {
   const state = createTestState();
   state.turn.playerId = "test-player-1";
   state.turn.playerIndex = state.turn.order.indexOf("test-player-1");
   state.players.find(player => player.id === "test-player-1").position = { row: 13, col: 12 };
-  assert.equal(submitAccusation(state, "test-player-1", { ...state.solution, killer: "crowley" }), false);
-  assert.equal(state.players[0].canAccuse, false);
+  const wrongKiller = state.solution.killer === "crowley" ? "curie" : "crowley";
+  assert.equal(submitAccusation(state, "test-player-1", { ...state.solution, killer: wrongKiller }, () => 0), false);
+  assert.equal(state.players[0].canAccuse, true);
+  assert.equal(state.players[0].turnsToSkip, 1);
   assert.equal(state.players[1].canAccuse, true);
   assert.equal(state.status, "active");
   assert.notEqual(state.turn.playerId, "test-player-1");

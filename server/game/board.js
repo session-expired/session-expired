@@ -22,13 +22,27 @@ const secretPass = [
     {row:2, col: 7}, {row:23, col: 28},
 ]
 
-// Kept in the persisted game snapshot so every player in a lobby is solving
-// the same case and a completed game can later be rendered on the scoreboard.
-const initialSolution = Object.freeze({
-    killer: "rasputin",
-    victim: "the victim",
-    method: "defenestration"
+const { methods } = require("../../public/assets/methods.json");
+const { rooms: roomOptions } = require("../../public/assets/rooms.json");
+const { murderers } = require("../../public/assets/murderers.json");
+const { victims } = require("../../public/assets/victims.json");
+
+const solutionPools = Object.freeze({
+    killers: murderers,
+    victims,
+    rooms: roomOptions.filter(room => room.canBeMurderScene),
+    methods
 });
+
+function createSolution(random = Math.random) {
+    const choose = options => options[Math.floor(random() * options.length)];
+    return {
+        killer: choose(solutionPools.killers).id,
+        victim: choose(solutionPools.victims).id,
+        room: choose(solutionPools.rooms).id,
+        method: choose(solutionPools.methods).id
+    };
+}
 
 //Initializing all rooms
 let wardensOffice = new Room("Wardens_office", {start: 12, end: 19}, {start: 8, end: 17}, {col: 19, row: 12});
@@ -102,6 +116,7 @@ function createInitialGameState(gamePlayers, random = Math.random, lobby = {}) {
         username: player.username,
         character: player.selected_character,
         canAccuse: true,
+        turnsToSkip: 0,
         position: availableSpawnPoints[index],
         facing: "right",
         dialogueEvent: null,
@@ -142,7 +157,7 @@ function createInitialGameState(gamePlayers, random = Math.random, lobby = {}) {
             movementRemaining: 0,
             visitedPositions: []
         },
-        solution: { ...initialSolution },
+        solution: createSolution(random),
         winner: null,
         createdAt: Date.now()
     };
@@ -313,6 +328,25 @@ function activateTurn(state, index) {
     state.turn.visitedPositions = [];
 }
 
+function activateNextEligibleTurn(state, startIndex, random = Math.random) {
+    for (let index = startIndex; index < state.turn.order.length; index++) {
+        const playerId = state.turn.order[index];
+        const player = state.players.find(candidate => String(candidate.id) === String(playerId));
+        if (!player) continue;
+        if ((player.turnsToSkip || 0) > 0) {
+            player.turnsToSkip -= 1;
+            continue;
+        }
+        activateTurn(state, index);
+        return { warden: false };
+    }
+    state.turn.playerId = null;
+    state.turn.movementRemaining = 0;
+    state.turn.phase = "warden";
+    takeWardenTurn(state, random);
+    return { warden: true };
+}
+
 function finishPlayerTurn(state, playerId, random = Math.random) {
     if (state.status !== "active" || state.turn.phase === "finished") {
         throw new Error("This game has already finished.");
@@ -323,13 +357,7 @@ function finishPlayerTurn(state, playerId, random = Math.random) {
     const completedIndex = state.turn.playerIndex;
     state.turn.playerId = null;
     state.turn.movementRemaining = 0;
-    if (completedIndex === state.turn.order.length - 1) {
-        state.turn.phase = "warden";
-        takeWardenTurn(state, random);
-        return { warden: true };
-    }
-    activateTurn(state, completedIndex + 1);
-    return { warden: false };
+    return activateNextEligibleTurn(state, completedIndex + 1, random);
 }
 
 function endPlayerTurn(state, playerId, random = Math.random) {
@@ -340,10 +368,10 @@ function endPlayerTurn(state, playerId, random = Math.random) {
     return finishPlayerTurn(state, playerId, random);
 }
 
-function completeWardenTurn(state) {
+function completeWardenTurn(state, random = Math.random) {
     if (state.status !== "active" || state.turn.phase !== "warden" || state.turn.playerId !== null) return false;
     state.turn.round += 1;
-    activateTurn(state, 0);
+    activateNextEligibleTurn(state, 0, random);
     return true;
 }
 
@@ -372,8 +400,7 @@ function removePlayerFromGame(state, playerId, random = Math.random) {
         takeWardenTurn(state, random);
         return { warden: true };
     }
-    activateTurn(state, removedIndex);
-    return { warden: false };
+    return activateNextEligibleTurn(state, removedIndex, random);
 }
 
 function isAdjacent(firstPosition, secondPosition) {
@@ -484,7 +511,18 @@ function movePlayer(state, playerId, destination, random = Math.random) {
     return cost;
 }
 
-function submitAccusation(state, playerId, accusation) {
+function moveToRandomSpawn(state, player, random = Math.random) {
+    const occupied = new Set(state.players
+        .filter(candidate => String(candidate.id) !== String(player.id))
+        .map(candidate => `${candidate.position.row},${candidate.position.col}`));
+    if (state.warden?.position) occupied.add(`${state.warden.position.row},${state.warden.position.col}`);
+    const available = spawnPoints.filter(position => !occupied.has(`${position.row},${position.col}`));
+    if (!available.length) throw new Error("No starting point is available.");
+    player.position = { ...available[Math.floor(random() * available.length)] };
+    player.secretPassageCooldown = null;
+}
+
+function submitAccusation(state, playerId, accusation, random = Math.random) {
     if (state.status !== "active") throw new Error("This game has already finished.");
     if (String(state.turn.playerId) !== String(playerId) ||
         !["awaiting_roll", "moving", "awaiting_end"].includes(state.turn.phase)) {
@@ -497,9 +535,9 @@ function submitAccusation(state, playerId, accusation) {
         throw new Error("You must be adjacent to the Warden to make an accusation.");
     }
 
-    const fields = ["killer", "victim", "method"];
+    const fields = ["killer", "victim", "room", "method"];
     if (fields.some(field => typeof accusation?.[field] !== "string")) {
-        throw new Error("Choose a killer, victim, and method.");
+        throw new Error("Choose a killer, victim, room, and method.");
     }
     const correct = fields.every(field =>
         accusation[field].trim().toLowerCase() === String(state.solution[field]).toLowerCase()
@@ -516,13 +554,9 @@ function submitAccusation(state, playerId, accusation) {
             character: player.character
         };
     } else {
-        player.canAccuse = false;
-        if (!state.players.some(candidate => candidate.canAccuse)) {
-            state.status = "finished";
-            state.turn.phase = "finished";
-            state.turn.playerId = null;
-            state.turn.movementRemaining = 0;
-        } else finishPlayerTurn(state, playerId);
+        moveToRandomSpawn(state, player, random);
+        player.turnsToSkip = (player.turnsToSkip || 0) + 1;
+        finishPlayerTurn(state, playerId, random);
     }
     return correct;
 }
@@ -531,7 +565,8 @@ module.exports = {
     rooms,
     spawnPoints,
     secretPass,
-    initialSolution,
+    solutionPools,
+    createSolution,
     createInitialGameState,
     rollMovementDie,
     movementDistances,
@@ -542,5 +577,6 @@ module.exports = {
     completeWardenTurn,
     removePlayerFromGame,
     isAdjacent,
+    moveToRandomSpawn,
     submitAccusation
 };

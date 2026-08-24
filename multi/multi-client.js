@@ -52,7 +52,7 @@ window.addEventListener("DOMContentLoaded", () => {
     )?.name || "Hallway";
     document.getElementById("debug-summary").innerHTML = `
       <p>Lobby/game: ${state.lobbyName} · Status: ${state.status} · Turn ${state.turn.number}: ${current?.username || "none"}</p>
-      <ul>${state.players.map(player => `<li>${player.id} · ${player.character} · ${roomAt(player)} (${player.position.row}, ${player.position.col}) · accuse: ${player.canAccuse}</li>`).join("")}</ul>
+      <ul>${state.players.map(player => `<li>${player.id} · ${player.character} · ${roomAt(player)} (${player.position.row}, ${player.position.col}) · turns to skip: ${player.turnsToSkip || 0}</li>`).join("")}</ul>
       <p>Winner: ${state.winner?.username || "none"}</p>`;
     document.getElementById("raw-state").textContent = JSON.stringify(state, null, 2);
     const fingerprint = JSON.stringify(state);

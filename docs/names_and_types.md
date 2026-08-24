@@ -8,6 +8,8 @@
 * Eviscerated
 * Poisoned
 * Suffocated
+* Drowned
+* Bludgeoned
 
 ## Room
 

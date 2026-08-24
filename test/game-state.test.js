@@ -2,7 +2,8 @@ const test = require("node:test");
 const assert = require("node:assert/strict");
 const {
   createInitialGameState,
-  initialSolution,
+  solutionPools,
+  createSolution,
   rooms,
   spawnPoints,
   rollMovementDie,
@@ -36,12 +37,13 @@ test("a launched game snapshots the board and its lobby players", () => {
   ));
   assert.notDeepEqual(state.players[0].position, state.players[1].position);
   assert.ok(state.players.every(player => player.canAccuse));
+  assert.ok(state.players.every(player => player.turnsToSkip === 0));
   assert.deepEqual(state.solution, {
-    killer: "rasputin",
-    victim: "the victim",
-    method: "defenestration"
+    killer: "brahe",
+    victim: "nicholas_ii",
+    room: "hydrotherapy",
+    method: "electrocuted"
   });
-  assert.notStrictEqual(state.solution, initialSolution);
   assert.equal(state.winner, null);
   assert.equal(typeof state.createdAt, "number");
 });
@@ -55,7 +57,18 @@ test("each lobby receives its own game solution snapshot", () => {
 
   assert.equal(first.lobbyName, "Lobby One");
   assert.equal(second.lobbyName, "Lobby Two");
-  assert.equal(second.solution.killer, "rasputin");
+  assert.equal(second.solution.killer, "brahe");
+});
+
+test("a game solution draws all four accusation fields from their pools", () => {
+  const first = createSolution(() => 0);
+  const last = createSolution(() => 0.999999);
+  for (const [field, poolName] of [["killer", "killers"], ["victim", "victims"], ["room", "rooms"], ["method", "methods"]]) {
+    assert.ok(solutionPools[poolName].some(option => option.id === first[field]));
+    assert.ok(solutionPools[poolName].some(option => option.id === last[field]));
+    assert.notEqual(first[field], last[field]);
+  }
+  assert.ok(solutionPools.rooms.every(room => room.id !== "wardens_office"));
 });
 
 test("players receive randomized, exclusive spawn points", () => {
@@ -167,18 +180,46 @@ test("current Warden position is used for accusation eligibility", () => {
   assert.throws(() => submitAccusation(state, "1", state.solution), /adjacent to the Warden/i);
 });
 
-test("an incorrect accusation resolves once and consumes the player's turn", () => {
+test("an incorrect accusation returns the player to a spawn and consumes the turn", () => {
   const state = createInitialGameState([
     { id: 1, username: "One" }, { id: 2, username: "Two" }
   ], () => 0.999);
   state.players[0].position = { row: 13, col: 12 };
-  assert.equal(submitAccusation(state, "1", { ...state.solution, killer: "crowley" }), false);
-  assert.equal(state.players[0].canAccuse, false);
+  const positionBefore = { ...state.players[0].position };
+  const wrongKiller = state.solution.killer === "crowley" ? "curie" : "crowley";
+  assert.equal(submitAccusation(state, "1", { ...state.solution, killer: wrongKiller }, () => 0), false);
+  assert.equal(state.players[0].canAccuse, true);
+  assert.equal(state.players[0].turnsToSkip, 1);
+  assert.notDeepEqual(state.players[0].position, positionBefore);
+  assert.ok(spawnPoints.some(point =>
+    point.row === state.players[0].position.row && point.col === state.players[0].position.col
+  ));
+  assert.notDeepEqual(state.players[0].position, state.players[1].position);
   assert.equal(state.turn.playerId, "2");
   assert.throws(
     () => submitAccusation(state, "1", state.solution),
     /not this player's turn/i
   );
+});
+
+test("a bad accuser loses exactly their next turn", () => {
+  const state = createInitialGameState([
+    { id: 1, username: "One" }, { id: 2, username: "Two" }
+  ], () => 0.999);
+  state.players[0].position = { row: 13, col: 12 };
+  const wrongKiller = state.solution.killer === "crowley" ? "curie" : "crowley";
+  submitAccusation(state, "1", { ...state.solution, killer: wrongKiller }, () => 0);
+  state.turn.phase = "awaiting_end";
+  endPlayerTurn(state, "2", () => 0);
+  assert.equal(state.turn.phase, "warden");
+
+  completeWardenTurn(state, () => 0);
+  assert.equal(state.turn.playerId, "2");
+  assert.equal(state.players[0].turnsToSkip, 0);
+  state.turn.phase = "awaiting_end";
+  endPlayerTurn(state, "2", () => 0);
+  completeWardenTurn(state, () => 0);
+  assert.equal(state.turn.playerId, "1");
 });
 
 test("a correct accusation finishes the turn state without advancing", () => {
@@ -191,6 +232,18 @@ test("a correct accusation finishes the turn state without advancing", () => {
   assert.equal(state.turn.phase, "finished");
   assert.equal(state.turn.playerId, null);
   assert.equal(completeWardenTurn(state), false);
+});
+
+test("the murder room is required for a correct accusation", () => {
+  const state = createInitialGameState([
+    { id: 1, username: "One" }, { id: 2, username: "Two" }
+  ], () => 0);
+  const activePlayer = state.players.find(player => player.id === state.turn.playerId);
+  activePlayer.position = { row: 13, col: 12 };
+  const wrongRoom = solutionPools.rooms.find(room => room.id !== state.solution.room).id;
+
+  assert.equal(submitAccusation(state, activePlayer.id, { ...state.solution, room: wrongRoom }), false);
+  assert.equal(state.winner, null);
 });
 
 test("the Warden starts at tile 13,13 using Bonaparte's standing sprite", () => {

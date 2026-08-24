@@ -1,0 +1,10 @@
+{
+  "murderers": [
+    { "id": "brahe", "name": "Tycho Brahe" },
+    { "id": "lovelace", "name": "Ada Lovelace" },
+    { "id": "curie", "name": "Marie Curie" },
+    { "id": "rasputin", "name": "Grigori Rasputin" },
+    { "id": "crowley", "name": "Aleister Crowley" },
+    { "id": "mallon", "name": "Typhoid Mary" }
+  ]
+}

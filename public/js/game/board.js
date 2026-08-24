@@ -26,6 +26,30 @@ let characterDialogue = new Map();
 const activeDialogue = new Map();
 const movingCharacterAnimations = new Set();
 let speechPositionFrame = null;
+let accusationOptionsLoaded = false;
+
+if (accusationForm) {
+    Promise.all([
+        fetch("/assets/murderers.json").then(response => response.json()),
+        fetch("/assets/victims.json").then(response => response.json()),
+        fetch("/assets/rooms.json").then(response => response.json()),
+        fetch("/assets/methods.json").then(response => response.json())
+    ]).then(([killerData, victimData, roomData, methodData]) => {
+        const populate = (name, options) => {
+            const select = accusationForm.elements.namedItem(name);
+            select.replaceChildren(...options.map(item => new Option(item.name, item.id)));
+        };
+        populate("killer", killerData.murderers);
+        populate("victim", victimData.victims);
+        populate("room", roomData.rooms.filter(room => room.canBeMurderScene));
+        populate("method", methodData.methods);
+        accusationOptionsLoaded = true;
+        if (gameState) renderTurn();
+    }).catch(() => {
+        accusationStatus.textContent = "Accusation options could not be loaded.";
+        accuseButton.disabled = true;
+    });
+}
 
 function showCharacterDialogue(character, group) {
     const sayings = characterDialogue.get(character)?.[group] || [];
@@ -268,7 +292,7 @@ function renderTurn() {
         const adjacent = localPlayer?.position && gameState.warden?.position &&
             Math.abs(localPlayer.position.row - gameState.warden.position.row) +
             Math.abs(localPlayer.position.col - gameState.warden.position.col) === 1;
-        const eligible = gameState.status === "active" && isMine && adjacent && localPlayer?.canAccuse;
+        const eligible = accusationOptionsLoaded && gameState.status === "active" && isMine && adjacent && localPlayer?.canAccuse;
         accuseButton.disabled = !eligible;
         accusationStatus.textContent = eligible ? "You are adjacent to the Warden." :
             !isMine ? "You may only accuse during your turn." :

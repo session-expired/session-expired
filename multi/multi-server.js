@@ -42,6 +42,7 @@ function scheduleWardenCompletion() {
   wardenTimer = setTimeout(() => {
     wardenTimer = null;
     completeWardenTurn(state);
+    if (state.turn.phase === "warden") scheduleWardenCompletion();
   }, wardenPhaseMs);
 }
 

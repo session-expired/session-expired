@@ -30,6 +30,16 @@ const state = createInitialGameState([{
   username: user.username,
   selected_character: selectedCharacter.id
 }], Math.random, { id: gameId, name: "Development Lobby" });
+let wardenTimer = null;
+
+function scheduleWardenCompletion() {
+  if (wardenTimer) return;
+  wardenTimer = setTimeout(() => {
+    wardenTimer = null;
+    completeWardenTurn(state);
+    if (state.turn.phase === "warden") scheduleWardenCompletion();
+  }, 1200);
+}
 
 app.disable("x-powered-by");
 app.use(express.json({ limit: "10kb" }));
@@ -73,7 +83,7 @@ app.post(`/api/games/${gameId}/move`, (request, response) => {
 app.post(`/api/games/${gameId}/end-turn`, (request, response) => {
   try {
     const transition = endPlayerTurn(state, user.id);
-    if (transition.warden) setTimeout(() => completeWardenTurn(state), 1200);
+    if (transition.warden) scheduleWardenCompletion();
     response.json({ state });
   } catch (error) {
     response.status(409).json({ error: error.message });
@@ -82,6 +92,7 @@ app.post(`/api/games/${gameId}/end-turn`, (request, response) => {
 app.post(`/api/games/${gameId}/accuse`, (request, response) => {
   try {
     const correct = submitAccusation(state, user.id, request.body);
+    if (!correct && state.turn.phase === "warden") scheduleWardenCompletion();
     response.json({ correct, state });
   } catch (error) {
     response.status(409).json({ error: error.message });

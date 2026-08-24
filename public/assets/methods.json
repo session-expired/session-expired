@@ -1,0 +1,12 @@
+{
+  "methods": [
+    { "id": "electrocuted", "name": "Electrocuted" },
+    { "id": "lobotomized", "name": "Lobotomized" },
+    { "id": "defenestrated", "name": "Defenestrated" },
+    { "id": "eviscerated", "name": "Eviscerated" },
+    { "id": "poisoned", "name": "Poisoned" },
+    { "id": "suffocated", "name": "Suffocated" },
+    { "id": "drowned", "name": "Drowned" },
+    { "id": "bludgeoned", "name": "Bludgeoned" }
+  ]
+}

@@ -119,6 +119,7 @@ function scheduleWardenCompletion(gameId) {
       await client.query("UPDATE games SET state = $1::jsonb WHERE id = $2", [JSON.stringify(state), gameId]);
       await client.query("COMMIT");
       broadcastGameState(gameId, state);
+      if (state.turn.phase === "warden") scheduleWardenCompletion(gameId);
     } catch (error) {
       if (client) await client.query("ROLLBACK");
       console.error("Unable to complete Warden phase:", error);

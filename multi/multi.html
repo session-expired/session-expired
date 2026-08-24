@@ -19,9 +19,10 @@
       <form id="accusation-form">
         <strong>Accusation</strong>
         <span id="accusation-status">You must reach the Warden to make an accusation.</span>
-        <select name="killer"><option value="rasputin">Rasputin</option><option value="crowley">Crowley</option></select>
-        <select name="victim"><option value="the victim">The victim</option><option value="the warden">The warden</option></select>
-        <select name="method"><option value="defenestration">Defenestration</option><option value="poisoning">Poisoning</option></select>
+        <select name="killer" aria-label="Killer"></select>
+        <select name="victim" aria-label="Victim"></select>
+        <select name="room" aria-label="Room"></select>
+        <select name="method" aria-label="Method"></select>
         <button type="submit" disabled>Accuse</button>
       </form>
       <details><summary>Raw JSON state</summary><pre id="raw-state"></pre></details>

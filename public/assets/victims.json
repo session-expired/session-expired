@@ -1,0 +1,299 @@
+{
+  "victims": [
+    {
+      "id": "nicholas_ii",
+      "name": "Tsar Nicholas II",
+      "description": "The last Emperor of Russia. Regal, doomed, and probably regretting several personnel decisions.",
+      "comments": {
+        "rasputin": "Rasputin was closely associated with Nicholas II's imperial family.",
+        "napoleon": "Another emperor. Napoleon presumably considers that sufficient justification."
+      }
+    },
+    {
+      "id": "alexandra_feodorovna",
+      "name": "Tsarina Alexandra",
+      "description": "Empress of Russia and a devoted believer in Rasputin's abilities.",
+      "comments": {
+        "rasputin": "Alexandra's trust in Rasputin helped give him extraordinary access to the imperial family."
+      }
+    },
+    {
+      "id": "felix_yusupov",
+      "name": "Prince Felix Yusupov",
+      "description": "Russian aristocrat, fabulously wealthy, and experienced in extremely complicated murder plots.",
+      "comments": {
+        "rasputin": "Yusupov participated in Rasputin's actual murder. Apparently Rasputin has objected."
+      }
+    },
+    {
+      "id": "manderup_parsberg",
+      "name": "Manderup Parsberg",
+      "description": "Danish nobleman remembered primarily for one exceptionally consequential argument.",
+      "comments": {
+        "brahe": "Brahe dueled Parsberg in 1566. The encounter cost Brahe part of his nose."
+      }
+    },
+    {
+      "id": "johannes_kepler",
+      "name": "Johannes Kepler",
+      "description": "Astronomer, mathematician, planetary-motion enthusiast, and inheritor of some very valuable observations.",
+      "comments": {
+        "brahe": "Kepler worked with Brahe and gained access to his astronomical observations after Brahe's death."
+      }
+    },
+    {
+      "id": "galileo",
+      "name": "Galileo Galilei",
+      "description": "Astronomer, physicist, telescope enthusiast, and accomplished professional troublemaker.",
+      "comments": {
+        "brahe": "A rival astronomical worldview is more than enough motive in this institution."
+      }
+    },
+    {
+      "id": "isaac_newton",
+      "name": "Isaac Newton",
+      "description": "Mathematician, physicist, alchemist, and notoriously unpleasant coworker.",
+      "comments": {
+        "brahe": "Newton arrived later, but chronology has never stopped an academic dispute here.",
+        "curie": "Physics eventually became Curie's territory too. The centuries are irrelevant."
+      }
+    },
+    {
+      "id": "charles_babbage",
+      "name": "Charles Babbage",
+      "description": "Designer of enormous mechanical computers he had considerable difficulty actually finishing.",
+      "comments": {
+        "lovelace": "Lovelace's work on Babbage's Analytical Engine produced her most famous contributions to computing."
+      }
+    },
+    {
+      "id": "lord_byron",
+      "name": "Lord Byron",
+      "description": "Romantic poet, celebrity scandal generator, and apparently inexhaustible source of bad decisions.",
+      "comments": {
+        "lovelace": "Byron was Ada Lovelace's father, though she barely knew him.",
+        "crowley": "There is no important historical connection. Crowley presumably found one anyway."
+      }
+    },
+    {
+      "id": "augustus_de_morgan",
+      "name": "Augustus De Morgan",
+      "description": "Mathematician and logician who would eventually have laws named after him.",
+      "comments": {
+        "lovelace": "De Morgan tutored Lovelace in mathematics."
+      }
+    },
+    {
+      "id": "alan_turing",
+      "name": "Alan Turing",
+      "description": "Mathematician, cryptanalyst, computing pioneer, and a man born roughly a century too late for this argument.",
+      "comments": {
+        "lovelace": "Both became foundational figures in computing. Chronology has been overruled."
+      }
+    },
+    {
+      "id": "arthur_edward_waite",
+      "name": "Arthur Edward Waite",
+      "description": "Occultist, mystic, writer, and participant in organizations where nobody could simply get along.",
+      "comments": {
+        "crowley": "Waite and Crowley were bitter occult rivals. Crowley repeatedly mocked him in print."
+      }
+    },
+    {
+      "id": "william_butler_yeats",
+      "name": "William Butler Yeats",
+      "description": "Poet, Nobel laureate, occultist, and unwilling participant in magical organizational politics.",
+      "comments": {
+        "crowley": "Yeats and Crowley were rivals within the Hermetic Order of the Golden Dawn."
+      }
+    },
+    {
+      "id": "macgregor_mathers",
+      "name": "Samuel Liddell MacGregor Mathers",
+      "description": "Occultist, ceremonial magician, and proof that even secret magical societies need office politics.",
+      "comments": {
+        "crowley": "Mathers was Crowley's mentor before their relationship spectacularly deteriorated."
+      }
+    },
+    {
+      "id": "harry_houdini",
+      "name": "Harry Houdini",
+      "description": "Escape artist, illusionist, and relentless enemy of fraudulent spiritualists.",
+      "comments": {
+        "crowley": "Houdini's crusade against supernatural fraud makes him an irresistible target for occult nonsense."
+      }
+    },
+    {
+      "id": "pierre_curie",
+      "name": "Pierre Curie",
+      "description": "Physicist, researcher, and one half of an extraordinarily radioactive marriage.",
+      "comments": {
+        "curie": "Pierre was Marie Curie's husband and scientific collaborator."
+      }
+    },
+    {
+      "id": "henri_becquerel",
+      "name": "Henri Becquerel",
+      "description": "Physicist who discovered spontaneous radioactivity and thereby gave everyone considerably more work.",
+      "comments": {
+        "curie": "Becquerel's discovery directly preceded and influenced the Curies' research into radioactivity."
+      }
+    },
+    {
+      "id": "paul_langevin",
+      "name": "Paul Langevin",
+      "description": "French physicist whose private life became significantly more public than intended.",
+      "comments": {
+        "curie": "Curie's relationship with Langevin became the center of a major public scandal."
+      }
+    },
+    {
+      "id": "albert_einstein",
+      "name": "Albert Einstein",
+      "description": "Theoretical physicist, professional hair icon, and eventually the default visual shorthand for genius.",
+      "comments": {
+        "curie": "Einstein was a friend and supporter of Curie, particularly during the Langevin scandal."
+      }
+    },
+    {
+      "id": "george_soper",
+      "name": "George Soper",
+      "description": "Sanitary engineer and epidemiological investigator with a talent for finding people who did not want to be found.",
+      "comments": {
+        "mallon": "Soper identified Mary Mallon as the likely source of multiple typhoid outbreaks and confronted her about it."
+      }
+    },
+    {
+      "id": "sara_josephine_baker",
+      "name": "Sara Josephine Baker",
+      "description": "Physician and public-health reformer who specialized in solving problems people preferred to ignore.",
+      "comments": {
+        "mallon": "Baker participated in the effort to apprehend Mallon after she refused voluntary testing."
+      }
+    },
+    {
+      "id": "robert_koch",
+      "name": "Robert Koch",
+      "description": "Physician and microbiologist who helped establish that specific microorganisms cause specific diseases.",
+      "comments": {
+        "mallon": "Germ theory is doing Mallon's legal defense absolutely no favors."
+      }
+    },
+    {
+      "id": "louis_pasteur",
+      "name": "Louis Pasteur",
+      "description": "Chemist and microbiologist responsible for several discoveries inconvenient to anyone denying germs exist.",
+      "comments": {
+        "mallon": "Pasteur helped establish germ theory. Mallon would probably prefer everyone stop establishing it."
+      }
+    },
+    {
+      "id": "john_snow",
+      "name": "John Snow",
+      "description": "Physician who tracked a cholera outbreak to contaminated water using suspiciously competent epidemiology.",
+      "comments": {
+        "mallon": "Snow helped establish the investigative methods that would later make asymptomatic carriers very uncomfortable."
+      }
+    },
+    {
+      "id": "duke_of_wellington",
+      "name": "Arthur Wellesley, Duke of Wellington",
+      "description": "British commander, statesman, and owner of one extremely inconvenient Belgian victory.",
+      "comments": {
+        "napoleon": "Wellington commanded the Allied army that defeated Napoleon at Waterloo."
+      }
+    },
+    {
+      "id": "horatio_nelson",
+      "name": "Horatio Nelson",
+      "description": "British admiral with one arm, one eye, and an irritating habit of defeating the French.",
+      "comments": {
+        "napoleon": "Nelson destroyed Napoleon's hopes of challenging British naval dominance at Trafalgar."
+      }
+    },
+    {
+      "id": "alexander_i",
+      "name": "Tsar Alexander I",
+      "description": "Emperor of Russia and owner of a country Napoleon discovered was considerably larger than expected.",
+      "comments": {
+        "napoleon": "Alexander opposed Napoleon and survived the 1812 invasion of Russia considerably better than Napoleon did."
+      }
+    },
+    {
+      "id": "blucher",
+      "name": "Gebhard Leberecht von Blücher",
+      "description": "Prussian field marshal who considered seventy-two an entirely reasonable age to keep ruining Napoleon's day.",
+      "comments": {
+        "napoleon": "Blücher's Prussian forces arrived at Waterloo and helped turn Napoleon's defeat into a catastrophe."
+      }
+    },
+    {
+      "id": "beethoven",
+      "name": "Ludwig van Beethoven",
+      "description": "Composer, pianist, musical revolutionary, and famously difficult man to impress.",
+      "comments": {
+        "napoleon": "Beethoven initially admired Napoleon, then angrily rejected him after Napoleon declared himself emperor."
+      }
+    },
+    {
+      "id": "sigmund_freud",
+      "name": "Sigmund Freud",
+      "description": "Neurologist and founder of psychoanalysis. In this building, he has made a catastrophic career choice.",
+      "comments": {
+        "rasputin": "Freud would undoubtedly have questions. Rasputin would undoubtedly hate all of them.",
+        "crowley": "There are several possible interpretations of Crowley. Freud should keep them to himself."
+      }
+    },
+    {
+      "id": "nikola_tesla",
+      "name": "Nikola Tesla",
+      "description": "Inventor, electrical engineer, futurist, and magnet for increasingly implausible legends.",
+      "comments": {
+        "curie": "Different fields, same general period, approximately enough electricity and radiation to make everyone nervous."
+      }
+    },
+    {
+      "id": "florence_nightingale",
+      "name": "Florence Nightingale",
+      "description": "Nurse, statistician, reformer, and dangerous advocate for cleanliness.",
+      "comments": {
+        "mallon": "Nightingale's obsession with sanitation puts her philosophically on the worst possible side of this dispute."
+      }
+    },
+    {
+      "id": "queen_victoria",
+      "name": "Queen Victoria",
+      "description": "Queen of the United Kingdom, Empress of India, and unwilling namesake of an entire century's furniture.",
+      "comments": {
+        "napoleon": "Wrong generation of Bonaparte, but Napoleon has never respected borders and apparently now rejects time.",
+        "crowley": "Crowley was born during Victoria's reign. This is apparently enough."
+      }
+    },
+    {
+      "id": "edgar_allan_poe",
+      "name": "Edgar Allan Poe",
+      "description": "Writer, poet, critic, and suspiciously appropriate person to find dead in an asylum.",
+      "comments": {
+        "crowley": "No meaningful connection is required. Look at the man."
+      }
+    },
+    {
+      "id": "oscar_wilde",
+      "name": "Oscar Wilde",
+      "description": "Writer, wit, aesthete, and almost certainly the person with the best last words in the room.",
+      "comments": {
+        "crowley": "Their timelines overlap just enough for the asylum to insist this makes sense."
+      }
+    },
+    {
+      "id": "charles_darwin",
+      "name": "Charles Darwin",
+      "description": "Naturalist whose observations about finches eventually caused arguments about practically everything.",
+      "comments": {
+        "curie": "Science.",
+        "mallon": "Also science.",
+        "brahe": "Close enough."
+      }
+    }
+  ]
+}
