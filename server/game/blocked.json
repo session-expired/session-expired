@@ -195,6 +195,48 @@
       "cols": { "start": 23, "end": 23 },
       "description": "...",
       "enabled": false
+    },
+        {
+      "id": "or_top_left",
+      "rows": { "start": 17, "end": 18 },
+      "cols": { "start": 23, "end": 24 },
+      "description": "...",
+      "enabled": false
+    },
+        {
+      "id": "or_top_right",
+      "rows": { "start": 17, "end": 18 },
+      "cols": { "start": 26, "end": 30 },
+      "description": "...",
+      "enabled": false
+    },
+            {
+      "id": "ward_top",
+      "rows": { "start": 8, "end": 9 },
+      "cols": { "start": 12, "end": 19 },
+      "description": "...",
+      "enabled": false
+    },
+                {
+      "id": "ward_desk",
+      "rows": { "start": 10, "end": 11 },
+      "cols": { "start": 14, "end": 17 },
+      "description": "...",
+      "enabled": false
+    },
+                {
+      "id": "ward_plant",
+      "rows": { "start": 16, "end": 16 },
+      "cols": { "start": 13, "end": 13 },
+      "description": "...",
+      "enabled": false
+    },
+                    {
+      "id": "ward_plant",
+      "rows": { "start": 15, "end": 16 },
+      "cols": { "start": 18, "end": 19 },
+      "description": "...",
+      "enabled": false
     }
   ],
   "search_items": [
@@ -448,6 +490,42 @@
       "cols": { "start": 27, "end": 28 },
       "description": "Placeholder",
       "roomId": "hydrotherapy",
+      "hintIds": [],
+      "enabled": false
+    },
+    {
+      "id": "or_table",
+      "rows": { "start": 21, "end": 22 },
+      "cols": { "start": 25, "end": 27 },
+      "description": "Placeholder",
+      "roomId": "operating_theater",
+      "hintIds": [],
+      "enabled": false
+    },
+    {
+      "id": "or_bot_cart",
+      "rows": { "start": 23, "end": 24 },
+      "cols": { "start": 22, "end": 23 },
+      "description": "Placeholder",
+      "roomId": "operating_theater",
+      "hintIds": [],
+      "enabled": false
+    },
+    {
+      "id": "or_chem_cab",
+      "rows": { "start": 18, "end": 18 },
+      "cols": { "start": 22, "end": 22 },
+      "description": "Placeholder",
+      "roomId": "operating_theater",
+      "hintIds": [],
+      "enabled": false
+    },
+    {
+      "id": "or_top_table",
+      "rows": { "start": 18, "end": 18 },
+      "cols": { "start": 28, "end": 29 },
+      "description": "Placeholder",
+      "roomId": "operating_theater",
       "hintIds": [],
       "enabled": false
     }
