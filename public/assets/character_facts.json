@@ -1,0 +1,284 @@
+{
+  "characters": [
+    {
+      "id": "rasputin",
+      "name": "Grigori Rasputin",
+      "facts": [
+        {
+          "type": "fact",
+          "text": "Rasputin was born into a Siberian peasant family and eventually gained extraordinary access to the Russian imperial family."
+        },
+        {
+          "type": "fact",
+          "text": "He became particularly important to Empress Alexandra because she believed he could help her son Alexei during attacks of hemophilia."
+        },
+        {
+          "type": "fact",
+          "text": "Despite the nickname 'Mad Monk,' Rasputin was never actually an ordained Russian Orthodox monk."
+        },
+        {
+          "type": "fact",
+          "text": "His drinking, womanizing, and relationships with admirers helped make him one of the most scandalous figures in late Imperial Russia."
+        },
+        {
+          "type": "fact",
+          "text": "Rasputin was assassinated in 1916 by conspirators that included Prince Felix Yusupov and Grand Duke Dmitri Pavlovich."
+        },
+        {
+          "type": "legend",
+          "text": "The famous story says Rasputin survived cyanide, beatings, and gunshots before finally drowning beneath an icy river. It is a fantastic story, but much of it probably did not happen."
+        },
+        {
+          "type": "disputed",
+          "text": "The autopsy reportedly found no poison in Rasputin's body, seriously undermining the famous poisoned-cakes portion of his murder story."
+        },
+        {
+          "type": "rumor",
+          "text": "Enemies circulated claims that Rasputin was secretly having an affair with Empress Alexandra. Historians have found no convincing evidence for it."
+        },
+        {
+          "type": "rumor",
+          "text": "Rasputin's reputation for supernatural healing became enormous, although more mundane explanations have been proposed for why Alexei sometimes improved under his care."
+        }
+      ]
+    },
+    {
+      "id": "brahe",
+      "name": "Tycho Brahe",
+      "facts": [
+        {
+          "type": "fact",
+          "text": "Tycho lost part of his nose in a sword duel with another Danish nobleman after an argument over mathematics."
+        },
+        {
+          "type": "fact",
+          "text": "He wore a prosthetic nose afterward. Although legend often calls it gold or silver, analysis of his remains suggests the everyday prosthesis was probably brass."
+        },
+        {
+          "type": "fact",
+          "text": "Before the telescope existed, Tycho made astronomical observations precise enough to become essential evidence for later models of the Solar System."
+        },
+        {
+          "type": "fact",
+          "text": "Tycho's observations of a new star in 1572 helped undermine the old idea that the heavens beyond the Moon were eternally unchanging."
+        },
+        {
+          "type": "fact",
+          "text": "Johannes Kepler gained access to Tycho's extraordinarily precise observations after Tycho's death and used them in developing his laws of planetary motion."
+        },
+        {
+          "type": "reported_anecdote",
+          "text": "Tycho reportedly kept a tame elk at his estate."
+        },
+        {
+          "type": "reported_anecdote",
+          "text": "According to an early biographical account, Tycho's elk was visiting another nobleman's house, drank a great deal of beer, fell down a staircase, and died. History occasionally refuses to be improved upon."
+        },
+        {
+          "type": "reported_anecdote",
+          "text": "Tycho also kept a man named Jepp as a court jester and reportedly believed that Jepp possessed clairvoyant abilities."
+        },
+        {
+          "type": "legend",
+          "text": "For centuries a popular story claimed Tycho died because court etiquette prevented him from leaving a banquet to urinate. Modern examination has weakened both the ruptured-bladder story and theories that he was poisoned."
+        }
+      ]
+    },
+    {
+      "id": "lovelace",
+      "name": "Ada Lovelace",
+      "facts": [
+        {
+          "type": "family_fact",
+          "text": "Ada's father, Lord Byron, once acquired a tame bear while attending Trinity College because the rules prohibited keeping dogs but apparently neglected to prohibit bears. When questioned about it, Byron joked that the bear should sit for a college fellowship."
+        },
+        {
+          "type": "fact",
+          "text": "Ada was the only legitimate child of the poet Lord Byron."
+        },
+        {
+          "type": "fact",
+          "text": "Her parents separated shortly after her birth, and Ada never developed a relationship with Byron."
+        },
+        {
+          "type": "fact",
+          "text": "Her mother deliberately encouraged mathematics and logic in Ada's education, partly out of fear that she might inherit Byron's temperament."
+        },
+        {
+          "type": "fact",
+          "text": "While writing about Charles Babbage's Analytical Engine, Ada described an algorithm for calculating Bernoulli numbers and is consequently often described as the first computer programmer."
+        },
+        {
+          "type": "fact",
+          "text": "Ada understood something remarkably modern about computing: she realized a sufficiently capable machine might manipulate symbols representing things other than numbers, including music."
+        },
+        {
+          "type": "fact",
+          "text": "Ada became heavily involved in gambling on horse races and attempted to apply mathematical thinking to betting."
+        },
+        {
+          "type": "fact",
+          "text": "Her gambling went badly enough to leave her thousands of pounds in debt."
+        },
+        {
+          "type": "rumor",
+          "text": "Stories later claimed Ada lost enormous fortunes and repeatedly pawned the family jewels. Some versions appear considerably more dramatic than the surviving evidence supports."
+        },
+        {
+          "type": "rumor",
+          "text": "Ada was surrounded by rumors of extramarital affairs. The surviving evidence leaves parts of her private life frustratingly ambiguous."
+        },
+        {
+          "type": "fact",
+          "text": "Charles Dickens visited Ada while she was dying and, at her request, read to her from Dombey and Son."
+        }
+      ]
+    },
+    {
+      "id": "crowley",
+      "name": "Aleister Crowley",
+      "facts": [
+        {
+          "type": "fact",
+          "text": "Crowley was an occultist, ceremonial magician, writer, poet, painter, and unusually accomplished mountaineer."
+        },
+        {
+          "type": "fact",
+          "text": "He participated in the pioneering 1902 expedition attempting K2, decades before the mountain was successfully climbed."
+        },
+        {
+          "type": "fact",
+          "text": "Crowley later led a disastrous 1905 attempt on Kangchenjunga, during which members of the expedition rebelled against his leadership."
+        },
+        {
+          "type": "fact",
+          "text": "Several members of the Kangchenjunga expedition were killed in an avalanche while descending after Crowley warned them that continuing downward was dangerous."
+        },
+        {
+          "type": "fact",
+          "text": "Crowley founded the religion and philosophy of Thelema, whose best-known maxim begins 'Do what thou wilt.'"
+        },
+        {
+          "type": "fact",
+          "text": "British newspapers famously branded Crowley 'the wickedest man in the world,' a reputation he did little to discourage."
+        },
+        {
+          "type": "fact",
+          "text": "Crowley deliberately cultivated scandal and provocation, making the boundary between his genuine beliefs and his public persona unusually difficult to untangle."
+        },
+        {
+          "type": "fact",
+          "text": "He experimented extensively with drugs and wrote openly about his experiences at a time when doing so was especially scandalous."
+        },
+        {
+          "type": "rumor",
+          "text": "Crowley's activities during World War I generated persistent claims that he was secretly working for British intelligence while publicly writing anti-British propaganda in the United States. His exact relationship with intelligence services remains debated."
+        },
+        {
+          "type": "warning",
+          "text": "Many sensational stories about Crowley involve satanism, human sacrifice, or supernatural crimes. His actual life was strange enough that these inventions should not be confused with documented history."
+        }
+      ]
+    },
+    {
+      "id": "curie",
+      "name": "Marie Curie",
+      "facts": [
+        {
+          "type": "fact",
+          "text": "Marie Curie was the first woman to receive a Nobel Prize."
+        },
+        {
+          "type": "fact",
+          "text": "She became the first person ever awarded two Nobel Prizes and remains the only person to win Nobels in two different scientific fields: Physics and Chemistry."
+        },
+        {
+          "type": "fact",
+          "text": "Marie and Pierre Curie's research led to the discovery of polonium and radium."
+        },
+        {
+          "type": "fact",
+          "text": "Polonium was named for Poland, Marie's homeland, which at the time did not exist as an independent country."
+        },
+        {
+          "type": "fact",
+          "text": "During World War I, Curie organized mobile X-ray units that could be brought near the battlefield to help surgeons locate bullets and fractures."
+        },
+        {
+          "type": "fact",
+          "text": "After Pierre Curie's death, Marie took over his professorship and became the first female professor at the University of Paris."
+        },
+        {
+          "type": "fact",
+          "text": "Curie's long exposure to radioactive material occurred before its dangers were properly understood and contributed to the illness that eventually killed her."
+        },
+        {
+          "type": "fact",
+          "text": "In 1911, Curie's relationship with married physicist Paul Langevin became a major public scandal after private correspondence reached the press."
+        },
+        {
+          "type": "fact",
+          "text": "The scandal became so vicious that an angry crowd gathered outside Curie's home and she and her daughters sought refuge with friends."
+        },
+        {
+          "type": "rumor",
+          "text": "Hostile newspapers falsely claimed Curie was Jewish and suggested that her relationship with Langevin had begun while Pierre was alive. The attacks mixed genuine scandal with xenophobic fabrication."
+        },
+        {
+          "type": "strange_epilogue",
+          "text": "Decades later, Marie Curie's granddaughter Hélène married Paul Langevin's grandson Michel. History has a sense of humor."
+        }
+      ]
+    },
+    {
+      "id": "mallon",
+      "name": "Mary Mallon",
+      "facts": [
+        {
+          "type": "fact",
+          "text": "Mary Mallon was an Irish-born cook who became the first person identified in the United States as an asymptomatic carrier of the bacteria responsible for typhoid fever."
+        },
+        {
+          "type": "fact",
+          "text": "Mallon herself did not show the symptoms that devastated people around her, which contributed to her refusal to believe that she was spreading the disease."
+        },
+        {
+          "type": "fact",
+          "text": "Sanitation engineer George Soper traced outbreaks among wealthy households to kitchens where Mallon had worked."
+        },
+        {
+          "type": "fact",
+          "text": "When Soper first confronted Mallon and requested blood, urine, and stool samples, she reacted angrily and refused."
+        },
+        {
+          "type": "fact",
+          "text": "New York health authorities forcibly quarantined Mallon on North Brother Island in 1907."
+        },
+        {
+          "type": "fact",
+          "text": "She was released in 1910 after agreeing not to work as a cook."
+        },
+        {
+          "type": "fact",
+          "text": "Mallon eventually returned to cooking and used assumed surnames, including Mary Brown."
+        },
+        {
+          "type": "fact",
+          "text": "After another typhoid outbreak was traced to a maternity hospital where she worked, Mallon was quarantined again and remained isolated for the rest of her life."
+        },
+        {
+          "type": "disputed",
+          "text": "The exact number of infections and deaths attributable to Mallon varies between historical accounts. Claims should therefore be treated as estimates rather than a precise body count."
+        },
+        {
+          "type": "historical_context",
+          "text": "Mallon was not the only known healthy typhoid carrier. Her extraordinarily long confinement has since become part of a larger debate about public health, individual liberty, class, and the unequal treatment of disease carriers."
+        },
+        {
+          "type": "fact",
+          "text": "The nickname 'Typhoid Mary' outlived Mallon and became an expression for someone who spreads disease, largely erasing the actual person behind the phrase."
+        }
+      ]
+    }
+  ]
+}
