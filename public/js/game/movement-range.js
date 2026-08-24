@@ -43,9 +43,16 @@ export function renderMovementRange(state, currentUserId, boardLayout, elements)
             if (!entersDoor(current, { row, col })) queue.push({ row, col });
         }
     }
-    const reachable = new Set(distances.keys());
+    const reachable = new Set([...distances]
+        .filter(([, distance]) => distance < turn.movementRemaining)
+        .map(([position]) => position));
     reachable.add(`${player.position.row},${player.position.col}`);
+    const currentRoom = state.board.rooms.find(room =>
+        player.position.row >= room.rows.start && player.position.row <= room.rows.end &&
+        player.position.col >= room.cols.start && player.position.col <= room.cols.end
+    );
     for (const item of state.board.searchItems || []) {
+        if (!currentRoom || item.roomId !== currentRoom.id) continue;
         let canReachAdjacentTile = false;
         for (let row = item.rows.start; row <= item.rows.end && !canReachAdjacentTile; row++) {
             for (let col = item.cols.start; col <= item.cols.end && !canReachAdjacentTile; col++) {

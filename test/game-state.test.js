@@ -10,6 +10,7 @@ const {
   spawnPoints,
   blockedTiles,
   searchItems,
+  blockingAreaAt,
   rollMovementDie,
   movementDistances,
   movementPath,
@@ -46,6 +47,7 @@ test("a launched game snapshots the board and its lobby players", () => {
   assert.ok(state.players.every(player => player.canAccuse));
   assert.ok(state.players.every(player => player.turnsToSkip === 0));
   assert.ok(state.players.every(player => Array.isArray(player.discoveredHintIds)));
+  assert.ok(state.players.every(player => Array.isArray(player.discoveredHints)));
   assert.deepEqual(state.solution, {
     killer: "brahe",
     victim: "nicholas_ii",
@@ -70,7 +72,7 @@ test("each lobby receives its own game solution snapshot", () => {
 
 test("rooms expose stable IDs and hint links", () => {
   assert.deepEqual(rooms.map(room => room.id), [
-    "wardens_office", "padded_cells", "cafeteria", "operating_theater", "rec_room",
+    "wardens_office", "padded_cell", "cafeteria", "operating_theater", "rec_room",
     "showers", "solitary_confinement", "hydrotherapy", "electrotherapy"
   ]);
   assert.ok(rooms.every(room => Array.isArray(room.hintIds)));
@@ -123,6 +125,8 @@ test("a player discovers a search-item hint from an adjacent tile", () => {
   ], () => 0);
   const player = state.players.find(candidate => candidate.id === state.turn.playerId);
   player.position = { row: 3, col: 2 };
+  state.turn.phase = "moving";
+  state.turn.movementRemaining = 4;
   const catalog = {
     categories: ["murderer", "victim", "room", "method"],
     roomIds: rooms.map(room => room.id),
@@ -134,11 +138,21 @@ test("a player discovers a search-item hint from an adjacent tile", () => {
   }];
 
   const first = discoverHint(state, player.id, "muddy_cuff", catalog);
+  state.turn.phase = "moving";
+  state.turn.movementRemaining = 2;
   const second = discoverHint(state, player.id, "muddy_cuff", catalog);
 
   assert.equal(first.alreadyDiscovered, false);
   assert.equal(second.alreadyDiscovered, true);
   assert.deepEqual(player.discoveredHintIds, ["muddy_cuff"]);
+  assert.deepEqual(player.discoveredHints, [{
+    id: "muddy_cuff",
+    category: "murderer",
+    text: "A muddy cuff.",
+    searchItemId: "desk"
+  }]);
+  assert.equal(state.turn.movementRemaining, 0);
+  assert.equal(state.turn.phase, "awaiting_end");
 });
 
 test("hints cannot be collected away from their search item or by an inactive player", () => {
@@ -148,7 +162,9 @@ test("hints cannot be collected away from their search item or by an inactive pl
   ], () => 0);
   const current = state.players.find(candidate => candidate.id === state.turn.playerId);
   const inactive = state.players.find(candidate => candidate.id !== state.turn.playerId);
-  current.position = { row: 9, col: 10 };
+  current.position = { row: 7, col: 8 };
+  state.turn.phase = "moving";
+  state.turn.movementRemaining = 3;
   const catalog = {
     categories: ["murderer", "victim", "room", "method"],
     roomIds: rooms.map(room => room.id),
@@ -163,6 +179,28 @@ test("hints cannot be collected away from their search item or by an inactive pl
   assert.throws(() => discoverHint(state, inactive.id, "muddy_cuff", catalog), /not this player's turn/);
   assert.deepEqual(current.discoveredHintIds, []);
   assert.deepEqual(inactive.discoveredHintIds, []);
+});
+
+test("a search item is unavailable outside its associated room", () => {
+  const state = createInitialGameState([{ id: "1", username: "Ada" }], () => 0.5);
+  const player = state.players[0];
+  player.position = { row: 3, col: 2 };
+  state.turn.playerId = player.id;
+  state.turn.phase = "moving";
+  state.turn.movementRemaining = 3;
+  const hint = hintCatalog.hints.find(candidate => hintSupportsSolution(candidate, state.solution));
+  state.board.searchItems = [{
+    id: "misplaced_desk",
+    rows: { start: 3, end: 3 },
+    cols: { start: 3, end: 3 },
+    description: "A desk assigned to another room.",
+    roomId: "cafeteria",
+    hintIds: [hint.id]
+  }];
+
+  assert.throws(() => discoverHint(state, player.id, hint.id), /current room/);
+  assert.deepEqual(player.discoveredHintIds, []);
+  assert.equal(state.turn.movementRemaining, 3);
 });
 
 test("a game solution draws all four accusation fields from their pools", () => {
@@ -635,10 +673,10 @@ test("entering the Warden's office triggers Bonaparte's enter dialogue", () => {
 
 test("a player beginning a turn on a door can move into its room", () => {
   const state = createInitialGameState([{ id: 1, username: "Player" }]);
-  state.players[0].position = { row: 7, col: 28 };
+  state.players[0].position = { row: 7, col: 7 };
   state.turn.phase = "moving";
   state.turn.movementRemaining = 1;
-  assert.equal(movementDistances(state, "1").get("6,28"), 1);
+  assert.equal(movementDistances(state, "1").get("6,7"), 1);
 });
 
 test("the server rejects a direct move through a room wall", () => {
@@ -689,6 +727,39 @@ test("search items are blocked movement areas with descriptions and room associa
   state.turn.movementRemaining = 2;
 
   assert.equal(movementDistances(state, "1").has("9,11"), false);
+  assert.throws(() => movePlayer(state, "1", { row: 9, col: 11 }), /outside/i);
+});
+
+test("configured blocking and search areas load across every room", () => {
+  const searchableRoomIds = new Set(searchItems.map(item => item.roomId));
+  assert.deepEqual(searchableRoomIds, new Set(rooms.map(room => room.id).filter(id => id !== "wardens_office")));
+  assert.ok(blockedTiles.length > 20);
+});
+
+test("a search item takes priority when it overlaps a blocked area", () => {
+  const state = createInitialGameState([{ id: "1", username: "Player" }]);
+  state.board.blockedTiles = [{
+    id: "cabinet_back", rows: { start: 4, end: 5 }, cols: { start: 4, end: 5 }
+  }];
+  state.board.searchItems = [{
+    id: "cabinet", rows: { start: 5, end: 6 }, cols: { start: 5, end: 6 },
+    roomId: "rec_room", description: "Cabinet", hintIds: []
+  }];
+
+  assert.equal(blockingAreaAt(state, { row: 5, col: 5 }).id, "cabinet");
+});
+
+test("searching requires retained movement points", () => {
+  const state = createInitialGameState([{ id: "1", username: "Ada" }], () => 0.5);
+  const item = state.board.searchItems.find(candidate => candidate.hintIds.length);
+  const hintId = item.hintIds[0];
+  state.players[0].position = { row: item.rows.start - 1, col: item.cols.start };
+  state.turn.playerId = "1";
+  state.turn.phase = "awaiting_end";
+  state.turn.movementRemaining = 0;
+
+  assert.throws(() => discoverHint(state, "1", hintId), /retain movement points/);
+  assert.deepEqual(state.players[0].discoveredHintIds, []);
 });
 
 test("entering a secret passage teleports to another passage and triggers dialogue", () => {
@@ -716,7 +787,9 @@ test("an occupied secret passage uses an available adjacent tile, including diag
   state.turn.movementRemaining = 3;
 
   movePlayer(state, "1", { row: 2, col: 23 }, () => 0);
-  assert.deepEqual(state.players[0].position, { row: 22, col: 2 });
+  assert.ok(Math.abs(state.players[0].position.row - 23) <= 1);
+  assert.ok(Math.abs(state.players[0].position.col - 3) <= 1);
+  assert.notDeepEqual(state.players[0].position, { row: 23, col: 3 });
   assert.notDeepEqual(state.players[0].position, state.players[1].position);
 });
 

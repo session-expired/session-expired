@@ -2,7 +2,7 @@
   "categories": ["murderer", "victim", "room", "method"],
   "roomIds": [
     "wardens_office",
-    "padded_cells",
+    "padded_cell",
     "cafeteria",
     "operating_theater",
     "rec_room",
@@ -72,16 +72,16 @@
     {
       "id": "room_operating_theater_clear",
       "category": "room",
-      "roomId": "padded_cells",
+      "roomId": "padded_cell",
       "text": "The operating theater's fresh floor seal is completely undisturbed.",
       "excludes": "operating_theater"
     },
     {
-      "id": "room_padded_cells_clear",
+      "id": "room_padded_cell_clear",
       "category": "room",
       "roomId": "showers",
       "text": "The padded-cell inspection found no trace of the victim.",
-      "excludes": "padded_cells"
+      "excludes": "padded_cell"
     },
     {
       "id": "room_solitary_clear",
@@ -143,7 +143,7 @@
     {
       "id": "method_eviscerated_clear",
       "category": "method",
-      "roomId": "padded_cells",
+      "roomId": "padded_cell",
       "text": "The examination rules out evisceration.",
       "excludes": "eviscerated"
     },
@@ -186,7 +186,7 @@
     {
       "id": "victim_alexandra_clear",
       "category": "victim",
-      "roomId": "padded_cells",
+      "roomId": "padded_cell",
       "text": "A nurse spoke with Tsarina Alexandra after the recorded time of death.",
       "excludes": "alexandra_feodorovna"
     },
@@ -277,7 +277,7 @@
     {
       "id": "victim_freud_clear",
       "category": "victim",
-      "roomId": "padded_cells",
+      "roomId": "padded_cell",
       "text": "Sigmund Freud completed patient notes after the time of death.",
       "excludes": "sigmund_freud"
     },

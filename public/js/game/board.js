@@ -4,6 +4,7 @@ import { createBoardLayout } from "./board-layout.js";
 import { createAccusationControls } from "./accusation-controls.js";
 import { createEntityRenderer } from "./entity-renderer.js";
 import { renderMovementRange } from "./movement-range.js";
+import { renderJournal } from "./journal.js";
 
 const gameId = window.location.pathname.split("/").filter(Boolean).at(-1);
 let gameState;
@@ -37,6 +38,7 @@ function renderTurn() {
 
 function renderGameState() {
     renderTurn();
+    renderJournal(elements, gameState, currentUserId);
     entityRenderer.render();
     renderMovementRange(gameState, currentUserId, boardLayout, elements);
 }
@@ -169,6 +171,27 @@ function bindBoardInput() {
                 candidate.id === square.dataset.searchItemId
             );
             const player = gameState.players.find(candidate => String(candidate.id) === currentUserId);
+            const currentRoom = gameState.board.rooms.find(room => player?.position &&
+                player.position.row >= room.rows.start && player.position.row <= room.rows.end &&
+                player.position.col >= room.cols.start && player.position.col <= room.cols.end
+            );
+            if (!currentRoom || item?.roomId !== currentRoom.id) {
+                elements.status.textContent = "You can only search objects in your current room.";
+                return;
+            }
+            const adjacent = player?.position && item && (() => {
+                const rowDistance = player.position.row < item.rows.start
+                    ? item.rows.start - player.position.row
+                    : player.position.row > item.rows.end ? player.position.row - item.rows.end : 0;
+                const colDistance = player.position.col < item.cols.start
+                    ? item.cols.start - player.position.col
+                    : player.position.col > item.cols.end ? player.position.col - item.cols.end : 0;
+                return rowDistance + colDistance === 1;
+            })();
+            if (!adjacent) {
+                elements.status.textContent = "Move beside the object, then click it to search.";
+                return;
+            }
             const hintId = item?.hintIds?.find(id => !player?.discoveredHintIds?.includes(id));
             if (!hintId) {
                 elements.status.textContent = `${item?.description || "This object"} contains no undiscovered hints.`;

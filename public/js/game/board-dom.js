@@ -12,6 +12,9 @@ export const elements = {
     endTurnButton: document.getElementById("end-turn"),
     accusationForm: document.getElementById("accusation-form"),
     accusationStatus: document.getElementById("accusation-status"),
+    journal: document.getElementById("journal"),
+    journalEntries: document.getElementById("journal-entries"),
+    journalCount: document.getElementById("journal-count"),
     clickOutput: document.getElementById("clickOutput")
 };
 

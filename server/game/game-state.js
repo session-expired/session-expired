@@ -19,7 +19,7 @@ function createInitialGameState(gamePlayers, random = Math.random, lobby = {}) {
     const gameRooms = roomsForSolution(solution);
     const players = gamePlayers.map((player, index) => ({
         id: String(player.id), username: player.username, character: player.selected_character,
-        canAccuse: true, turnsToSkip: 0, discoveredHintIds: [], position: availableSpawnPoints[index],
+        canAccuse: true, turnsToSkip: 0, discoveredHintIds: [], discoveredHints: [], position: availableSpawnPoints[index],
         facing: "right", dialogueEvent: null, dialogueEventId: 0, secretPassageCooldown: null
     }));
     const turnOrder = shuffle(players.map(player => String(player.id)), random);

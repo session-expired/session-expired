@@ -42,6 +42,13 @@
         <select name="method" aria-label="Method"></select>
         <button type="submit" disabled>Accuse</button>
       </form>
+      <details id="journal" class="journal">
+        <summary>Investigation Journal (<span id="journal-count">0</span>)</summary>
+        <div class="journal-paper">
+          <h2>Case Notes</h2>
+          <ol id="journal-entries"><li class="journal-empty">No clues recorded yet.</li></ol>
+        </div>
+      </details>
       <div class="board-controls" aria-label="Board zoom controls">
         <button id="zoom-out" type="button" aria-label="Zoom out">−</button>
         <button id="zoom-reset" type="button">100%</button>

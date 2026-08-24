@@ -172,6 +172,74 @@
 .accusation-controls select,
 .accusation-controls button { padding: 5px; }
 
+.journal {
+  width: min(520px, 100%);
+  margin: 4px 0 8px;
+  color: #29251c;
+  font-family: Georgia, "Times New Roman", serif;
+}
+
+.journal > summary {
+  width: fit-content;
+  padding: 7px 12px;
+  border: 1px solid #716746;
+  background: #d9cc94;
+  box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.35);
+  color: #29251c;
+  cursor: pointer;
+  font-weight: 700;
+  list-style-position: inside;
+}
+
+.journal[open] > summary {
+  border-bottom-color: #b9aa72;
+  box-shadow: 2px 1px 0 rgba(0, 0, 0, 0.25);
+}
+
+.journal-paper {
+  max-height: 260px;
+  padding: 14px 20px 18px 54px;
+  overflow-y: auto;
+  border: 1px solid #827650;
+  background-color: #eee4b9;
+  background-image:
+    linear-gradient(90deg, transparent 38px, rgba(176, 64, 64, 0.42) 39px, transparent 40px),
+    repeating-linear-gradient(0deg, transparent, transparent 25px, rgba(75, 103, 134, 0.24) 26px);
+  box-shadow: 3px 4px 0 rgba(0, 0, 0, 0.32);
+}
+
+.journal-paper h2 {
+  margin: 0 0 9px;
+  font-size: 20px;
+  text-decoration: underline;
+}
+
+.journal-paper ol {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.journal-entry {
+  min-height: 52px;
+  padding: 4px 2px 7px;
+}
+
+.journal-entry-heading {
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.journal-entry p {
+  margin: 3px 0 0;
+  line-height: 1.35;
+}
+
+.journal-empty {
+  color: #6d644d;
+  font-style: italic;
+}
+
 #roll-movement,
 #end-turn {
   padding: 7px 9px;

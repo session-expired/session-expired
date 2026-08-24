@@ -11,7 +11,7 @@
       "name": "Operating Theater",
       "canBeMurderScene": true
     },
-    { "id": "padded_cells", "name": "Padded Cells", "canBeMurderScene": true },
+    { "id": "padded_cell", "name": "Padded Cells", "canBeMurderScene": true },
     {
       "id": "solitary_confinement",
       "name": "Solitary Confinement",

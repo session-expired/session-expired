@@ -68,175 +68,175 @@
       "rows": { "start": 2, "end": 5 },
       "cols": { "start": 12, "end": 12 },
       "description": "...",
-      "enabled": false
+      "enabled": true
     },
     {
       "id": "solitary_right",
       "rows": { "start": 2, "end": 5 },
       "cols": { "start": 19, "end": 19 },
       "description": "...",
-      "enabled": false
+      "enabled": true
     },
     {
       "id": "cafeteria_table_mid",
       "rows": { "start": 4, "end": 6 },
       "cols": { "start": 26, "end": 26 },
       "description": "...",
-      "enabled": false
+      "enabled": true
     },
     {
       "id": "cafeteria_table_left",
       "rows": { "start": 4, "end": 6 },
       "cols": { "start": 23, "end": 23 },
       "description": "...",
-      "enabled": false
+      "enabled": true
     },
     {
       "id": "cafeteria_back_wall_1",
       "rows": { "start": 2, "end": 2 },
       "cols": { "start": 22, "end": 22 },
       "description": "...",
-      "enabled": false
+      "enabled": true
     },
     {
       "id": "cafeteria_back_wall_2",
       "rows": { "start": 2, "end": 2 },
       "cols": { "start": 24, "end": 30 },
       "description": "...",
-      "enabled": false
+      "enabled": true
     },
     {
       "id": "electro_back_wall",
       "rows": { "start": 10, "end": 10 },
       "cols": { "start": 2, "end": 8 },
       "description": "...",
-      "enabled": false
+      "enabled": true
     },
     {
       "id": "electro_basin",
       "rows": { "start": 13, "end": 13 },
       "cols": { "start": 8, "end": 8 },
       "description": "...",
-      "enabled": false
+      "enabled": true
     },
     {
       "id": "padded_top_1",
       "rows": { "start": 17, "end": 17 },
       "cols": { "start": 2, "end": 3 },
       "description": "...",
-      "enabled": false
+      "enabled": true
     },
     {
       "id": "padded_top_2",
       "rows": { "start": 17, "end": 17 },
       "cols": { "start": 5, "end": 9 },
       "description": "...",
-      "enabled": false
+      "enabled": true
     },
     {
       "id": "padded_right",
       "rows": { "start": 17, "end": 24 },
       "cols": { "start": 9, "end": 9 },
       "description": "...",
-      "enabled": false
+      "enabled": true
     },
     {
       "id": "shower_top_right",
       "rows": { "start": 20, "end": 20 },
       "cols": { "start": 16, "end": 19 },
       "description": "...",
-      "enabled": false
+      "enabled": true
     },
     {
       "id": "shower_top_left",
       "rows": { "start": 20, "end": 20 },
       "cols": { "start": 14, "end": 14 },
       "description": "...",
-      "enabled": false
+      "enabled": true
     },
     {
       "id": "shower_benches",
       "rows": { "start": 22, "end": 23 },
       "cols": { "start": 15, "end": 17 },
       "description": "...",
-      "enabled": false
+      "enabled": true
     },
     {
       "id": "shower_trash",
       "rows": { "start": 24, "end": 24 },
       "cols": { "start": 19, "end": 19 },
       "description": "...",
-      "enabled": false
+      "enabled": true
     },
     {
       "id": "hydro_top_left",
       "rows": { "start": 10, "end": 10 },
       "cols": { "start": 26, "end": 30 },
       "description": "...",
-      "enabled": false
+      "enabled": true
     },
     {
       "id": "hydro_safe",
       "rows": { "start": 11, "end": 11 },
       "cols": { "start": 26, "end": 26 },
       "description": "...",
-      "enabled": false
+      "enabled": true
     },
     {
       "id": "hydro_bot",
       "rows": { "start": 14, "end": 14 },
       "cols": { "start": 19, "end": 30 },
       "description": "...",
-      "enabled": false
+      "enabled": true
     },
     {
       "id": "hydro_left",
       "rows": { "start": 11, "end": 12 },
       "cols": { "start": 23, "end": 23 },
       "description": "...",
-      "enabled": false
+      "enabled": true
     },
         {
       "id": "or_top_left",
       "rows": { "start": 17, "end": 18 },
       "cols": { "start": 23, "end": 24 },
       "description": "...",
-      "enabled": false
+      "enabled": true
     },
         {
       "id": "or_top_right",
       "rows": { "start": 17, "end": 18 },
       "cols": { "start": 26, "end": 30 },
       "description": "...",
-      "enabled": false
+      "enabled": true
     },
             {
       "id": "ward_top",
       "rows": { "start": 8, "end": 9 },
       "cols": { "start": 12, "end": 19 },
       "description": "...",
-      "enabled": false
+      "enabled": true
     },
                 {
       "id": "ward_desk",
       "rows": { "start": 10, "end": 11 },
       "cols": { "start": 14, "end": 17 },
       "description": "...",
-      "enabled": false
+      "enabled": true
     },
                 {
-      "id": "ward_plant",
+      "id": "ward_plant_left",
       "rows": { "start": 16, "end": 16 },
       "cols": { "start": 13, "end": 13 },
       "description": "...",
-      "enabled": false
+      "enabled": true
     },
                     {
-      "id": "ward_plant",
+      "id": "ward_plant_right",
       "rows": { "start": 15, "end": 16 },
       "cols": { "start": 18, "end": 19 },
       "description": "...",
-      "enabled": false
+      "enabled": true
     }
   ],
   "search_items": [
@@ -301,7 +301,7 @@
       "description": "Don't look inside.",
       "roomId": "solitary_confinement",
       "hintIds": [],
-      "enabled": false
+      "enabled": true
     },
     {
       "id": "solitary_bed",
@@ -310,7 +310,7 @@
       "description": "This smells worse than the toilet.",
       "roomId": "solitary_confinement",
       "hintIds": [],
-      "enabled": false
+      "enabled": true
     },
     {
       "id": "solitary_sink",
@@ -319,7 +319,7 @@
       "description": "This also smells worse than the toilet.",
       "roomId": "solitary_confinement",
       "hintIds": [],
-      "enabled": false
+      "enabled": true
     },
 
     {
@@ -329,7 +329,7 @@
       "description": "Is that even food?",
       "roomId": "cafeteria",
       "hintIds": [],
-      "enabled": false
+      "enabled": true
     },
     {
       "id": "cafeteria_serving",
@@ -338,25 +338,25 @@
       "description": "This certainly is not food.",
       "roomId": "cafeteria",
       "hintIds": [],
-      "enabled": false
+      "enabled": true
     },
     {
       "id": "cafeteria_coffee_cart",
       "rows": { "start": 2, "end": 3 },
-      "cols": { "start": 13, "end": 13 },
+      "cols": { "start": 22, "end": 22 },
       "description": "Mud? Coffee? I'm not finding out.",
       "roomId": "cafeteria",
       "hintIds": [],
-      "enabled": false
+      "enabled": true
     },
     {
       "id": "electro_chair",
-      "rows": { "start": 13, "end": 14 },
+      "rows": { "start": 12, "end": 13 },
       "cols": { "start": 4, "end": 4 },
       "description": "Shock the brain away.",
       "roomId": "electrotherapy",
       "hintIds": [],
-      "enabled": false
+      "enabled": true
     },
     {
       "id": "electro_bed",
@@ -365,7 +365,7 @@
       "description": "This is worse than the solitary bed.",
       "roomId": "electrotherapy",
       "hintIds": [],
-      "enabled": false
+      "enabled": true
     },
     {
       "id": "electro_device",
@@ -374,7 +374,7 @@
       "description": "It looks like it's smiling at you.",
       "roomId": "electrotherapy",
       "hintIds": [],
-      "enabled": false
+      "enabled": true
     },
     {
       "id": "electro_cart_top",
@@ -383,7 +383,7 @@
       "description": "A whole cart of fun.",
       "roomId": "electrotherapy",
       "hintIds": [],
-      "enabled": false
+      "enabled": true
     },
     {
       "id": "electro_cart_bottom",
@@ -392,34 +392,34 @@
       "description": "A whole cart of fun.",
       "roomId": "electrotherapy",
       "hintIds": [],
-      "enabled": false
+      "enabled": true
     },
     {
       "id": "padded_chair_top",
       "rows": { "start": 19, "end": 20 },
       "cols": { "start": 7, "end": 7 },
       "description": "Restraints, for their pleasure.",
-      "roomId": "padded_cells",
+      "roomId": "padded_cell",
       "hintIds": [],
-      "enabled": false
+      "enabled": true
     },
     {
       "id": "padded_chair_bot",
       "rows": { "start": 21, "end": 22 },
       "cols": { "start": 7, "end": 7 },
       "description": "Restraints, for your pleasure.",
-      "roomId": "padded_cells",
+      "roomId": "padded_cell",
       "hintIds": [],
-      "enabled": false
+      "enabled": true
     },
     {
       "id": "padded_bed",
       "rows": { "start": 21, "end": 22 },
       "cols": { "start": 2, "end": 2 },
       "description": "Why does everything here have restraints?",
-      "roomId": "padded_cells",
+      "roomId": "padded_cell",
       "hintIds": [],
-      "enabled": false
+      "enabled": true
     },
     {
       "id": "lockers",
@@ -428,7 +428,7 @@
       "description": "You don't want to know what the people here store...",
       "roomId": "showers",
       "hintIds": [],
-      "enabled": false
+      "enabled": true
     },
     {
       "id": "shower_top",
@@ -437,7 +437,7 @@
       "description": "Placeholder",
       "roomId": "showers",
       "hintIds": [],
-      "enabled": false
+      "enabled": true
     },
     {
       "id": "shower_mid",
@@ -446,7 +446,7 @@
       "description": "Placeholder",
       "roomId": "showers",
       "hintIds": [],
-      "enabled": false
+      "enabled": true
     },
     {
       "id": "shower_bottom",
@@ -455,7 +455,7 @@
       "description": "Placeholder",
       "roomId": "showers",
       "hintIds": [],
-      "enabled": false
+      "enabled": true
     },
     {
       "id": "hydro_tank_left",
@@ -464,7 +464,7 @@
       "description": "Placeholder",
       "roomId": "hydrotherapy",
       "hintIds": [],
-      "enabled": false
+      "enabled": true
     },
     {
       "id": "hydro_tank_right",
@@ -473,7 +473,7 @@
       "description": "Placeholder",
       "roomId": "hydrotherapy",
       "hintIds": [],
-      "enabled": false
+      "enabled": true
     },
     {
       "id": "hydro_bath_left",
@@ -482,16 +482,16 @@
       "description": "Placeholder",
       "roomId": "hydrotherapy",
       "hintIds": [],
-      "enabled": false
+      "enabled": true
     },
     {
-      "id": "hydro_bath_left",
+      "id": "hydro_bath_right",
       "rows": { "start": 12, "end": 12 },
       "cols": { "start": 27, "end": 28 },
       "description": "Placeholder",
       "roomId": "hydrotherapy",
       "hintIds": [],
-      "enabled": false
+      "enabled": true
     },
     {
       "id": "or_table",
@@ -500,7 +500,7 @@
       "description": "Placeholder",
       "roomId": "operating_theater",
       "hintIds": [],
-      "enabled": false
+      "enabled": true
     },
     {
       "id": "or_bot_cart",
@@ -509,7 +509,7 @@
       "description": "Placeholder",
       "roomId": "operating_theater",
       "hintIds": [],
-      "enabled": false
+      "enabled": true
     },
     {
       "id": "or_chem_cab",
@@ -518,7 +518,7 @@
       "description": "Placeholder",
       "roomId": "operating_theater",
       "hintIds": [],
-      "enabled": false
+      "enabled": true
     },
     {
       "id": "or_top_table",
@@ -527,7 +527,7 @@
       "description": "Placeholder",
       "roomId": "operating_theater",
       "hintIds": [],
-      "enabled": false
+      "enabled": true
     }
   ]
 }

@@ -1,5 +1,5 @@
 const hintCatalog = require("./hints.json");
-const { rooms } = require("./board-data");
+const { rooms, roomAtPosition } = require("./board-data");
 
 const solutionFieldByHintCategory = Object.freeze({
     murderer: "killer",
@@ -32,9 +32,11 @@ function isAdjacentToArea(position, area) {
 
 function discoverHint(state, playerId, hintId, catalog = hintCatalog) {
     if (state.status !== "active") throw new Error("This game has already finished.");
-    if (String(state.turn.playerId) !== String(playerId) ||
-        !["awaiting_roll", "moving", "awaiting_end"].includes(state.turn.phase)) {
+    if (String(state.turn.playerId) !== String(playerId)) {
         throw new Error("It is not this player's turn.");
+    }
+    if (state.turn.phase !== "moving" || state.turn.movementRemaining <= 0) {
+        throw new Error("Roll and retain movement points before searching.");
     }
     const player = state.players.find(candidate => String(candidate.id) === String(playerId));
     if (!player) throw new Error("Player not found.");
@@ -47,12 +49,27 @@ function discoverHint(state, playerId, hintId, catalog = hintCatalog) {
     }
     const searchItem = state.board.searchItems?.find(item => item.hintIds?.includes(hint.id));
     if (!searchItem) throw new Error("This hint is not active in this game.");
+    const currentRoom = roomAtPosition(state, player.position);
+    if (!currentRoom || currentRoom.id !== searchItem.roomId) {
+        throw new Error("You can only search objects in your current room.");
+    }
     if (!isAdjacentToArea(player.position, searchItem)) {
         throw new Error("You must be adjacent to the search item to discover its hint.");
     }
     if (!Array.isArray(player.discoveredHintIds)) player.discoveredHintIds = [];
+    if (!Array.isArray(player.discoveredHints)) player.discoveredHints = [];
     const alreadyDiscovered = player.discoveredHintIds.includes(hint.id);
-    if (!alreadyDiscovered) player.discoveredHintIds.push(hint.id);
+    if (!alreadyDiscovered) {
+        player.discoveredHintIds.push(hint.id);
+        player.discoveredHints.push({
+            id: hint.id,
+            category: hint.category,
+            text: hint.text,
+            searchItemId: searchItem.id
+        });
+    }
+    state.turn.movementRemaining = 0;
+    state.turn.phase = "awaiting_end";
     return { hint, alreadyDiscovered };
 }
 

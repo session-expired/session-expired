@@ -23,7 +23,7 @@ const secretPass = [
 
 const rooms = [
     new Room("wardens_office", "Wardens_office", {start: 12, end: 19}, {start: 8, end: 17}, {col: 19, row: 12}),
-    new Room("padded_cells", "Padded Cells", {start: 1, end: 9}, {start: 17, end: 24}, {col: 4, row: 17}),
+    new Room("padded_cell", "Padded Cell", {start: 1, end: 9}, {start: 17, end: 24}, {col: 4, row: 17}),
     new Room("cafeteria", "Cafeteria", {start: 22, end: 30}, {start: 1, end: 7}, {col: 28, row: 7}),
     new Room("operating_theater", "Operating Theater", {start: 22, end: 30}, {start: 17, end: 24}, {col: 25, row: 17}),
     new Room("rec_room", "Rec Room", {start: 1, end: 9}, {start: 1, end: 7}, {col: 7, row: 7}),
@@ -44,7 +44,8 @@ function positionInArea(position, area) {
 function blockingAreaAt(state, position) {
     const boardBlockedTiles = state?.board?.blockedTiles || blockedTiles;
     const boardSearchItems = state?.board?.searchItems || searchItems;
-    return [...boardBlockedTiles, ...boardSearchItems].find(area => positionInArea(position, area));
+    return boardSearchItems.find(item => positionInArea(position, item)) ||
+        boardBlockedTiles.find(area => positionInArea(position, area));
 }
 
 function roomAtPosition(state, position) {
