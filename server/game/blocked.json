@@ -20,7 +20,8 @@
       "cols": { "start": 30, "end": 30 },
       "description": "Wall",
       "enabled": true
-    },    {
+    },
+    {
       "id": "right_wall_2",
       "rows": { "start": 15, "end": 17 },
       "cols": { "start": 30, "end": 30 },
@@ -34,7 +35,7 @@
       "description": "Top wall",
       "enabled": true
     },
-        {
+    {
       "id": "bottom_wall_2",
       "rows": { "start": 24, "end": 24 },
       "cols": { "start": 10, "end": 11 },
@@ -104,38 +105,94 @@
       "description": "...",
       "enabled": false
     },
-        {
+    {
       "id": "electro_back_wall",
       "rows": { "start": 10, "end": 10 },
       "cols": { "start": 2, "end": 8 },
       "description": "...",
       "enabled": false
     },
-            {
+    {
       "id": "electro_basin",
       "rows": { "start": 13, "end": 13 },
       "cols": { "start": 8, "end": 8 },
       "description": "...",
       "enabled": false
     },
-                {
+    {
       "id": "padded_top_1",
       "rows": { "start": 17, "end": 17 },
       "cols": { "start": 2, "end": 3 },
       "description": "...",
       "enabled": false
     },
-                {
+    {
       "id": "padded_top_2",
       "rows": { "start": 17, "end": 17 },
       "cols": { "start": 5, "end": 9 },
       "description": "...",
       "enabled": false
     },
-                {
+    {
       "id": "padded_right",
       "rows": { "start": 17, "end": 24 },
       "cols": { "start": 9, "end": 9 },
+      "description": "...",
+      "enabled": false
+    },
+    {
+      "id": "shower_top_right",
+      "rows": { "start": 20, "end": 20 },
+      "cols": { "start": 16, "end": 19 },
+      "description": "...",
+      "enabled": false
+    },
+    {
+      "id": "shower_top_left",
+      "rows": { "start": 20, "end": 20 },
+      "cols": { "start": 14, "end": 14 },
+      "description": "...",
+      "enabled": false
+    },
+    {
+      "id": "shower_benches",
+      "rows": { "start": 22, "end": 23 },
+      "cols": { "start": 15, "end": 17 },
+      "description": "...",
+      "enabled": false
+    },
+    {
+      "id": "shower_trash",
+      "rows": { "start": 24, "end": 24 },
+      "cols": { "start": 19, "end": 19 },
+      "description": "...",
+      "enabled": false
+    },
+    {
+      "id": "hydro_top_left",
+      "rows": { "start": 10, "end": 10 },
+      "cols": { "start": 26, "end": 30 },
+      "description": "...",
+      "enabled": false
+    },
+    {
+      "id": "hydro_safe",
+      "rows": { "start": 11, "end": 11 },
+      "cols": { "start": 26, "end": 26 },
+      "description": "...",
+      "enabled": false
+    },
+    {
+      "id": "hydro_bot",
+      "rows": { "start": 14, "end": 14 },
+      "cols": { "start": 19, "end": 30 },
+      "description": "...",
+      "enabled": false
+    },
+    {
+      "id": "hydro_left",
+      "rows": { "start": 11, "end": 12 },
+      "cols": { "start": 23, "end": 23 },
       "description": "...",
       "enabled": false
     }
@@ -259,7 +316,7 @@
       "hintIds": [],
       "enabled": false
     },
-        {
+    {
       "id": "electro_bed",
       "rows": { "start": 12, "end": 13 },
       "cols": { "start": 2, "end": 2 },
@@ -268,7 +325,7 @@
       "hintIds": [],
       "enabled": false
     },
-        {
+    {
       "id": "electro_device",
       "rows": { "start": 11, "end": 11 },
       "cols": { "start": 7, "end": 8 },
@@ -277,7 +334,7 @@
       "hintIds": [],
       "enabled": false
     },
-        {
+    {
       "id": "electro_cart_top",
       "rows": { "start": 11, "end": 11 },
       "cols": { "start": 2, "end": 2 },
@@ -286,7 +343,7 @@
       "hintIds": [],
       "enabled": false
     },
-        {
+    {
       "id": "electro_cart_bottom",
       "rows": { "start": 14, "end": 14 },
       "cols": { "start": 2, "end": 2 },
@@ -295,7 +352,7 @@
       "hintIds": [],
       "enabled": false
     },
-            {
+    {
       "id": "padded_chair_top",
       "rows": { "start": 19, "end": 20 },
       "cols": { "start": 7, "end": 7 },
@@ -304,7 +361,7 @@
       "hintIds": [],
       "enabled": false
     },
-                {
+    {
       "id": "padded_chair_bot",
       "rows": { "start": 21, "end": 22 },
       "cols": { "start": 7, "end": 7 },
@@ -313,12 +370,84 @@
       "hintIds": [],
       "enabled": false
     },
-                {
+    {
       "id": "padded_bed",
       "rows": { "start": 21, "end": 22 },
       "cols": { "start": 2, "end": 2 },
       "description": "Why does everything here have restraints?",
       "roomId": "padded_cell",
+      "hintIds": [],
+      "enabled": false
+    },
+    {
+      "id": "lockers",
+      "rows": { "start": 21, "end": 23 },
+      "cols": { "start": 19, "end": 19 },
+      "description": "You don't want to know what the people here store...",
+      "roomId": "showers",
+      "hintIds": [],
+      "enabled": false
+    },
+    {
+      "id": "shower_top",
+      "rows": { "start": 21, "end": 21 },
+      "cols": { "start": 13, "end": 13 },
+      "description": "Placeholder",
+      "roomId": "showers",
+      "hintIds": [],
+      "enabled": false
+    },
+    {
+      "id": "shower_mid",
+      "rows": { "start": 22, "end": 22 },
+      "cols": { "start": 13, "end": 13 },
+      "description": "Placeholder",
+      "roomId": "showers",
+      "hintIds": [],
+      "enabled": false
+    },
+    {
+      "id": "shower_bottom",
+      "rows": { "start": 23, "end": 24 },
+      "cols": { "start": 13, "end": 13 },
+      "description": "Placeholder",
+      "roomId": "showers",
+      "hintIds": [],
+      "enabled": false
+    },
+    {
+      "id": "hydro_tank_left",
+      "rows": { "start": 13, "end": 14 },
+      "cols": { "start": 23, "end": 23 },
+      "description": "Placeholder",
+      "roomId": "hydrotherapy",
+      "hintIds": [],
+      "enabled": false
+    },
+    {
+      "id": "hydro_tank_right",
+      "rows": { "start": 11, "end": 11 },
+      "cols": { "start": 30, "end": 30 },
+      "description": "Placeholder",
+      "roomId": "hydrotherapy",
+      "hintIds": [],
+      "enabled": false
+    },
+    {
+      "id": "hydro_bath_left",
+      "rows": { "start": 14, "end": 14 },
+      "cols": { "start": 25, "end": 27 },
+      "description": "Placeholder",
+      "roomId": "hydrotherapy",
+      "hintIds": [],
+      "enabled": false
+    },
+    {
+      "id": "hydro_bath_left",
+      "rows": { "start": 12, "end": 12 },
+      "cols": { "start": 27, "end": 28 },
+      "description": "Placeholder",
+      "roomId": "hydrotherapy",
       "hintIds": [],
       "enabled": false
     }
