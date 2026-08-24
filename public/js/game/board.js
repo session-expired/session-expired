@@ -164,9 +164,11 @@ function bindBoardInput() {
         const square = event.target.closest("[data-row][data-col]");
         if (!square?.dataset.type) return;
         if (square.classList.contains("movement-range")) await handleMovementClick(square);
-        const tileLabel = ["door", "secret passage"].includes(square.dataset.type)
-            ? [square.dataset.type, square.dataset.roomName].filter(Boolean).join(", ")
-            : square.dataset.roomName || square.dataset.type;
+        const tileLabel = square.dataset.searchDescription || (
+            ["door", "secret passage"].includes(square.dataset.type)
+                ? [square.dataset.type, square.dataset.roomName].filter(Boolean).join(", ")
+                : square.dataset.roomName || square.dataset.type
+        );
         elements.clickOutput.textContent = `${tileLabel}\ncol ${square.dataset.col}, row ${square.dataset.row}`;
     });
 }
@@ -184,7 +186,15 @@ loadGameResources(gameId)
             if (activePlayer) entityRenderer.showDialogue(activePlayer.character, "turn_start");
         }
         const { rows, cols } = gameState.board;
-        boardLayout.build({ rows, cols, rooms: board.rooms, spawnPoints: board.spawnPoints, secretPass: board.secretPass });
+        boardLayout.build({
+            rows,
+            cols,
+            rooms: board.rooms,
+            spawnPoints: board.spawnPoints,
+            secretPass: board.secretPass,
+            blockedTiles: gameState.board.blockedTiles || board.blockedTiles,
+            searchItems: gameState.board.searchItems || board.searchItems
+        });
         window.addEventListener("resize", () => boardLayout.size(rows, cols));
         if (window.ResizeObserver) {
             new ResizeObserver(() => boardLayout.size(rows, cols)).observe(elements.game);

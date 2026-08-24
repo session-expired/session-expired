@@ -5,6 +5,8 @@ const {
   rooms,
   spawnPoints,
   secretPass,
+  blockedTiles,
+  searchItems,
   rollMovementDie,
   movementPath,
   movePlayer,
@@ -62,7 +64,9 @@ app.get(`/api/games/${gameId}`, (request, response) => {
     currentUserId: state.turn.playerId
   });
 });
-app.get("/api/board", (request, response) => response.json({ rooms, spawnPoints, secretPass }));
+app.get("/api/board", (request, response) => response.json({
+  rooms, spawnPoints, secretPass, blockedTiles, searchItems
+}));
 app.get("/__multi/state", (request, response) => response.json({ state }));
 app.post("/__multi/reset", (request, response) => {
   if (wardenTimer) clearTimeout(wardenTimer);

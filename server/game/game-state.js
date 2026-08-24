@@ -1,4 +1,4 @@
-const { spawnPoints } = require("./board-data");
+const { spawnPoints, blockedTiles, searchItems } = require("./board-data");
 const { createSolution } = require("./solution");
 const { roomsForSolution } = require("./hint-rules");
 
@@ -16,6 +16,8 @@ function createInitialGameState(gamePlayers, random = Math.random, lobby = {}) {
     }
     const availableSpawnPoints = shuffle(spawnPoints.map(point => ({ ...point })), random);
     const solution = createSolution(random);
+    const gameRooms = roomsForSolution(solution);
+    const activeHintIds = new Set(gameRooms.flatMap(room => room.hintIds));
     const players = gamePlayers.map((player, index) => ({
         id: String(player.id), username: player.username, character: player.selected_character,
         canAccuse: true, turnsToSkip: 0, discoveredHintIds: [], position: availableSpawnPoints[index],
@@ -27,7 +29,16 @@ function createInitialGameState(gamePlayers, random = Math.random, lobby = {}) {
         lobbyId: lobby.id == null ? null : String(lobby.id),
         lobbyName: lobby.name ?? null,
         status: "active",
-        board: { rows: 24, cols: 30, rooms: roomsForSolution(solution) },
+        board: {
+            rows: 24,
+            cols: 30,
+            rooms: gameRooms,
+            blockedTiles: structuredClone(blockedTiles),
+            searchItems: searchItems.map(item => ({
+                ...structuredClone(item),
+                hintIds: (item.hintIds || []).filter(hintId => activeHintIds.has(hintId))
+            }))
+        },
         players,
         warden: {
             character: "bonaparte", position: { row: 13, col: 13 }, previousPosition: null,

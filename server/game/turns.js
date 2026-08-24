@@ -1,4 +1,4 @@
-const { rooms } = require("./board-data");
+const { rooms, blockingAreaAt } = require("./board-data");
 const { movementDistances } = require("./movement");
 
 function rollMovementDie(state, playerId, random = Math.random) {
@@ -23,7 +23,11 @@ function takeWardenTurn(state, random = Math.random) {
     if (state.warden.previousPosition) {
         forbidden.add(`${state.warden.previousPosition.row},${state.warden.previousPosition.col}`);
     }
-    for (const tile of office.blockedTile || []) forbidden.add(`${tile.row},${tile.col}`);
+    for (let row = office.rows.start; row <= office.rows.end; row++) {
+        for (let col = office.cols.start; col <= office.cols.end; col++) {
+            if (blockingAreaAt(state, { row, col })) forbidden.add(`${row},${col}`);
+        }
+    }
     forbidden.add(`${office.doors.row},${office.doors.col}`);
     const visited = new Set([`${start.row},${start.col}`]);
     const path = [];

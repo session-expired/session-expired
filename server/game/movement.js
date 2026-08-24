@@ -1,4 +1,4 @@
-const { rooms, secretPass } = require("./board-data");
+const { rooms, secretPass, blockingAreaAt } = require("./board-data");
 
 function movementDistances(state, playerId) {
     const player = state.players.find(candidate => String(candidate.id) === String(playerId));
@@ -20,7 +20,7 @@ function movementDistances(state, playerId) {
     );
     const isBlockedTile = (row, col) => {
         if (player.secretPassageCooldown?.row === row && player.secretPassageCooldown?.col === col) return true;
-        return roomAt(row, col)?.blockedTile?.some(tile => tile.row === row && tile.col === col) || false;
+        return Boolean(blockingAreaAt(state, { row, col }));
     };
     const canCrossRoomBoundary = (from, to) => {
         const fromRoom = roomAt(from.row, from.col);
@@ -84,14 +84,11 @@ function useSecretPassage(state, player, entry, random = Math.random) {
         destination.row >= room.rows.start && destination.row <= room.rows.end &&
         destination.col >= room.cols.start && destination.col <= room.cols.end
     );
-    const blockedByArt = tile => destinationRoom?.blockedTile?.some(blocked =>
-        blocked.row === tile.row && blocked.col === tile.col
-    );
     const isAvailable = tile => tile.row >= 1 && tile.row <= state.board.rows &&
         tile.col >= 1 && tile.col <= state.board.cols &&
         (!destinationRoom || (tile.row >= destinationRoom.rows.start && tile.row <= destinationRoom.rows.end &&
             tile.col >= destinationRoom.cols.start && tile.col <= destinationRoom.cols.end)) &&
-        !occupied.has(`${tile.row},${tile.col}`) && !blockedByArt(tile);
+        !occupied.has(`${tile.row},${tile.col}`) && !blockingAreaAt(state, tile);
 
     let arrival = destination;
     if (!isAvailable(arrival)) {

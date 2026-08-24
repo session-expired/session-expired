@@ -8,6 +8,8 @@ const {
   rooms,
   spawnPoints,
   secretPass,
+  blockedTiles,
+  searchItems,
   rollMovementDie,
   movementPath,
   movePlayer,
@@ -110,7 +112,9 @@ app.post(`/api/games/${gameId}/accuse`, (request, response) => {
 app.post(`/api/games/${gameId}/quit`, (request, response) => {
   response.json({ ok: true, redirect: `/game/${gameId}` });
 });
-app.get("/api/board", (request, response) => response.json({ rooms, spawnPoints, secretPass }));
+app.get("/api/board", (request, response) => response.json({
+  rooms, spawnPoints, secretPass, blockedTiles, searchItems
+}));
 
 app.use("/css", express.static(path.join(publicDirectory, "css"), { fallthrough: false }));
 app.use("/assets", express.static(path.join(publicDirectory, "assets"), { fallthrough: false }));

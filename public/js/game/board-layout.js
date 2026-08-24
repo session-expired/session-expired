@@ -45,7 +45,7 @@ export function createBoardLayout(elements, onLayout = () => {}) {
         applyZoom();
     }
 
-    function build({ rows, cols, rooms, spawnPoints, secretPass }) {
+    function build({ rows, cols, rooms, spawnPoints, secretPass, blockedTiles = [], searchItems = [] }) {
         const roomAt = (row, col) => rooms.find(room =>
             row >= room.rows.start && row <= room.rows.end &&
             col >= room.cols.start && col <= room.cols.end
@@ -53,6 +53,8 @@ export function createBoardLayout(elements, onLayout = () => {}) {
         elements.board.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
         elements.board.style.gridTemplateRows = `repeat(${rows}, 1fr)`;
         elements.board.replaceChildren();
+        const contains = (area, row, col) => row >= area.rows.start && row <= area.rows.end &&
+            col >= area.cols.start && col <= area.cols.end;
         for (let row = 1; row <= rows; row++) {
             for (let col = 1; col <= cols; col++) {
                 const square = document.createElement("div");
@@ -60,11 +62,18 @@ export function createBoardLayout(elements, onLayout = () => {}) {
                 const isDoor = room && row === room.doors.row && col === room.doors.col;
                 const isSpawn = spawnPoints.some(point => row === point.row && col === point.col);
                 const isPassage = secretPass.some(point => row === point.row && col === point.col);
-                const isBlocked = room?.blockedTile?.some(tile => row === tile.row && col === tile.col);
+                const blockedArea = blockedTiles.find(area => contains(area, row, col));
+                const searchItem = searchItems.find(item => contains(item, row, col));
                 square.dataset.type = isPassage ? "secret passage" : isDoor ? "door" :
                     room ? "room" : isSpawn ? "spawn point" : "hallway";
                 if (room) square.dataset.roomName = room.name;
-                if (isBlocked) square.dataset.blocked = "true";
+                if (blockedArea || searchItem) square.dataset.blocked = "true";
+                if (blockedArea) square.dataset.blockedAreaId = blockedArea.id;
+                if (searchItem) {
+                    square.dataset.searchItemId = searchItem.id;
+                    square.dataset.searchDescription = searchItem.description;
+                    square.dataset.searchRoomId = searchItem.roomId;
+                }
                 square.dataset.row = row;
                 square.dataset.col = col;
                 elements.board.appendChild(square);

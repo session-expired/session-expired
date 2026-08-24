@@ -1,0 +1,40 @@
+{
+  "blocked_tiles": [
+    {
+      "id": "cafeteria_obstacle_1",
+      "rows": { "start": 6, "end": 6 },
+      "cols": { "start": 23, "end": 23 },
+      "description": "Existing cafeteria art obstacle."
+    },
+    {
+      "id": "cafeteria_obstacle_2",
+      "rows": { "start": 7, "end": 7 },
+      "cols": { "start": 24, "end": 24 },
+      "description": "Existing cafeteria art obstacle."
+    },
+    {
+      "id": "rec_room_blocked_area",
+      "rows": { "start": 1, "end": 2 },
+      "cols": { "start": 1, "end": 6 },
+      "description": "Rec Room blocked area migrated from the room definition."
+    },
+    {
+      "id": "blocked_area_placeholder",
+      "rows": { "start": 1, "end": 2 },
+      "cols": { "start": 1, "end": 2 },
+      "description": "Copy and populate this blocked-area entry.",
+      "enabled": false
+    }
+  ],
+  "search_items": [
+    {
+      "id": "search_item_placeholder",
+      "rows": { "start": 1, "end": 2 },
+      "cols": { "start": 1, "end": 2 },
+      "description": "Describe the object players can investigate.",
+      "roomId": "rec_room",
+      "hintIds": [],
+      "enabled": false
+    }
+  ]
+}

@@ -1,13 +1,13 @@
 const hintCatalog = require("./hints.json");
+const blockedCatalog = require("./blocked.json");
 
 class Room {
-    constructor(id, name, cols, rows, doors, blockedTile = []) {
+    constructor(id, name, cols, rows, doors) {
         this.id = id;
         this.name = name;
         this.cols = cols;
         this.rows = rows;
         this.doors = doors;
-        this.blockedTile = blockedTile;
         this.hintIds = hintCatalog.hints.filter(hint => hint.roomId === id).map(hint => hint.id);
     }
 }
@@ -24,9 +24,7 @@ const secretPass = [
 const rooms = [
     new Room("wardens_office", "Wardens_office", {start: 12, end: 19}, {start: 8, end: 17}, {col: 19, row: 12}),
     new Room("padded_cells", "Padded Cells", {start: 1, end: 9}, {start: 17, end: 24}, {col: 4, row: 17}),
-    new Room("cafeteria", "Cafeteria", {start: 22, end: 30}, {start: 1, end: 7}, {col: 28, row: 7}, [
-        {row: 6, col: 23}, {row: 7, col: 24}
-    ]),
+    new Room("cafeteria", "Cafeteria", {start: 22, end: 30}, {start: 1, end: 7}, {col: 28, row: 7}),
     new Room("operating_theater", "Operating Theater", {start: 22, end: 30}, {start: 17, end: 24}, {col: 25, row: 17}),
     new Room("rec_room", "Rec Room", {start: 1, end: 9}, {start: 1, end: 7}, {col: 7, row: 7}),
     new Room("showers", "Showers", {start: 12, end: 19}, {start: 20, end: 24}, {col: 15, row: 20}),
@@ -34,6 +32,20 @@ const rooms = [
     new Room("hydrotherapy", "Hydrotherapy", {start: 23, end: 30}, {start: 10, end: 14}, {col: 25, row: 10}),
     new Room("electrotherapy", "Electrotherapy", {start: 1, end: 8}, {start: 10, end: 14}, {col: 7, row: 14})
 ];
+
+const blockedTiles = blockedCatalog.blocked_tiles.filter(area => area.enabled !== false);
+const searchItems = blockedCatalog.search_items.filter(item => item.enabled !== false);
+
+function positionInArea(position, area) {
+    return position.row >= area.rows.start && position.row <= area.rows.end &&
+        position.col >= area.cols.start && position.col <= area.cols.end;
+}
+
+function blockingAreaAt(state, position) {
+    const boardBlockedTiles = state?.board?.blockedTiles || blockedTiles;
+    const boardSearchItems = state?.board?.searchItems || searchItems;
+    return [...boardBlockedTiles, ...boardSearchItems].find(area => positionInArea(position, area));
+}
 
 function roomAtPosition(state, position) {
     return (state.board.rooms || rooms).find(room =>
@@ -51,4 +63,7 @@ function getSquareType(row, col) {
     return row === room.doors.row && col === room.doors.col ? "door" : "room";
 }
 
-module.exports = { rooms, spawnPoints, secretPass, roomAtPosition, getSquareType };
+module.exports = {
+    rooms, spawnPoints, secretPass, blockedTiles, searchItems,
+    positionInArea, blockingAreaAt, roomAtPosition, getSquareType
+};

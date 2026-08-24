@@ -33,7 +33,7 @@ const publicDirectory = path.join(__dirname, "..", "public");
 const pageDirectory = path.join(__dirname, "pages");
 const publicPageDirectory = path.join(publicDirectory, "pages");
 const {
-  rooms, spawnPoints, secretPass, rollMovementDie, movementPath, movePlayer,
+  rooms, spawnPoints, secretPass, blockedTiles, searchItems, rollMovementDie, movementPath, movePlayer,
   endPlayerTurn, completeWardenTurn, removePlayerFromGame, discoverHint, submitAccusation
 } = require("./game/board");
 const minimumLobbyPlayers = process.env.SESSION_EXPIRED_DEV_RUNNER === "true" ? 1 : 2;
@@ -531,7 +531,7 @@ app.post("/api/games/:gameId/quit", requireAuthentication, async (request, respo
 
 //mss446
 app.get("/api/board", requireAuthentication, (request, response) => {
-  response.json({ rooms, spawnPoints, secretPass });
+  response.json({ rooms, spawnPoints, secretPass, blockedTiles, searchItems });
 });
 
 app.post("/api/logout", (request, response, next) => {

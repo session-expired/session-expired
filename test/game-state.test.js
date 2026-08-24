@@ -8,6 +8,8 @@ const {
   createSolution,
   rooms,
   spawnPoints,
+  blockedTiles,
+  searchItems,
   rollMovementDie,
   movementDistances,
   movementPath,
@@ -471,15 +473,15 @@ test("the Warden takes a turn after the final active player", () => {
     { id: 1, username: "One" },
     { id: 2, username: "Two" }
   ]);
-  state.players[0].position = { row: 1, col: 1 };
-  state.players[1].position = { row: 2, col: 1 };
+  state.players[0].position = { row: 4, col: 1 };
+  state.players[1].position = { row: 3, col: 1 };
   state.turn.playerIndex = 1;
   state.turn.order = ["1", "2"];
   state.turn.playerId = "2";
   state.turn.phase = "moving";
   state.turn.movementRemaining = 1;
 
-  movePlayer(state, "2", { row: 2, col: 2 }, () => 0);
+  movePlayer(state, "2", { row: 3, col: 2 }, () => 0);
   assert.equal(state.turn.phase, "awaiting_end");
   endPlayerTurn(state, "2", () => 0);
   assert.equal(state.turn.playerId, null);
@@ -627,27 +629,46 @@ test("the server rejects a direct move through a room wall", () => {
   assert.throws(() => movePlayer(state, "1", { row: 7, col: 27 }), /outside/i);
 });
 
-test("rooms expose a blockedTile list for art obstacles", () => {
-  assert.ok(rooms.every(room => Array.isArray(room.blockedTile)));
-  assert.ok(rooms.every(room => room.blockedTile.every(tile =>
-    Number.isInteger(tile.row) && Number.isInteger(tile.col)
-  )));
+test("blocked areas are independent from rooms and support inclusive ranges", () => {
+  assert.ok(rooms.every(room => !("blockedTile" in room)));
+  assert.ok(blockedTiles.some(area => area.rows.start < area.rows.end && area.cols.start < area.cols.end));
+  assert.ok(blockedTiles.every(area =>
+    Number.isInteger(area.rows.start) && Number.isInteger(area.rows.end) &&
+    Number.isInteger(area.cols.start) && Number.isInteger(area.cols.end)
+  ));
 });
 
-test("blocked room tiles are excluded from legal movement and cannot be crossed", () => {
+test("blocked hallway ranges are excluded from legal movement and cannot be crossed", () => {
   const state = createInitialGameState([{ id: 1, username: "Player" }]);
-  state.board.rooms = JSON.parse(JSON.stringify(state.board.rooms));
-  const cafeteria = state.board.rooms.find(room => room.name === "Cafeteria");
-  cafeteria.blockedTile.push({ row: 6, col: 27 });
-  state.players[0].position = { row: 6, col: 28 };
+  state.board.blockedTiles = [{
+    id: "hallway_test", rows: { start: 9, end: 10 }, cols: { start: 11, end: 11 }
+  }];
+  state.players[0].position = { row: 9, col: 10 };
   state.turn.phase = "moving";
   state.turn.movementRemaining = 2;
 
   const range = movementDistances(state, "1");
-  assert.equal(range.has("6,27"), false);
-  assert.throws(() => movePlayer(state, "1", { row: 6, col: 27 }), /outside/i);
-  assert.equal(range.has("6,26"), false);
-  assert.equal(range.get("5,27"), 2);
+  assert.equal(range.has("9,11"), false);
+  assert.equal(range.has("10,11"), false);
+  assert.throws(() => movePlayer(state, "1", { row: 9, col: 11 }), /outside/i);
+});
+
+test("search items are blocked movement areas with descriptions and room associations", () => {
+  assert.ok(Array.isArray(searchItems));
+  const state = createInitialGameState([{ id: 1, username: "Player" }]);
+  state.board.searchItems = [{
+    id: "hallway_cart",
+    rows: { start: 9, end: 9 },
+    cols: { start: 11, end: 12 },
+    description: "An abandoned medicine cart.",
+    roomId: "wardens_office",
+    hintIds: []
+  }];
+  state.players[0].position = { row: 9, col: 10 };
+  state.turn.phase = "moving";
+  state.turn.movementRemaining = 2;
+
+  assert.equal(movementDistances(state, "1").has("9,11"), false);
 });
 
 test("entering a secret passage teleports to another passage and triggers dialogue", () => {
