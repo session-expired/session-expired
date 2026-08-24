@@ -249,6 +249,10 @@ function renderMovementRange() {
             if (!entersDoorFromHallway(current, { row, col })) queue.push({ row, col });
         }
     }
+    if (distances.size === 1) {
+        endTurnButton.hidden = false;
+        turnStatusElement.textContent = "YOUR TURN · no legal moves remain · end your turn";
+    }
 }
 
 function renderGameState() {

@@ -279,6 +279,29 @@ test("a player cannot end their turn while movement points remain", () => {
   assert.equal(state.turn.movementRemaining, 5);
 });
 
+test("a player with no remaining legal moves may end their turn", () => {
+  const state = createInitialGameState([
+    { id: 1, username: "One" },
+    { id: 2, username: "Two" },
+    { id: 3, username: "Three" },
+    { id: 4, username: "Four" }
+  ], () => 0.999);
+  state.players[0].position = { row: 1, col: 1 };
+  state.players[1].position = { row: 1, col: 2 };
+  state.players[2].position = { row: 2, col: 1 };
+  state.players[3].position = { row: 20, col: 20 };
+  state.turn.order = ["1", "2", "3", "4"];
+  state.turn.playerId = "1";
+  state.turn.playerIndex = 0;
+  state.turn.phase = "moving";
+  state.turn.movementRemaining = 6;
+  state.turn.visitedPositions = [{ row: 1, col: 1 }];
+
+  assert.equal(movementDistances(state, "1").size, 0);
+  assert.doesNotThrow(() => endPlayerTurn(state, "1"));
+  assert.equal(state.turn.playerId, "2");
+});
+
 test("a player cannot revisit or path through a position used earlier in the same turn", () => {
   const state = createInitialGameState([{ id: 1, username: "Player" }]);
   state.players[0].position = { row: 18, col: 10 };

@@ -361,9 +361,15 @@ function finishPlayerTurn(state, playerId, random = Math.random) {
 }
 
 function endPlayerTurn(state, playerId, random = Math.random) {
-    if (state.turn.phase !== "awaiting_end" || state.turn.movementRemaining !== 0) {
-        if (String(state.turn.playerId) !== String(playerId)) throw new Error("It is not this player's turn.");
+    if (String(state.turn.playerId) !== String(playerId)) throw new Error("It is not this player's turn.");
+    const usedAllMovement = state.turn.phase === "awaiting_end" && state.turn.movementRemaining === 0;
+    const hasNoLegalMoves = state.turn.phase === "moving" && movementDistances(state, playerId).size === 0;
+    if (!usedAllMovement && !hasNoLegalMoves) {
         throw new Error("Use all movement points before ending your turn.");
+    }
+    if (hasNoLegalMoves) {
+        state.turn.phase = "awaiting_end";
+        state.turn.movementRemaining = 0;
     }
     return finishPlayerTurn(state, playerId, random);
 }
