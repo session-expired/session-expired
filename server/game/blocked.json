@@ -8,6 +8,40 @@
       "enabled": true
     },
     {
+      "id": "left_wall",
+      "rows": { "start": 1, "end": 24 },
+      "cols": { "start": 1, "end": 1 },
+      "description": "Wall",
+      "enabled": true
+    },
+    {
+      "id": "right_wall_1",
+      "rows": { "start": 8, "end": 9 },
+      "cols": { "start": 30, "end": 30 },
+      "description": "Wall",
+      "enabled": true
+    },    {
+      "id": "right_wall_2",
+      "rows": { "start": 15, "end": 17 },
+      "cols": { "start": 30, "end": 30 },
+      "description": "Wall",
+      "enabled": true
+    },
+    {
+      "id": "bottom_wall_1",
+      "rows": { "start": 24, "end": 24 },
+      "cols": { "start": 20, "end": 21 },
+      "description": "Top wall",
+      "enabled": true
+    },
+        {
+      "id": "bottom_wall_2",
+      "rows": { "start": 24, "end": 24 },
+      "cols": { "start": 10, "end": 11 },
+      "description": "Top wall",
+      "enabled": true
+    },
+    {
       "id": "rec_top_left",
       "rows": { "start": 2, "end": 2 },
       "cols": { "start": 1, "end": 3 },
@@ -67,6 +101,41 @@
       "id": "cafeteria_back_wall_2",
       "rows": { "start": 2, "end": 2 },
       "cols": { "start": 24, "end": 30 },
+      "description": "...",
+      "enabled": false
+    },
+        {
+      "id": "electro_back_wall",
+      "rows": { "start": 10, "end": 10 },
+      "cols": { "start": 2, "end": 8 },
+      "description": "...",
+      "enabled": false
+    },
+            {
+      "id": "electro_basin",
+      "rows": { "start": 13, "end": 13 },
+      "cols": { "start": 8, "end": 8 },
+      "description": "...",
+      "enabled": false
+    },
+                {
+      "id": "padded_top_1",
+      "rows": { "start": 17, "end": 17 },
+      "cols": { "start": 2, "end": 3 },
+      "description": "...",
+      "enabled": false
+    },
+                {
+      "id": "padded_top_2",
+      "rows": { "start": 17, "end": 17 },
+      "cols": { "start": 5, "end": 9 },
+      "description": "...",
+      "enabled": false
+    },
+                {
+      "id": "padded_right",
+      "rows": { "start": 17, "end": 24 },
+      "cols": { "start": 9, "end": 9 },
       "description": "...",
       "enabled": false
     }
@@ -182,11 +251,74 @@
       "enabled": false
     },
     {
-      "id": "solitary_bed",
-      "rows": { "start": 2, "end": 3 },
-      "cols": { "start": 13, "end": 13 },
-      "description": "This smells worse than the toilet.",
-      "roomId": "solitary",
+      "id": "electro_chair",
+      "rows": { "start": 13, "end": 14 },
+      "cols": { "start": 4, "end": 4 },
+      "description": "Shock the brain away.",
+      "roomId": "electrotherapy",
+      "hintIds": [],
+      "enabled": false
+    },
+        {
+      "id": "electro_bed",
+      "rows": { "start": 12, "end": 13 },
+      "cols": { "start": 2, "end": 2 },
+      "description": "This is worse than the solitary bed.",
+      "roomId": "electrotherapy",
+      "hintIds": [],
+      "enabled": false
+    },
+        {
+      "id": "electro_device",
+      "rows": { "start": 11, "end": 11 },
+      "cols": { "start": 7, "end": 8 },
+      "description": "It looks like it's smiling at you.",
+      "roomId": "electrotherapy",
+      "hintIds": [],
+      "enabled": false
+    },
+        {
+      "id": "electro_cart_top",
+      "rows": { "start": 11, "end": 11 },
+      "cols": { "start": 2, "end": 2 },
+      "description": "A whole cart of fun.",
+      "roomId": "electrotherapy",
+      "hintIds": [],
+      "enabled": false
+    },
+        {
+      "id": "electro_cart_bottom",
+      "rows": { "start": 14, "end": 14 },
+      "cols": { "start": 2, "end": 2 },
+      "description": "A whole cart of fun.",
+      "roomId": "electrotherapy",
+      "hintIds": [],
+      "enabled": false
+    },
+            {
+      "id": "padded_chair_top",
+      "rows": { "start": 19, "end": 20 },
+      "cols": { "start": 7, "end": 7 },
+      "description": "Restraints, for their pleasure.",
+      "roomId": "padded_cell",
+      "hintIds": [],
+      "enabled": false
+    },
+                {
+      "id": "padded_chair_bot",
+      "rows": { "start": 21, "end": 22 },
+      "cols": { "start": 7, "end": 7 },
+      "description": "Restraints, for your pleasure.",
+      "roomId": "padded_cell",
+      "hintIds": [],
+      "enabled": false
+    },
+                {
+      "id": "padded_bed",
+      "rows": { "start": 21, "end": 22 },
+      "cols": { "start": 2, "end": 2 },
+      "description": "Why does everything here have restraints?",
+      "roomId": "padded_cell",
       "hintIds": [],
       "enabled": false
     }
