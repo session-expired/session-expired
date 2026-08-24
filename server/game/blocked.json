@@ -256,7 +256,7 @@
       "description": "A card table. Every card appears to be a three.",
       "roomId": "rec_room",
       "hintIds": [],
-      "enabled": false
+      "enabled": true
     },
     {
       "id": "foosball",
@@ -265,7 +265,7 @@
       "description": "A foosball table, why are all of the heads missing?",
       "roomId": "rec_room",
       "hintIds": [],
-      "enabled": false
+      "enabled": true
     },
     {
       "id": "coffee_table",
@@ -274,7 +274,7 @@
       "description": "A coffee table. You don't recognize the magazine",
       "roomId": "rec_room",
       "hintIds": [],
-      "enabled": false
+      "enabled": true
     },
     {
       "id": "piano",
@@ -283,7 +283,7 @@
       "description": "It seems that five of the keys still work.",
       "roomId": "rec_room",
       "hintIds": [],
-      "enabled": false
+      "enabled": true
     },
     {
       "id": "pool_table",
@@ -292,14 +292,14 @@
       "description": "Why would the let the wards have this?",
       "roomId": "rec_room",
       "hintIds": [],
-      "enabled": false
+      "enabled": true
     },
     {
       "id": "solitary_toilet",
       "rows": { "start": 2, "end": 2 },
       "cols": { "start": 14, "end": 14 },
       "description": "Don't look inside.",
-      "roomId": "solitary",
+      "roomId": "solitary_confinement",
       "hintIds": [],
       "enabled": false
     },
@@ -308,7 +308,7 @@
       "rows": { "start": 2, "end": 3 },
       "cols": { "start": 13, "end": 13 },
       "description": "This smells worse than the toilet.",
-      "roomId": "solitary",
+      "roomId": "solitary_confinement",
       "hintIds": [],
       "enabled": false
     },
@@ -317,7 +317,7 @@
       "rows": { "start": 3, "end": 3 },
       "cols": { "start": 19, "end": 19 },
       "description": "This also smells worse than the toilet.",
-      "roomId": "solitary",
+      "roomId": "solitary_confinement",
       "hintIds": [],
       "enabled": false
     },
@@ -399,7 +399,7 @@
       "rows": { "start": 19, "end": 20 },
       "cols": { "start": 7, "end": 7 },
       "description": "Restraints, for their pleasure.",
-      "roomId": "padded_cell",
+      "roomId": "padded_cells",
       "hintIds": [],
       "enabled": false
     },
@@ -408,7 +408,7 @@
       "rows": { "start": 21, "end": 22 },
       "cols": { "start": 7, "end": 7 },
       "description": "Restraints, for your pleasure.",
-      "roomId": "padded_cell",
+      "roomId": "padded_cells",
       "hintIds": [],
       "enabled": false
     },
@@ -417,7 +417,7 @@
       "rows": { "start": 21, "end": 22 },
       "cols": { "start": 2, "end": 2 },
       "description": "Why does everything here have restraints?",
-      "roomId": "padded_cell",
+      "roomId": "padded_cells",
       "hintIds": [],
       "enabled": false
     },

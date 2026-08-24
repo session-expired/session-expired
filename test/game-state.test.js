@@ -89,6 +89,18 @@ test("a game's populated hints never rule out its correct accusation", () => {
   }
 });
 
+test("all active hints are distributed exactly once among search items", () => {
+  const state = createInitialGameState([
+    { id: "1", username: "Ada", selected_character: "lovelace" }
+  ], () => 0.5);
+  const activeHintIds = state.board.rooms.flatMap(room => room.hintIds).sort();
+  const distributedHintIds = state.board.searchItems.flatMap(item => item.hintIds).sort();
+
+  assert.ok(state.board.searchItems.length > 1);
+  assert.deepEqual(distributedHintIds, activeHintIds);
+  assert.equal(new Set(distributedHintIds).size, distributedHintIds.length);
+});
+
 test("the hint catalog uses valid categories, rooms, and accusation options", () => {
   const optionsByCategory = {
     murderer: solutionPools.killers,
@@ -104,18 +116,22 @@ test("the hint catalog uses valid categories, rooms, and accusation options", ()
   }
 });
 
-test("a player discovers a room-linked hint through authoritative game state", () => {
+test("a player discovers a search-item hint from an adjacent tile", () => {
   const state = createInitialGameState([
     { id: "1", username: "Ada", selected_character: "lovelace" },
     { id: "2", username: "Grace", selected_character: "curie" }
   ], () => 0);
   const player = state.players.find(candidate => candidate.id === state.turn.playerId);
-  player.position = { row: 2, col: 2 };
+  player.position = { row: 3, col: 2 };
   const catalog = {
     categories: ["murderer", "victim", "room", "method"],
     roomIds: rooms.map(room => room.id),
     hints: [{ id: "muddy_cuff", category: "murderer", roomId: "rec_room", text: "A muddy cuff." }]
   };
+  state.board.searchItems = [{
+    id: "desk", rows: { start: 3, end: 3 }, cols: { start: 3, end: 4 },
+    description: "A desk.", roomId: "rec_room", hintIds: ["muddy_cuff"]
+  }];
 
   const first = discoverHint(state, player.id, "muddy_cuff", catalog);
   const second = discoverHint(state, player.id, "muddy_cuff", catalog);
@@ -125,7 +141,7 @@ test("a player discovers a room-linked hint through authoritative game state", (
   assert.deepEqual(player.discoveredHintIds, ["muddy_cuff"]);
 });
 
-test("hints cannot be collected from another room or by an inactive player", () => {
+test("hints cannot be collected away from their search item or by an inactive player", () => {
   const state = createInitialGameState([
     { id: "1", username: "Ada", selected_character: "lovelace" },
     { id: "2", username: "Grace", selected_character: "curie" }
@@ -138,8 +154,12 @@ test("hints cannot be collected from another room or by an inactive player", () 
     roomIds: rooms.map(room => room.id),
     hints: [{ id: "muddy_cuff", category: "murderer", roomId: "rec_room", text: "A muddy cuff." }]
   };
+  state.board.searchItems = [{
+    id: "desk", rows: { start: 3, end: 3 }, cols: { start: 3, end: 4 },
+    description: "A desk.", roomId: "rec_room", hintIds: ["muddy_cuff"]
+  }];
 
-  assert.throws(() => discoverHint(state, current.id, "muddy_cuff", catalog), /hint's room/);
+  assert.throws(() => discoverHint(state, current.id, "muddy_cuff", catalog), /adjacent to the search item/);
   assert.throws(() => discoverHint(state, inactive.id, "muddy_cuff", catalog), /not this player's turn/);
   assert.deepEqual(current.discoveredHintIds, []);
   assert.deepEqual(inactive.discoveredHintIds, []);

@@ -1,5 +1,5 @@
 import { elements } from "./board-dom.js";
-import { endTurn, loadGameResources, movePlayer, quitGame, rollMovement } from "./board-api.js";
+import { discoverHint, endTurn, loadGameResources, movePlayer, quitGame, rollMovement } from "./board-api.js";
 import { createBoardLayout } from "./board-layout.js";
 import { createAccusationControls } from "./accusation-controls.js";
 import { createEntityRenderer } from "./entity-renderer.js";
@@ -164,6 +164,24 @@ function bindBoardInput() {
         const square = event.target.closest("[data-row][data-col]");
         if (!square?.dataset.type) return;
         if (square.classList.contains("movement-range")) await handleMovementClick(square);
+        if (square.classList.contains("search-item-in-range")) {
+            const item = gameState.board.searchItems?.find(candidate =>
+                candidate.id === square.dataset.searchItemId
+            );
+            const player = gameState.players.find(candidate => String(candidate.id) === currentUserId);
+            const hintId = item?.hintIds?.find(id => !player?.discoveredHintIds?.includes(id));
+            if (!hintId) {
+                elements.status.textContent = `${item?.description || "This object"} contains no undiscovered hints.`;
+            } else {
+                try {
+                    const data = await discoverHint(gameId, hintId);
+                    elements.status.textContent = `${item.description} Hint: ${data.hint.text}`;
+                    applyAuthoritativeState(data.state);
+                } catch (error) {
+                    elements.status.textContent = error.message;
+                }
+            }
+        }
         const tileLabel = square.dataset.searchDescription || (
             ["door", "secret passage"].includes(square.dataset.type)
                 ? [square.dataset.type, square.dataset.roomName].filter(Boolean).join(", ")

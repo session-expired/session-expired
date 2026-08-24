@@ -1,6 +1,8 @@
 export function renderMovementRange(state, currentUserId, boardLayout, elements) {
     elements.board.querySelectorAll(".movement-range")
         .forEach(square => square.classList.remove("movement-range"));
+    elements.board.querySelectorAll(".search-item-in-range")
+        .forEach(square => square.classList.remove("search-item-in-range"));
     const turn = state?.turn;
     if (turn?.phase !== "moving" || String(turn.playerId) !== currentUserId) return;
     const player = state.players.find(candidate => String(candidate.id) === currentUserId);
@@ -39,6 +41,23 @@ export function renderMovementRange(state, currentUserId, boardLayout, elements)
             distances.set(key, distance + 1);
             boardLayout.squareAt(row, col)?.classList.add("movement-range");
             if (!entersDoor(current, { row, col })) queue.push({ row, col });
+        }
+    }
+    const reachable = new Set(distances.keys());
+    reachable.add(`${player.position.row},${player.position.col}`);
+    for (const item of state.board.searchItems || []) {
+        let canReachAdjacentTile = false;
+        for (let row = item.rows.start; row <= item.rows.end && !canReachAdjacentTile; row++) {
+            for (let col = item.cols.start; col <= item.cols.end && !canReachAdjacentTile; col++) {
+                canReachAdjacentTile = [[-1, 0], [1, 0], [0, -1], [0, 1]].some(([rowOffset, colOffset]) =>
+                    reachable.has(`${row + rowOffset},${col + colOffset}`)
+                );
+            }
+        }
+        if (canReachAdjacentTile) {
+            elements.board.querySelectorAll("[data-search-item-id]").forEach(square => {
+                if (square.dataset.searchItemId === item.id) square.classList.add("search-item-in-range");
+            });
         }
     }
     if (distances.size === 1) {

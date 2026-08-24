@@ -17,13 +17,20 @@ function createInitialGameState(gamePlayers, random = Math.random, lobby = {}) {
     const availableSpawnPoints = shuffle(spawnPoints.map(point => ({ ...point })), random);
     const solution = createSolution(random);
     const gameRooms = roomsForSolution(solution);
-    const activeHintIds = new Set(gameRooms.flatMap(room => room.hintIds));
     const players = gamePlayers.map((player, index) => ({
         id: String(player.id), username: player.username, character: player.selected_character,
         canAccuse: true, turnsToSkip: 0, discoveredHintIds: [], position: availableSpawnPoints[index],
         facing: "right", dialogueEvent: null, dialogueEventId: 0, secretPassageCooldown: null
     }));
     const turnOrder = shuffle(players.map(player => String(player.id)), random);
+    const gameSearchItems = searchItems.map(item => ({ ...structuredClone(item), hintIds: [] }));
+    if (gameSearchItems.length) {
+        const activeHintIds = shuffle(gameRooms.flatMap(room => room.hintIds), random);
+        const itemOffset = Math.floor(random() * gameSearchItems.length);
+        activeHintIds.forEach((hintId, index) => {
+            gameSearchItems[(itemOffset + index) % gameSearchItems.length].hintIds.push(hintId);
+        });
+    }
 
     return {
         lobbyId: lobby.id == null ? null : String(lobby.id),
@@ -34,10 +41,7 @@ function createInitialGameState(gamePlayers, random = Math.random, lobby = {}) {
             cols: 30,
             rooms: gameRooms,
             blockedTiles: structuredClone(blockedTiles),
-            searchItems: searchItems.map(item => ({
-                ...structuredClone(item),
-                hintIds: (item.hintIds || []).filter(hintId => activeHintIds.has(hintId))
-            }))
+            searchItems: gameSearchItems
         },
         players,
         warden: {
