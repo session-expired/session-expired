@@ -320,7 +320,7 @@
       "text": "The murderer was not Typhoid Mary.",
       "eliminates": ["mallon"]
     },
-       {
+    {
       "id": "room_not_hydrotherapy",
       "category": "room",
       "roomId": "hydrotherapy",
@@ -376,7 +376,7 @@
       "text": "The murder did not happen in the Rec Room.",
       "eliminates": ["rec_room"]
     },
-        {
+    {
       "id": "method_not_electrocuted",
       "category": "method",
       "roomId": "electrotherapy",
