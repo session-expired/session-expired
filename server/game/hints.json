@@ -1,6 +1,16 @@
 {
   "categories": ["murderer", "victim", "room", "method"],
-  "roomIds": ["wardens_office", "padded_cells", "cafeteria", "operating_theater", "rec_room", "showers", "solitary_confinement", "hydrotherapy", "electrotherapy"],
+  "roomIds": [
+    "wardens_office",
+    "padded_cells",
+    "cafeteria",
+    "operating_theater",
+    "rec_room",
+    "showers",
+    "solitary_confinement",
+    "hydrotherapy",
+    "electrotherapy"
+  ],
   "itemTemplate": {
     "id": "unique_hint_id",
     "category": "murderer",
@@ -9,48 +19,288 @@
     "excludes": "one_option_id_this_hint_rules_out"
   },
   "hints": [
-    { "id": "murderer_brahe_alibi", "category": "murderer", "roomId": "electrotherapy", "text": "The electrical treatment log places Tycho Brahe here when the murder occurred.", "excludes": "brahe" },
-    { "id": "murderer_lovelace_alibi", "category": "murderer", "roomId": "rec_room", "text": "A completed calculation bears Ada Lovelace's signature and the time of the murder.", "excludes": "lovelace" },
-    { "id": "murderer_curie_alibi", "category": "murderer", "roomId": "hydrotherapy", "text": "A nurse's log confirms Marie Curie was under observation during the murder.", "excludes": "curie" },
-    { "id": "murderer_rasputin_alibi", "category": "murderer", "roomId": "showers", "text": "Several witnesses place Grigori Rasputin in the showers at the critical time.", "excludes": "rasputin" },
-    { "id": "murderer_crowley_alibi", "category": "murderer", "roomId": "solitary_confinement", "text": "The solitary-confinement register accounts for Aleister Crowley when the murder occurred.", "excludes": "crowley" },
-    { "id": "murderer_mallon_alibi", "category": "murderer", "roomId": "cafeteria", "text": "The kitchen duty ledger accounts for Typhoid Mary during the murder.", "excludes": "mallon" },
+    {
+      "id": "murderer_brahe_alibi",
+      "category": "murderer",
+      "roomId": "electrotherapy",
+      "text": "The electrical treatment log places Tycho Brahe here when the murder occurred.",
+      "excludes": "brahe"
+    },
+    {
+      "id": "murderer_lovelace_alibi",
+      "category": "murderer",
+      "roomId": "rec_room",
+      "text": "A completed calculation bears Ada Lovelace's signature and the time of the murder.",
+      "excludes": "lovelace"
+    },
+    {
+      "id": "murderer_curie_alibi",
+      "category": "murderer",
+      "roomId": "hydrotherapy",
+      "text": "A nurse's log confirms Marie Curie was under observation during the murder.",
+      "excludes": "curie"
+    },
+    {
+      "id": "murderer_rasputin_alibi",
+      "category": "murderer",
+      "roomId": "showers",
+      "text": "Several witnesses place Grigori Rasputin in the showers at the critical time.",
+      "excludes": "rasputin"
+    },
+    {
+      "id": "murderer_crowley_alibi",
+      "category": "murderer",
+      "roomId": "solitary_confinement",
+      "text": "The solitary-confinement register accounts for Aleister Crowley when the murder occurred.",
+      "excludes": "crowley"
+    },
+    {
+      "id": "murderer_mallon_alibi",
+      "category": "murderer",
+      "roomId": "cafeteria",
+      "text": "The kitchen duty ledger accounts for Typhoid Mary during the murder.",
+      "excludes": "mallon"
+    },
 
-    { "id": "room_hydrotherapy_clear", "category": "room", "roomId": "operating_theater", "text": "The hydrotherapy room had been drained and locked before the murder.", "excludes": "hydrotherapy" },
-    { "id": "room_operating_theater_clear", "category": "room", "roomId": "padded_cells", "text": "The operating theater's fresh floor seal is completely undisturbed.", "excludes": "operating_theater" },
-    { "id": "room_padded_cells_clear", "category": "room", "roomId": "showers", "text": "The padded-cell inspection found no trace of the victim.", "excludes": "padded_cells" },
-    { "id": "room_solitary_clear", "category": "room", "roomId": "rec_room", "text": "The solitary cells remained continuously occupied and observed.", "excludes": "solitary_confinement" },
-    { "id": "room_electrotherapy_clear", "category": "room", "roomId": "cafeteria", "text": "The electrotherapy room's entry log shows nobody entered around the time of death.", "excludes": "electrotherapy" },
-    { "id": "room_showers_clear", "category": "room", "roomId": "hydrotherapy", "text": "The shower drains contain no evidence connected to the murder.", "excludes": "showers" },
-    { "id": "room_cafeteria_clear", "category": "room", "roomId": "electrotherapy", "text": "The cafeteria was crowded with witnesses throughout the relevant period.", "excludes": "cafeteria" },
-    { "id": "room_rec_room_clear", "category": "room", "roomId": "solitary_confinement", "text": "The recreation room was sealed for repairs before the murder.", "excludes": "rec_room" },
+    {
+      "id": "room_hydrotherapy_clear",
+      "category": "room",
+      "roomId": "operating_theater",
+      "text": "The hydrotherapy room had been drained and locked before the murder.",
+      "excludes": "hydrotherapy"
+    },
+    {
+      "id": "room_operating_theater_clear",
+      "category": "room",
+      "roomId": "padded_cells",
+      "text": "The operating theater's fresh floor seal is completely undisturbed.",
+      "excludes": "operating_theater"
+    },
+    {
+      "id": "room_padded_cells_clear",
+      "category": "room",
+      "roomId": "showers",
+      "text": "The padded-cell inspection found no trace of the victim.",
+      "excludes": "padded_cells"
+    },
+    {
+      "id": "room_solitary_clear",
+      "category": "room",
+      "roomId": "rec_room",
+      "text": "The solitary cells remained continuously occupied and observed.",
+      "excludes": "solitary_confinement"
+    },
+    {
+      "id": "room_electrotherapy_clear",
+      "category": "room",
+      "roomId": "cafeteria",
+      "text": "The electrotherapy room's entry log shows nobody entered around the time of death.",
+      "excludes": "electrotherapy"
+    },
+    {
+      "id": "room_showers_clear",
+      "category": "room",
+      "roomId": "hydrotherapy",
+      "text": "The shower drains contain no evidence connected to the murder.",
+      "excludes": "showers"
+    },
+    {
+      "id": "room_cafeteria_clear",
+      "category": "room",
+      "roomId": "electrotherapy",
+      "text": "The cafeteria was crowded with witnesses throughout the relevant period.",
+      "excludes": "cafeteria"
+    },
+    {
+      "id": "room_rec_room_clear",
+      "category": "room",
+      "roomId": "solitary_confinement",
+      "text": "The recreation room was sealed for repairs before the murder.",
+      "excludes": "rec_room"
+    },
 
-    { "id": "method_electrocuted_clear", "category": "method", "roomId": "hydrotherapy", "text": "The examination found no electrical burns on the victim.", "excludes": "electrocuted" },
-    { "id": "method_lobotomized_clear", "category": "method", "roomId": "operating_theater", "text": "The skull shows no evidence of a lobotomy.", "excludes": "lobotomized" },
-    { "id": "method_defenestrated_clear", "category": "method", "roomId": "rec_room", "text": "No fractures or debris suggest a fall through a window.", "excludes": "defenestrated" },
-    { "id": "method_eviscerated_clear", "category": "method", "roomId": "padded_cells", "text": "The examination rules out evisceration.", "excludes": "eviscerated" },
-    { "id": "method_poisoned_clear", "category": "method", "roomId": "cafeteria", "text": "The toxicology notes found no poison in the victim's system.", "excludes": "poisoned" },
-    { "id": "method_suffocated_clear", "category": "method", "roomId": "solitary_confinement", "text": "The victim's airway and lungs show no signs of suffocation.", "excludes": "suffocated" },
-    { "id": "method_drowned_clear", "category": "method", "roomId": "showers", "text": "The lungs were dry; the victim was not drowned.", "excludes": "drowned" },
-    { "id": "method_bludgeoned_clear", "category": "method", "roomId": "electrotherapy", "text": "There is no blunt-force trauma consistent with bludgeoning.", "excludes": "bludgeoned" },
+    {
+      "id": "method_electrocuted_clear",
+      "category": "method",
+      "roomId": "hydrotherapy",
+      "text": "The examination found no electrical burns on the victim.",
+      "excludes": "electrocuted"
+    },
+    {
+      "id": "method_lobotomized_clear",
+      "category": "method",
+      "roomId": "operating_theater",
+      "text": "The skull shows no evidence of a lobotomy.",
+      "excludes": "lobotomized"
+    },
+    {
+      "id": "method_defenestrated_clear",
+      "category": "method",
+      "roomId": "rec_room",
+      "text": "No fractures or debris suggest a fall through a window.",
+      "excludes": "defenestrated"
+    },
+    {
+      "id": "method_eviscerated_clear",
+      "category": "method",
+      "roomId": "padded_cells",
+      "text": "The examination rules out evisceration.",
+      "excludes": "eviscerated"
+    },
+    {
+      "id": "method_poisoned_clear",
+      "category": "method",
+      "roomId": "cafeteria",
+      "text": "The toxicology notes found no poison in the victim's system.",
+      "excludes": "poisoned"
+    },
+    {
+      "id": "method_suffocated_clear",
+      "category": "method",
+      "roomId": "solitary_confinement",
+      "text": "The victim's airway and lungs show no signs of suffocation.",
+      "excludes": "suffocated"
+    },
+    {
+      "id": "method_drowned_clear",
+      "category": "method",
+      "roomId": "showers",
+      "text": "The lungs were dry; the victim was not drowned.",
+      "excludes": "drowned"
+    },
+    {
+      "id": "method_bludgeoned_clear",
+      "category": "method",
+      "roomId": "electrotherapy",
+      "text": "There is no blunt-force trauma consistent with bludgeoning.",
+      "excludes": "bludgeoned"
+    },
 
-    { "id": "victim_nicholas_clear", "category": "victim", "roomId": "wardens_office", "text": "A signed imperial telegram proves Tsar Nicholas II was alive after the murder.", "excludes": "nicholas_ii" },
-    { "id": "victim_alexandra_clear", "category": "victim", "roomId": "padded_cells", "text": "A nurse spoke with Tsarina Alexandra after the recorded time of death.", "excludes": "alexandra_feodorovna" },
-    { "id": "victim_yusupov_clear", "category": "victim", "roomId": "cafeteria", "text": "Prince Felix Yusupov signed the meal register after the murder.", "excludes": "felix_yusupov" },
-    { "id": "victim_parsberg_clear", "category": "victim", "roomId": "rec_room", "text": "Manderup Parsberg was seen arguing in the recreation room after the murder.", "excludes": "manderup_parsberg" },
-    { "id": "victim_kepler_clear", "category": "victim", "roomId": "electrotherapy", "text": "Johannes Kepler completed an observation after the time of death.", "excludes": "johannes_kepler" },
-    { "id": "victim_babbage_clear", "category": "victim", "roomId": "operating_theater", "text": "Charles Babbage answered a maintenance request after the murder.", "excludes": "charles_babbage" },
-    { "id": "victim_byron_clear", "category": "victim", "roomId": "showers", "text": "Lord Byron left a newly written note dated after the murder.", "excludes": "lord_byron" },
-    { "id": "victim_waite_clear", "category": "victim", "roomId": "solitary_confinement", "text": "Arthur Edward Waite was recorded alive during the post-murder headcount.", "excludes": "arthur_edward_waite" },
-    { "id": "victim_houdini_clear", "category": "victim", "roomId": "hydrotherapy", "text": "Harry Houdini performed an escape after the murder had occurred.", "excludes": "harry_houdini" },
-    { "id": "victim_pierre_curie_clear", "category": "victim", "roomId": "electrotherapy", "text": "Pierre Curie's instrument log continues beyond the time of death.", "excludes": "pierre_curie" },
-    { "id": "victim_einstein_clear", "category": "victim", "roomId": "rec_room", "text": "Albert Einstein was witnessed alive after the alarm sounded.", "excludes": "albert_einstein" },
-    { "id": "victim_soper_clear", "category": "victim", "roomId": "cafeteria", "text": "George Soper filed a kitchen inspection after the murder.", "excludes": "george_soper" },
-    { "id": "victim_wellington_clear", "category": "victim", "roomId": "wardens_office", "text": "The Duke of Wellington attended a meeting after the murder.", "excludes": "duke_of_wellington" },
-    { "id": "victim_nelson_clear", "category": "victim", "roomId": "showers", "text": "Horatio Nelson was seen alive during the post-murder search.", "excludes": "horatio_nelson" },
-    { "id": "victim_freud_clear", "category": "victim", "roomId": "padded_cells", "text": "Sigmund Freud completed patient notes after the time of death.", "excludes": "sigmund_freud" },
-    { "id": "victim_tesla_clear", "category": "victim", "roomId": "electrotherapy", "text": "Nikola Tesla reset the electrical apparatus after the murder.", "excludes": "nikola_tesla" },
-    { "id": "victim_poe_clear", "category": "victim", "roomId": "solitary_confinement", "text": "Edgar Allan Poe left fresh writing composed after the murder.", "excludes": "edgar_allan_poe" },
-    { "id": "victim_darwin_clear", "category": "victim", "roomId": "hydrotherapy", "text": "Charles Darwin was interviewed after the body was discovered.", "excludes": "charles_darwin" }
+    {
+      "id": "victim_nicholas_clear",
+      "category": "victim",
+      "roomId": "wardens_office",
+      "text": "A signed imperial telegram proves Tsar Nicholas II was alive after the murder.",
+      "excludes": "nicholas_ii"
+    },
+    {
+      "id": "victim_alexandra_clear",
+      "category": "victim",
+      "roomId": "padded_cells",
+      "text": "A nurse spoke with Tsarina Alexandra after the recorded time of death.",
+      "excludes": "alexandra_feodorovna"
+    },
+    {
+      "id": "victim_yusupov_clear",
+      "category": "victim",
+      "roomId": "cafeteria",
+      "text": "Prince Felix Yusupov signed the meal register after the murder.",
+      "excludes": "felix_yusupov"
+    },
+    {
+      "id": "victim_parsberg_clear",
+      "category": "victim",
+      "roomId": "rec_room",
+      "text": "Manderup Parsberg was seen arguing in the recreation room after the murder.",
+      "excludes": "manderup_parsberg"
+    },
+    {
+      "id": "victim_kepler_clear",
+      "category": "victim",
+      "roomId": "electrotherapy",
+      "text": "Johannes Kepler completed an observation after the time of death.",
+      "excludes": "johannes_kepler"
+    },
+    {
+      "id": "victim_babbage_clear",
+      "category": "victim",
+      "roomId": "operating_theater",
+      "text": "Charles Babbage answered a maintenance request after the murder.",
+      "excludes": "charles_babbage"
+    },
+    {
+      "id": "victim_byron_clear",
+      "category": "victim",
+      "roomId": "showers",
+      "text": "Lord Byron left a newly written note dated after the murder.",
+      "excludes": "lord_byron"
+    },
+    {
+      "id": "victim_waite_clear",
+      "category": "victim",
+      "roomId": "solitary_confinement",
+      "text": "Arthur Edward Waite was recorded alive during the post-murder headcount.",
+      "excludes": "arthur_edward_waite"
+    },
+    {
+      "id": "victim_houdini_clear",
+      "category": "victim",
+      "roomId": "hydrotherapy",
+      "text": "Harry Houdini performed an escape after the murder had occurred.",
+      "excludes": "harry_houdini"
+    },
+    {
+      "id": "victim_pierre_curie_clear",
+      "category": "victim",
+      "roomId": "electrotherapy",
+      "text": "Pierre Curie's instrument log continues beyond the time of death.",
+      "excludes": "pierre_curie"
+    },
+    {
+      "id": "victim_einstein_clear",
+      "category": "victim",
+      "roomId": "rec_room",
+      "text": "Albert Einstein was witnessed alive after the alarm sounded.",
+      "excludes": "albert_einstein"
+    },
+    {
+      "id": "victim_soper_clear",
+      "category": "victim",
+      "roomId": "cafeteria",
+      "text": "George Soper filed a kitchen inspection after the murder.",
+      "excludes": "george_soper"
+    },
+    {
+      "id": "victim_wellington_clear",
+      "category": "victim",
+      "roomId": "wardens_office",
+      "text": "The Duke of Wellington attended a meeting after the murder.",
+      "excludes": "duke_of_wellington"
+    },
+    {
+      "id": "victim_nelson_clear",
+      "category": "victim",
+      "roomId": "showers",
+      "text": "Horatio Nelson was seen alive during the post-murder search.",
+      "excludes": "horatio_nelson"
+    },
+    {
+      "id": "victim_freud_clear",
+      "category": "victim",
+      "roomId": "padded_cells",
+      "text": "Sigmund Freud completed patient notes after the time of death.",
+      "excludes": "sigmund_freud"
+    },
+    {
+      "id": "victim_tesla_clear",
+      "category": "victim",
+      "roomId": "electrotherapy",
+      "text": "Nikola Tesla reset the electrical apparatus after the murder.",
+      "excludes": "nikola_tesla"
+    },
+    {
+      "id": "victim_poe_clear",
+      "category": "victim",
+      "roomId": "solitary_confinement",
+      "text": "Edgar Allan Poe left fresh writing composed after the murder.",
+      "excludes": "edgar_allan_poe"
+    },
+    {
+      "id": "victim_darwin_clear",
+      "category": "victim",
+      "roomId": "hydrotherapy",
+      "text": "Charles Darwin was interviewed after the body was discovered.",
+      "excludes": "charles_darwin"
+    }
   ]
 }
