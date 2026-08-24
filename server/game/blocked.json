@@ -1,28 +1,73 @@
 {
   "blocked_tiles": [
     {
-      "id": "cafeteria_obstacle_1",
-      "rows": { "start": 6, "end": 6 },
+      "id": "top_wall",
+      "rows": { "start": 1, "end": 1 },
+      "cols": { "start": 1, "end": 30 },
+      "description": "Top wall",
+      "enabled": true
+    },
+    {
+      "id": "rec_top_left",
+      "rows": { "start": 2, "end": 2 },
+      "cols": { "start": 1, "end": 3 },
+      "description": "...",
+      "enabled": true
+    },
+    {
+      "id": "rec_top_right",
+      "rows": { "start": 2, "end": 4 },
+      "cols": { "start": 8, "end": 9 },
+      "description": "...",
+      "enabled": true
+    },
+    {
+      "id": "rec_couch",
+      "rows": { "start": 5, "end": 6 },
+      "cols": { "start": 9, "end": 9 },
+      "description": "...",
+      "enabled": true
+    },
+    {
+      "id": "solitary_left",
+      "rows": { "start": 2, "end": 5 },
+      "cols": { "start": 12, "end": 12 },
+      "description": "...",
+      "enabled": false
+    },
+    {
+      "id": "solitary_right",
+      "rows": { "start": 2, "end": 5 },
+      "cols": { "start": 19, "end": 19 },
+      "description": "...",
+      "enabled": false
+    },
+    {
+      "id": "cafeteria_table_mid",
+      "rows": { "start": 4, "end": 6 },
+      "cols": { "start": 26, "end": 26 },
+      "description": "...",
+      "enabled": false
+    },
+    {
+      "id": "cafeteria_table_left",
+      "rows": { "start": 4, "end": 6 },
       "cols": { "start": 23, "end": 23 },
-      "description": "Existing cafeteria art obstacle."
+      "description": "...",
+      "enabled": false
     },
     {
-      "id": "cafeteria_obstacle_2",
-      "rows": { "start": 7, "end": 7 },
-      "cols": { "start": 24, "end": 24 },
-      "description": "Existing cafeteria art obstacle."
+      "id": "cafeteria_back_wall_1",
+      "rows": { "start": 2, "end": 2 },
+      "cols": { "start": 22, "end": 22 },
+      "description": "...",
+      "enabled": false
     },
     {
-      "id": "rec_room_blocked_area",
-      "rows": { "start": 1, "end": 2 },
-      "cols": { "start": 1, "end": 6 },
-      "description": "Rec Room blocked area migrated from the room definition."
-    },
-    {
-      "id": "blocked_area_placeholder",
-      "rows": { "start": 1, "end": 2 },
-      "cols": { "start": 1, "end": 2 },
-      "description": "Copy and populate this blocked-area entry.",
+      "id": "cafeteria_back_wall_2",
+      "rows": { "start": 2, "end": 2 },
+      "cols": { "start": 24, "end": 30 },
+      "description": "...",
       "enabled": false
     }
   ],
@@ -33,6 +78,115 @@
       "cols": { "start": 1, "end": 2 },
       "description": "Describe the object players can investigate.",
       "roomId": "rec_room",
+      "hintIds": [],
+      "enabled": false
+    },
+    {
+      "id": "card_table",
+      "rows": { "start": 6, "end": 7 },
+      "cols": { "start": 2, "end": 3 },
+      "description": "A card table. Every card appears to be a three.",
+      "roomId": "rec_room",
+      "hintIds": [],
+      "enabled": false
+    },
+    {
+      "id": "foosball",
+      "rows": { "start": 6, "end": 7 },
+      "cols": { "start": 5, "end": 6 },
+      "description": "A foosball table, why are all of the heads missing?",
+      "roomId": "rec_room",
+      "hintIds": [],
+      "enabled": false
+    },
+    {
+      "id": "coffee_table",
+      "rows": { "start": 5, "end": 6 },
+      "cols": { "start": 8, "end": 8 },
+      "description": "A coffee table. You don't recognize the magazine",
+      "roomId": "rec_room",
+      "hintIds": [],
+      "enabled": false
+    },
+    {
+      "id": "piano",
+      "rows": { "start": 4, "end": 5 },
+      "cols": { "start": 1, "end": 2 },
+      "description": "It seems that five of the keys still work.",
+      "roomId": "rec_room",
+      "hintIds": [],
+      "enabled": false
+    },
+    {
+      "id": "pool_table",
+      "rows": { "start": 3, "end": 4 },
+      "cols": { "start": 4, "end": 6 },
+      "description": "Why would the let the wards have this?",
+      "roomId": "rec_room",
+      "hintIds": [],
+      "enabled": false
+    },
+    {
+      "id": "solitary_toilet",
+      "rows": { "start": 2, "end": 2 },
+      "cols": { "start": 14, "end": 14 },
+      "description": "Don't look inside.",
+      "roomId": "solitary",
+      "hintIds": [],
+      "enabled": false
+    },
+    {
+      "id": "solitary_bed",
+      "rows": { "start": 2, "end": 3 },
+      "cols": { "start": 13, "end": 13 },
+      "description": "This smells worse than the toilet.",
+      "roomId": "solitary",
+      "hintIds": [],
+      "enabled": false
+    },
+    {
+      "id": "solitary_sink",
+      "rows": { "start": 3, "end": 3 },
+      "cols": { "start": 19, "end": 19 },
+      "description": "This also smells worse than the toilet.",
+      "roomId": "solitary",
+      "hintIds": [],
+      "enabled": false
+    },
+
+    {
+      "id": "cafeteria_table_right",
+      "rows": { "start": 4, "end": 6 },
+      "cols": { "start": 28, "end": 29 },
+      "description": "Is that even food?",
+      "roomId": "cafeteria",
+      "hintIds": [],
+      "enabled": false
+    },
+    {
+      "id": "cafeteria_serving",
+      "rows": { "start": 3, "end": 3 },
+      "cols": { "start": 25, "end": 29 },
+      "description": "This certainly is not food.",
+      "roomId": "cafeteria",
+      "hintIds": [],
+      "enabled": false
+    },
+    {
+      "id": "cafeteria_coffee_cart",
+      "rows": { "start": 2, "end": 3 },
+      "cols": { "start": 13, "end": 13 },
+      "description": "Mud? Coffee? I'm not finding out.",
+      "roomId": "cafeteria",
+      "hintIds": [],
+      "enabled": false
+    },
+    {
+      "id": "solitary_bed",
+      "rows": { "start": 2, "end": 3 },
+      "cols": { "start": 13, "end": 13 },
+      "description": "This smells worse than the toilet.",
+      "roomId": "solitary",
       "hintIds": [],
       "enabled": false
     }

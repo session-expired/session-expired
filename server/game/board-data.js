@@ -13,8 +13,8 @@ class Room {
 }
 
 const spawnPoints = [
-    {row: 2, col: 10}, {row: 2, col: 21}, {row: 24, col: 10}, {row: 24, col: 21},
-    {row: 9, col: 1}, {row: 9, col: 30}, {row: 15, col: 1}, {row: 15, col: 30}
+    {row: 2, col: 10}, {row: 2, col: 21}, {row: 23, col: 10}, {row: 23, col: 21},
+    {row: 9, col: 2}, {row: 9, col: 29}, {row: 15, col: 2}, {row: 15, col: 29}
 ];
 
 const secretPass = [
