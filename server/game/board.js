@@ -1,11 +1,17 @@
+const hintCatalog = require("./hints.json");
+
 //Room object to hold the actual rooms and their dimensions/door location
 class Room {
-    constructor(name, cols, rows, doors, blockedTile = []) {
+    constructor(id, name, cols, rows, doors, blockedTile = []) {
+        this.id = id;
         this.name = name;
         this.cols = cols;
         this.rows = rows;
         this.doors = doors;
         this.blockedTile = blockedTile;
+        this.hintIds = hintCatalog.hints
+            .filter(hint => hint.roomId === id)
+            .map(hint => hint.id);
     }
 }
 
@@ -44,22 +50,43 @@ function createSolution(random = Math.random) {
     };
 }
 
+const solutionFieldByHintCategory = Object.freeze({
+    murderer: "killer",
+    victim: "victim",
+    room: "room",
+    method: "method"
+});
+
+function hintSupportsSolution(hint, solution) {
+    const solutionField = solutionFieldByHintCategory[hint.category];
+    return Boolean(solutionField) && hint.excludes !== solution[solutionField];
+}
+
+function roomsForSolution(solution) {
+    return rooms.map(room => ({
+        ...room,
+        hintIds: hintCatalog.hints
+            .filter(hint => hint.roomId === room.id && hintSupportsSolution(hint, solution))
+            .map(hint => hint.id)
+    }));
+}
+
 //Initializing all rooms
-let wardensOffice = new Room("Wardens_office", {start: 12, end: 19}, {start: 8, end: 17}, {col: 19, row: 12});
-let paddedCells = new Room("Padded Cells", {start: 1, end: 9}, {start: 17, end: 24}, {col: 4, row: 17});
-let cafeteria = new Room("Cafeteria", {start: 22, end: 30}, 
+let wardensOffice = new Room("wardens_office", "Wardens_office", {start: 12, end: 19}, {start: 8, end: 17}, {col: 19, row: 12});
+let paddedCells = new Room("padded_cells", "Padded Cells", {start: 1, end: 9}, {start: 17, end: 24}, {col: 4, row: 17});
+let cafeteria = new Room("cafeteria", "Cafeteria", {start: 22, end: 30},
     {start: 1, end: 7}, 
     {col: 28, row: 7},
 [
     {row: 6, col: 23},
     {row: 7, col: 24}
 ]);
-let operatingTheater = new Room("Operating Theater", {start: 22, end: 30}, {start: 17, end: 24}, {col: 25, row: 17});
-let recRoom = new Room("Rec Room", {start: 1, end: 9}, {start: 1, end: 7}, {col: 7, row: 7});
-let showers = new Room("Showers", {start: 12, end: 19}, {start: 20, end: 24}, {col: 15, row: 20});
-let solitaryConfinement = new Room("Solitary Confinement", {start: 12, end: 19}, {start: 1, end: 5}, {col: 16, row: 5});
-let hydrotherapy = new Room("Hydrotherapy", {start: 23, end: 30}, {start: 10, end: 14}, {col: 25, row: 10});
-let electrotherapy = new Room("Electrotherapy", {start: 1, end: 8}, {start: 10, end: 14}, {col: 7, row: 14});
+let operatingTheater = new Room("operating_theater", "Operating Theater", {start: 22, end: 30}, {start: 17, end: 24}, {col: 25, row: 17});
+let recRoom = new Room("rec_room", "Rec Room", {start: 1, end: 9}, {start: 1, end: 7}, {col: 7, row: 7});
+let showers = new Room("showers", "Showers", {start: 12, end: 19}, {start: 20, end: 24}, {col: 15, row: 20});
+let solitaryConfinement = new Room("solitary_confinement", "Solitary Confinement", {start: 12, end: 19}, {start: 1, end: 5}, {col: 16, row: 5});
+let hydrotherapy = new Room("hydrotherapy", "Hydrotherapy", {start: 23, end: 30}, {start: 10, end: 14}, {col: 25, row: 10});
+let electrotherapy = new Room("electrotherapy", "Electrotherapy", {start: 1, end: 8}, {start: 10, end: 14}, {col: 7, row: 14});
 
 
 
@@ -110,6 +137,7 @@ function createInitialGameState(gamePlayers, random = Math.random, lobby = {}) {
     }
 
     const availableSpawnPoints = shuffledSpawnPoints(random);
+    const solution = createSolution(random);
 
     const players = gamePlayers.map((player, index) => ({
         id: String(player.id),
@@ -117,6 +145,7 @@ function createInitialGameState(gamePlayers, random = Math.random, lobby = {}) {
         character: player.selected_character,
         canAccuse: true,
         turnsToSkip: 0,
+        discoveredHintIds: [],
         position: availableSpawnPoints[index],
         facing: "right",
         dialogueEvent: null,
@@ -132,7 +161,7 @@ function createInitialGameState(gamePlayers, random = Math.random, lobby = {}) {
         board: {
             rows: 24,
             cols: 30,
-            rooms
+            rooms: roomsForSolution(solution)
         },
         players,
         warden: {
@@ -157,7 +186,7 @@ function createInitialGameState(gamePlayers, random = Math.random, lobby = {}) {
             movementRemaining: 0,
             visitedPositions: []
         },
-        solution: createSolution(random),
+        solution,
         winner: null,
         createdAt: Date.now()
     };
@@ -528,6 +557,44 @@ function moveToRandomSpawn(state, player, random = Math.random) {
     player.secretPassageCooldown = null;
 }
 
+function roomAtPosition(state, position) {
+    return state.board.rooms.find(room =>
+        position.row >= room.rows.start && position.row <= room.rows.end &&
+        position.col >= room.cols.start && position.col <= room.cols.end
+    );
+}
+
+function discoverHint(state, playerId, hintId, catalog = hintCatalog) {
+    if (state.status !== "active") throw new Error("This game has already finished.");
+    if (String(state.turn.playerId) !== String(playerId) ||
+        !["awaiting_roll", "moving", "awaiting_end"].includes(state.turn.phase)) {
+        throw new Error("It is not this player's turn.");
+    }
+
+    const player = state.players.find(candidate => String(candidate.id) === String(playerId));
+    if (!player) throw new Error("Player not found.");
+    const hint = catalog.hints.find(candidate => candidate.id === hintId);
+    if (!hint) throw new Error("Hint not found.");
+    if (!catalog.categories.includes(hint.category)) throw new Error("This hint has an invalid category.");
+    if (!catalog.roomIds.includes(hint.roomId)) throw new Error("This hint has an invalid room.");
+    if (hint.excludes && !hintSupportsSolution(hint, state.solution)) {
+        throw new Error("This hint conflicts with the game's solution.");
+    }
+
+    const currentRoom = roomAtPosition(state, player.position);
+    if (!currentRoom || currentRoom.id !== hint.roomId) {
+        throw new Error("You must be in the hint's room to discover it.");
+    }
+    if (catalog === hintCatalog && !currentRoom.hintIds?.includes(hint.id)) {
+        throw new Error("This hint is not active in this game.");
+    }
+
+    if (!Array.isArray(player.discoveredHintIds)) player.discoveredHintIds = [];
+    const alreadyDiscovered = player.discoveredHintIds.includes(hint.id);
+    if (!alreadyDiscovered) player.discoveredHintIds.push(hint.id);
+    return { hint, alreadyDiscovered };
+}
+
 function submitAccusation(state, playerId, accusation, random = Math.random) {
     if (state.status !== "active") throw new Error("This game has already finished.");
     if (String(state.turn.playerId) !== String(playerId) ||
@@ -571,6 +638,8 @@ module.exports = {
     rooms,
     spawnPoints,
     secretPass,
+    hintCatalog,
+    hintSupportsSolution,
     solutionPools,
     createSolution,
     createInitialGameState,
@@ -584,5 +653,6 @@ module.exports = {
     removePlayerFromGame,
     isAdjacent,
     moveToRandomSpawn,
+    discoverHint,
     submitAccusation
 };

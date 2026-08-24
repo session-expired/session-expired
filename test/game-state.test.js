@@ -2,6 +2,8 @@ const test = require("node:test");
 const assert = require("node:assert/strict");
 const {
   createInitialGameState,
+  hintCatalog,
+  hintSupportsSolution,
   solutionPools,
   createSolution,
   rooms,
@@ -14,6 +16,7 @@ const {
   endPlayerTurn,
   completeWardenTurn,
   removePlayerFromGame,
+  discoverHint,
   submitAccusation
 } = require("../server/game/board");
 
@@ -27,7 +30,9 @@ test("a launched game snapshots the board and its lobby players", () => {
   assert.equal(state.status, "active");
   assert.equal(state.lobbyId, "27");
   assert.equal(state.lobbyName, "The Broken Window");
-  assert.deepEqual(state.board, { rows: 24, cols: 30, rooms });
+  assert.equal(state.board.rows, 24);
+  assert.equal(state.board.cols, 30);
+  assert.deepEqual(state.board.rooms.map(room => room.id), rooms.map(room => room.id));
   assert.deepEqual(state.players.map(({ id, username, character }) => ({ id, username, character })), [
     { id: "10", username: "Ada", character: "lovelace" },
     { id: "11", username: "Grace", character: "curie" }
@@ -38,6 +43,7 @@ test("a launched game snapshots the board and its lobby players", () => {
   assert.notDeepEqual(state.players[0].position, state.players[1].position);
   assert.ok(state.players.every(player => player.canAccuse));
   assert.ok(state.players.every(player => player.turnsToSkip === 0));
+  assert.ok(state.players.every(player => Array.isArray(player.discoveredHintIds)));
   assert.deepEqual(state.solution, {
     killer: "brahe",
     victim: "nicholas_ii",
@@ -58,6 +64,83 @@ test("each lobby receives its own game solution snapshot", () => {
   assert.equal(first.lobbyName, "Lobby One");
   assert.equal(second.lobbyName, "Lobby Two");
   assert.equal(second.solution.killer, "brahe");
+});
+
+test("rooms expose stable IDs and hint links", () => {
+  assert.deepEqual(rooms.map(room => room.id), [
+    "wardens_office", "padded_cells", "cafeteria", "operating_theater", "rec_room",
+    "showers", "solitary_confinement", "hydrotherapy", "electrotherapy"
+  ]);
+  assert.ok(rooms.every(room => Array.isArray(room.hintIds)));
+});
+
+test("a game's populated hints never rule out its correct accusation", () => {
+  const state = createInitialGameState([
+    { id: "1", username: "Ada", selected_character: "lovelace" }
+  ], () => 0);
+  const activeHintIds = state.board.rooms.flatMap(room => room.hintIds);
+
+  assert.ok(activeHintIds.length > 0);
+  for (const hintId of activeHintIds) {
+    const hint = hintCatalog.hints.find(candidate => candidate.id === hintId);
+    assert.ok(hintSupportsSolution(hint, state.solution), `${hintId} contradicts the solution`);
+  }
+});
+
+test("the hint catalog uses valid categories, rooms, and accusation options", () => {
+  const optionsByCategory = {
+    murderer: solutionPools.killers,
+    victim: solutionPools.victims,
+    room: solutionPools.rooms,
+    method: solutionPools.methods
+  };
+
+  for (const hint of hintCatalog.hints) {
+    assert.ok(hintCatalog.categories.includes(hint.category));
+    assert.ok(hintCatalog.roomIds.includes(hint.roomId));
+    assert.ok(optionsByCategory[hint.category].some(option => option.id === hint.excludes));
+  }
+});
+
+test("a player discovers a room-linked hint through authoritative game state", () => {
+  const state = createInitialGameState([
+    { id: "1", username: "Ada", selected_character: "lovelace" },
+    { id: "2", username: "Grace", selected_character: "curie" }
+  ], () => 0);
+  const player = state.players.find(candidate => candidate.id === state.turn.playerId);
+  player.position = { row: 2, col: 2 };
+  const catalog = {
+    categories: ["murderer", "victim", "room", "method"],
+    roomIds: rooms.map(room => room.id),
+    hints: [{ id: "muddy_cuff", category: "murderer", roomId: "rec_room", text: "A muddy cuff." }]
+  };
+
+  const first = discoverHint(state, player.id, "muddy_cuff", catalog);
+  const second = discoverHint(state, player.id, "muddy_cuff", catalog);
+
+  assert.equal(first.alreadyDiscovered, false);
+  assert.equal(second.alreadyDiscovered, true);
+  assert.deepEqual(player.discoveredHintIds, ["muddy_cuff"]);
+});
+
+test("hints cannot be collected from another room or by an inactive player", () => {
+  const state = createInitialGameState([
+    { id: "1", username: "Ada", selected_character: "lovelace" },
+    { id: "2", username: "Grace", selected_character: "curie" }
+  ], () => 0);
+  const current = state.players.find(candidate => candidate.id === state.turn.playerId);
+  const inactive = state.players.find(candidate => candidate.id !== state.turn.playerId);
+  current.position = { row: 9, col: 10 };
+  const catalog = {
+    categories: ["murderer", "victim", "room", "method"],
+    roomIds: rooms.map(room => room.id),
+    hints: [{ id: "muddy_cuff", category: "murderer", roomId: "rec_room", text: "A muddy cuff." }]
+  };
+
+  assert.throws(() => discoverHint(state, current.id, "muddy_cuff", catalog), /hint's room/);
+  assert.throws(() => discoverHint(state, inactive.id, "muddy_cuff", catalog), /not this player's turn/);
+  assert.deepEqual(current.discoveredHintIds, []);
+  assert.deepEqual(inactive.discoveredHintIds, []);
 });
 
 test("a game solution draws all four accusation fields from their pools", () => {

@@ -1,0 +1,436 @@
+{
+  "categories": ["murderer", "victim", "room", "method"],
+  "roomIds": [
+    "wardens_office",
+    "padded_cells",
+    "cafeteria",
+    "operating_theater",
+    "rec_room",
+    "showers",
+    "solitary_confinement",
+    "hydrotherapy",
+    "electrotherapy"
+  ],
+  "itemTemplate": {
+    "id": "unique_hint_id",
+    "category": "murderer",
+    "roomId": "cafeteria",
+    "text": "The hint shown to the player.",
+    "eliminates": []
+  },
+  "hints": [
+    {
+      "id": "victim_not_nicholas_ii",
+      "category": "victim",
+      "roomId": "wardens_office",
+      "text": "The victim was not Tsar Nicholas II.",
+      "eliminates": ["nicholas_ii"]
+    },
+    {
+      "id": "victim_not_alexandra_feodorovna",
+      "category": "victim",
+      "roomId": "padded_cells",
+      "text": "The victim was not Tsarina Alexandra.",
+      "eliminates": ["alexandra_feodorovna"]
+    },
+    {
+      "id": "victim_not_felix_yusupov",
+      "category": "victim",
+      "roomId": "cafeteria",
+      "text": "The victim was not Prince Felix Yusupov.",
+      "eliminates": ["felix_yusupov"]
+    },
+    {
+      "id": "victim_not_manderup_parsberg",
+      "category": "victim",
+      "roomId": "operating_theater",
+      "text": "The victim was not Manderup Parsberg.",
+      "eliminates": ["manderup_parsberg"]
+    },
+    {
+      "id": "victim_not_johannes_kepler",
+      "category": "victim",
+      "roomId": "rec_room",
+      "text": "The victim was not Johannes Kepler.",
+      "eliminates": ["johannes_kepler"]
+    },
+    {
+      "id": "victim_not_galileo",
+      "category": "victim",
+      "roomId": "showers",
+      "text": "The victim was not Galileo Galilei.",
+      "eliminates": ["galileo"]
+    },
+    {
+      "id": "victim_not_isaac_newton",
+      "category": "victim",
+      "roomId": "solitary_confinement",
+      "text": "The victim was not Isaac Newton.",
+      "eliminates": ["isaac_newton"]
+    },
+    {
+      "id": "victim_not_charles_babbage",
+      "category": "victim",
+      "roomId": "hydrotherapy",
+      "text": "The victim was not Charles Babbage.",
+      "eliminates": ["charles_babbage"]
+    },
+    {
+      "id": "victim_not_lord_byron",
+      "category": "victim",
+      "roomId": "electrotherapy",
+      "text": "The victim was not Lord Byron.",
+      "eliminates": ["lord_byron"]
+    },
+    {
+      "id": "victim_not_augustus_de_morgan",
+      "category": "victim",
+      "roomId": "wardens_office",
+      "text": "The victim was not Augustus De Morgan.",
+      "eliminates": ["augustus_de_morgan"]
+    },
+    {
+      "id": "victim_not_alan_turing",
+      "category": "victim",
+      "roomId": "padded_cells",
+      "text": "The victim was not Alan Turing.",
+      "eliminates": ["alan_turing"]
+    },
+    {
+      "id": "victim_not_arthur_edward_waite",
+      "category": "victim",
+      "roomId": "cafeteria",
+      "text": "The victim was not Arthur Edward Waite.",
+      "eliminates": ["arthur_edward_waite"]
+    },
+    {
+      "id": "victim_not_william_butler_yeats",
+      "category": "victim",
+      "roomId": "operating_theater",
+      "text": "The victim was not William Butler Yeats.",
+      "eliminates": ["william_butler_yeats"]
+    },
+    {
+      "id": "victim_not_macgregor_mathers",
+      "category": "victim",
+      "roomId": "rec_room",
+      "text": "The victim was not Samuel Liddell MacGregor Mathers.",
+      "eliminates": ["macgregor_mathers"]
+    },
+    {
+      "id": "victim_not_harry_houdini",
+      "category": "victim",
+      "roomId": "showers",
+      "text": "The victim was not Harry Houdini.",
+      "eliminates": ["harry_houdini"]
+    },
+    {
+      "id": "victim_not_pierre_curie",
+      "category": "victim",
+      "roomId": "solitary_confinement",
+      "text": "The victim was not Pierre Curie.",
+      "eliminates": ["pierre_curie"]
+    },
+    {
+      "id": "victim_not_henri_becquerel",
+      "category": "victim",
+      "roomId": "hydrotherapy",
+      "text": "The victim was not Henri Becquerel.",
+      "eliminates": ["henri_becquerel"]
+    },
+    {
+      "id": "victim_not_paul_langevin",
+      "category": "victim",
+      "roomId": "electrotherapy",
+      "text": "The victim was not Paul Langevin.",
+      "eliminates": ["paul_langevin"]
+    },
+    {
+      "id": "victim_not_albert_einstein",
+      "category": "victim",
+      "roomId": "wardens_office",
+      "text": "The victim was not Albert Einstein.",
+      "eliminates": ["albert_einstein"]
+    },
+    {
+      "id": "victim_not_george_soper",
+      "category": "victim",
+      "roomId": "padded_cells",
+      "text": "The victim was not George Soper.",
+      "eliminates": ["george_soper"]
+    },
+    {
+      "id": "victim_not_sara_josephine_baker",
+      "category": "victim",
+      "roomId": "cafeteria",
+      "text": "The victim was not Sara Josephine Baker.",
+      "eliminates": ["sara_josephine_baker"]
+    },
+    {
+      "id": "victim_not_robert_koch",
+      "category": "victim",
+      "roomId": "operating_theater",
+      "text": "The victim was not Robert Koch.",
+      "eliminates": ["robert_koch"]
+    },
+    {
+      "id": "victim_not_louis_pasteur",
+      "category": "victim",
+      "roomId": "rec_room",
+      "text": "The victim was not Louis Pasteur.",
+      "eliminates": ["louis_pasteur"]
+    },
+    {
+      "id": "victim_not_john_snow",
+      "category": "victim",
+      "roomId": "showers",
+      "text": "The victim was not John Snow.",
+      "eliminates": ["john_snow"]
+    },
+    {
+      "id": "victim_not_duke_of_wellington",
+      "category": "victim",
+      "roomId": "solitary_confinement",
+      "text": "The victim was not the Duke of Wellington.",
+      "eliminates": ["duke_of_wellington"]
+    },
+    {
+      "id": "victim_not_horatio_nelson",
+      "category": "victim",
+      "roomId": "hydrotherapy",
+      "text": "The victim was not Horatio Nelson.",
+      "eliminates": ["horatio_nelson"]
+    },
+    {
+      "id": "victim_not_alexander_i",
+      "category": "victim",
+      "roomId": "electrotherapy",
+      "text": "The victim was not Tsar Alexander I.",
+      "eliminates": ["alexander_i"]
+    },
+    {
+      "id": "victim_not_blucher",
+      "category": "victim",
+      "roomId": "wardens_office",
+      "text": "The victim was not Gebhard Leberecht von Blücher.",
+      "eliminates": ["blucher"]
+    },
+    {
+      "id": "victim_not_beethoven",
+      "category": "victim",
+      "roomId": "padded_cells",
+      "text": "The victim was not Ludwig van Beethoven.",
+      "eliminates": ["beethoven"]
+    },
+    {
+      "id": "victim_not_sigmund_freud",
+      "category": "victim",
+      "roomId": "cafeteria",
+      "text": "The victim was not Sigmund Freud.",
+      "eliminates": ["sigmund_freud"]
+    },
+    {
+      "id": "victim_not_nikola_tesla",
+      "category": "victim",
+      "roomId": "operating_theater",
+      "text": "The victim was not Nikola Tesla.",
+      "eliminates": ["nikola_tesla"]
+    },
+    {
+      "id": "victim_not_florence_nightingale",
+      "category": "victim",
+      "roomId": "rec_room",
+      "text": "The victim was not Florence Nightingale.",
+      "eliminates": ["florence_nightingale"]
+    },
+    {
+      "id": "victim_not_queen_victoria",
+      "category": "victim",
+      "roomId": "showers",
+      "text": "The victim was not Queen Victoria.",
+      "eliminates": ["queen_victoria"]
+    },
+    {
+      "id": "victim_not_edgar_allan_poe",
+      "category": "victim",
+      "roomId": "solitary_confinement",
+      "text": "The victim was not Edgar Allan Poe.",
+      "eliminates": ["edgar_allan_poe"]
+    },
+    {
+      "id": "victim_not_oscar_wilde",
+      "category": "victim",
+      "roomId": "hydrotherapy",
+      "text": "The victim was not Oscar Wilde.",
+      "eliminates": ["oscar_wilde"]
+    },
+    {
+      "id": "victim_not_charles_darwin",
+      "category": "victim",
+      "roomId": "electrotherapy",
+      "text": "The victim was not Charles Darwin.",
+      "eliminates": ["charles_darwin"]
+    },
+    {
+      "id": "murderer_not_napoleon",
+      "category": "murderer",
+      "roomId": "wardens_office",
+      "text": "The murderer was not Napoleon Bonaparte.",
+      "eliminates": ["napoleon"]
+    },
+    {
+      "id": "murderer_not_tycho_brahe",
+      "category": "murderer",
+      "roomId": "padded_cells",
+      "text": "The murderer was not Tycho Brahe.",
+      "eliminates": ["brahe"]
+    },
+    {
+      "id": "murderer_not_ada_lovelace",
+      "category": "murderer",
+      "roomId": "cafeteria",
+      "text": "The murderer was not Ada Lovelace.",
+      "eliminates": ["lovelace"]
+    },
+    {
+      "id": "murderer_not_marie_curie",
+      "category": "murderer",
+      "roomId": "operating_theater",
+      "text": "The murderer was not Marie Curie.",
+      "eliminates": ["curie"]
+    },
+    {
+      "id": "murderer_not_grigori_rasputin",
+      "category": "murderer",
+      "roomId": "rec_room",
+      "text": "The murderer was not Grigori Rasputin.",
+      "eliminates": ["rasputin"]
+    },
+    {
+      "id": "murderer_not_aleister_crowley",
+      "category": "murderer",
+      "roomId": "showers",
+      "text": "The murderer was not Aleister Crowley.",
+      "eliminates": ["crowley"]
+    },
+    {
+      "id": "murderer_not_typhoid_mary",
+      "category": "murderer",
+      "roomId": "solitary_confinement",
+      "text": "The murderer was not Typhoid Mary.",
+      "eliminates": ["mallon"]
+    },
+       {
+      "id": "room_not_hydrotherapy",
+      "category": "room",
+      "roomId": "hydrotherapy",
+      "text": "The murder did not happen in Hydrotherapy.",
+      "eliminates": ["hydrotherapy"]
+    },
+    {
+      "id": "room_not_operating_theater",
+      "category": "room",
+      "roomId": "operating_theater",
+      "text": "The murder did not happen in the Operating Theater.",
+      "eliminates": ["operating_theater"]
+    },
+    {
+      "id": "room_not_padded_cells",
+      "category": "room",
+      "roomId": "padded_cells",
+      "text": "The murder did not happen in the Padded Cells.",
+      "eliminates": ["padded_cells"]
+    },
+    {
+      "id": "room_not_solitary_confinement",
+      "category": "room",
+      "roomId": "solitary_confinement",
+      "text": "The murder did not happen in Solitary Confinement.",
+      "eliminates": ["solitary_confinement"]
+    },
+    {
+      "id": "room_not_electrotherapy",
+      "category": "room",
+      "roomId": "electrotherapy",
+      "text": "The murder did not happen in Electrotherapy.",
+      "eliminates": ["electrotherapy"]
+    },
+    {
+      "id": "room_not_showers",
+      "category": "room",
+      "roomId": "showers",
+      "text": "The murder did not happen in the Showers.",
+      "eliminates": ["showers"]
+    },
+    {
+      "id": "room_not_cafeteria",
+      "category": "room",
+      "roomId": "cafeteria",
+      "text": "The murder did not happen in the Cafeteria.",
+      "eliminates": ["cafeteria"]
+    },
+    {
+      "id": "room_not_rec_room",
+      "category": "room",
+      "roomId": "rec_room",
+      "text": "The murder did not happen in the Rec Room.",
+      "eliminates": ["rec_room"]
+    },
+        {
+      "id": "method_not_electrocuted",
+      "category": "method",
+      "roomId": "electrotherapy",
+      "text": "The victim was not electrocuted.",
+      "eliminates": ["electrocuted"]
+    },
+    {
+      "id": "method_not_lobotomized",
+      "category": "method",
+      "roomId": "operating_theater",
+      "text": "The victim was not lobotomized.",
+      "eliminates": ["lobotomized"]
+    },
+    {
+      "id": "method_not_defenestrated",
+      "category": "method",
+      "roomId": "padded_cells",
+      "text": "The victim was not defenestrated.",
+      "eliminates": ["defenestrated"]
+    },
+    {
+      "id": "method_not_eviscerated",
+      "category": "method",
+      "roomId": "solitary_confinement",
+      "text": "The victim was not eviscerated.",
+      "eliminates": ["eviscerated"]
+    },
+    {
+      "id": "method_not_poisoned",
+      "category": "method",
+      "roomId": "cafeteria",
+      "text": "The victim was not poisoned.",
+      "eliminates": ["poisoned"]
+    },
+    {
+      "id": "method_not_suffocated",
+      "category": "method",
+      "roomId": "rec_room",
+      "text": "The victim was not suffocated.",
+      "eliminates": ["suffocated"]
+    },
+    {
+      "id": "method_not_drowned",
+      "category": "method",
+      "roomId": "hydrotherapy",
+      "text": "The victim did not drown.",
+      "eliminates": ["drowned"]
+    },
+    {
+      "id": "method_not_bludgeoned",
+      "category": "method",
+      "roomId": "showers",
+      "text": "The victim was not bludgeoned.",
+      "eliminates": ["bludgeoned"]
+    }
+  ]
+}

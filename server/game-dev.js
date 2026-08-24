@@ -13,6 +13,7 @@ const {
   movePlayer,
   endPlayerTurn,
   completeWardenTurn,
+  discoverHint,
   submitAccusation
 } = require("./game/board");
 
@@ -76,6 +77,14 @@ app.post(`/api/games/${gameId}/move`, (request, response) => {
     const path = movementPath(state, user.id, request.body);
     const cost = movePlayer(state, user.id, request.body);
     response.json({ cost, distance: path.length, path, state });
+  } catch (error) {
+    response.status(409).json({ error: error.message });
+  }
+});
+app.post(`/api/games/${gameId}/hints/:hintId`, (request, response) => {
+  try {
+    const result = discoverHint(state, user.id, request.params.hintId);
+    response.json({ ...result, state });
   } catch (error) {
     response.status(409).json({ error: error.message });
   }

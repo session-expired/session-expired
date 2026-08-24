@@ -34,7 +34,7 @@ const pageDirectory = path.join(__dirname, "pages");
 const publicPageDirectory = path.join(publicDirectory, "pages");
 const {
   rooms, spawnPoints, secretPass, rollMovementDie, movementPath, movePlayer,
-  endPlayerTurn, completeWardenTurn, removePlayerFromGame, submitAccusation
+  endPlayerTurn, completeWardenTurn, removePlayerFromGame, discoverHint, submitAccusation
 } = require("./game/board");
 const minimumLobbyPlayers = process.env.SESSION_EXPIRED_DEV_RUNNER === "true" ? 1 : 2;
 const wardenPhaseMs = Number(process.env.WARDEN_PHASE_MS) || 1200;
@@ -363,6 +363,47 @@ app.post("/api/games/:gameId/move", requireAuthentication, async (request, respo
     await client.query("COMMIT");
     broadcastGameState(request.params.gameId, state);
     response.json({ cost, distance: path.length, path, state });
+  } catch (error) {
+    if (client) await client.query("ROLLBACK");
+    next(error);
+  } finally {
+    client?.release();
+  }
+});
+
+app.post("/api/games/:gameId/hints/:hintId", requireAuthentication, async (request, response, next) => {
+  if (!/^[1-9]\d*$/.test(request.params.gameId)) {
+    return response.status(404).json({ error: "Game not found." });
+  }
+
+  let client;
+  try {
+    client = await pool.connect();
+    await client.query("BEGIN");
+    const result = await client.query(
+      `SELECT g.state FROM games g
+       JOIN lobby_players lp ON lp.lobby_id = g.lobby_id
+       WHERE g.id = $1 AND lp.user_id = $2
+       FOR UPDATE OF g`,
+      [request.params.gameId, request.session.userId]
+    );
+    if (!result.rows[0]) {
+      await client.query("ROLLBACK");
+      return response.status(404).json({ error: "Game not found." });
+    }
+
+    const state = result.rows[0].state;
+    let discovery;
+    try {
+      discovery = discoverHint(state, request.session.userId, request.params.hintId);
+    } catch (error) {
+      await client.query("ROLLBACK");
+      return response.status(409).json({ error: error.message });
+    }
+    await client.query("UPDATE games SET state = $1::jsonb WHERE id = $2", [JSON.stringify(state), request.params.gameId]);
+    await client.query("COMMIT");
+    broadcastGameState(request.params.gameId, state);
+    response.json({ ...discovery, state });
   } catch (error) {
     if (client) await client.query("ROLLBACK");
     next(error);
