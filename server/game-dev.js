@@ -10,7 +10,10 @@ const {
   secretPass,
   rollMovementDie,
   movementPath,
-  movePlayer
+  movePlayer,
+  endPlayerTurn,
+  completeWardenTurn,
+  submitAccusation
 } = require("./game/board");
 
 const app = express();
@@ -26,7 +29,7 @@ const state = createInitialGameState([{
   id: user.id,
   username: user.username,
   selected_character: selectedCharacter.id
-}]);
+}], Math.random, { id: gameId, name: "Development Lobby" });
 
 app.disable("x-powered-by");
 app.use(express.json({ limit: "10kb" }));
@@ -63,6 +66,23 @@ app.post(`/api/games/${gameId}/move`, (request, response) => {
     const path = movementPath(state, user.id, request.body);
     const cost = movePlayer(state, user.id, request.body);
     response.json({ cost, distance: path.length, path, state });
+  } catch (error) {
+    response.status(409).json({ error: error.message });
+  }
+});
+app.post(`/api/games/${gameId}/end-turn`, (request, response) => {
+  try {
+    const transition = endPlayerTurn(state, user.id);
+    if (transition.warden) setTimeout(() => completeWardenTurn(state), 1200);
+    response.json({ state });
+  } catch (error) {
+    response.status(409).json({ error: error.message });
+  }
+});
+app.post(`/api/games/${gameId}/accuse`, (request, response) => {
+  try {
+    const correct = submitAccusation(state, user.id, request.body);
+    response.json({ correct, state });
   } catch (error) {
     response.status(409).json({ error: error.message });
   }

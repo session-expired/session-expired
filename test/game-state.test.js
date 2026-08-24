@@ -2,13 +2,18 @@ const test = require("node:test");
 const assert = require("node:assert/strict");
 const {
   createInitialGameState,
+  initialSolution,
   rooms,
   spawnPoints,
   rollMovementDie,
   movementDistances,
   movementPath,
   movePlayer,
-  takeWardenTurn
+  takeWardenTurn,
+  endPlayerTurn,
+  completeWardenTurn,
+  removePlayerFromGame,
+  submitAccusation
 } = require("../server/game/board");
 
 test("a launched game snapshots the board and its lobby players", () => {
@@ -16,9 +21,11 @@ test("a launched game snapshots the board and its lobby players", () => {
     { id: "10", username: "Ada", selected_character: "lovelace" },
     { id: "11", username: "Grace", selected_character: "curie" }
   ];
-  const state = createInitialGameState(players, () => 0);
+  const state = createInitialGameState(players, () => 0, { id: 27, name: "The Broken Window" });
 
   assert.equal(state.status, "active");
+  assert.equal(state.lobbyId, "27");
+  assert.equal(state.lobbyName, "The Broken Window");
   assert.deepEqual(state.board, { rows: 24, cols: 30, rooms });
   assert.deepEqual(state.players.map(({ id, username, character }) => ({ id, username, character })), [
     { id: "10", username: "Ada", character: "lovelace" },
@@ -28,6 +35,27 @@ test("a launched game snapshots the board and its lobby players", () => {
     point.row === state.players[0].position.row && point.col === state.players[0].position.col
   ));
   assert.notDeepEqual(state.players[0].position, state.players[1].position);
+  assert.ok(state.players.every(player => player.canAccuse));
+  assert.deepEqual(state.solution, {
+    killer: "rasputin",
+    victim: "the victim",
+    method: "defenestration"
+  });
+  assert.notStrictEqual(state.solution, initialSolution);
+  assert.equal(state.winner, null);
+  assert.equal(typeof state.createdAt, "number");
+});
+
+test("each lobby receives its own game solution snapshot", () => {
+  const players = [{ id: 1, username: "Player", selected_character: "curie" }];
+  const first = createInitialGameState(players, () => 0, { id: 1, name: "Lobby One" });
+  const second = createInitialGameState(players, () => 0, { id: 2, name: "Lobby Two" });
+
+  first.solution.killer = "crowley";
+
+  assert.equal(first.lobbyName, "Lobby One");
+  assert.equal(second.lobbyName, "Lobby Two");
+  assert.equal(second.solution.killer, "rasputin");
 });
 
 test("players receive randomized, exclusive spawn points", () => {
@@ -53,12 +81,116 @@ test("a game starts with the first player awaiting a 1d8 movement roll", () => {
   const state = createInitialGameState([{ id: 1, username: "Player" }]);
   assert.deepEqual(state.turn, {
     number: 1,
+    round: 1,
+    order: ["1"],
     playerIndex: 0,
     playerId: "1",
     phase: "awaiting_roll",
     die: { sides: 8, roll: null },
-    movementRemaining: 0
+    movementRemaining: 0,
+    visitedPositions: []
   });
+});
+
+test("turn order is shuffled once and remains stable across rounds", () => {
+  const players = [1, 2, 3, 4].map(id => ({ id, username: `Player ${id}` }));
+  const state = createInitialGameState(players, () => 0);
+  assert.deepEqual(state.turn.order, ["2", "3", "4", "1"]);
+  const originalOrder = [...state.turn.order];
+  for (const id of originalOrder) {
+    assert.equal(state.turn.playerId, id);
+    state.turn.phase = "awaiting_end";
+    state.turn.movementRemaining = 0;
+    endPlayerTurn(state, id, () => 0);
+  }
+  assert.equal(state.turn.phase, "warden");
+  assert.equal(state.turn.playerId, null);
+  assert.equal(completeWardenTurn(state), true);
+  assert.deepEqual(state.turn.order, originalOrder);
+  assert.equal(state.turn.playerId, originalOrder[0]);
+  assert.equal(state.turn.round, 2);
+});
+
+test("ending a turn is locked immediately and cannot be applied twice", () => {
+  const state = createInitialGameState([
+    { id: 1, username: "One" }, { id: 2, username: "Two" }
+  ], () => 0.999);
+  state.turn.phase = "awaiting_end";
+  endPlayerTurn(state, "1");
+  assert.equal(state.turn.playerId, "2");
+  assert.throws(() => endPlayerTurn(state, "1"), /not this player's turn/i);
+  assert.throws(() => movePlayer(state, "1", { row: 1, col: 1 }), /not this player's turn|roll/i);
+});
+
+test("a current player who leaves is skipped without deadlocking the turn", () => {
+  const state = createInitialGameState([
+    { id: 1, username: "One" }, { id: 2, username: "Two" }, { id: 3, username: "Three" }
+  ], () => 0.999);
+  assert.equal(state.turn.playerId, "1");
+  removePlayerFromGame(state, "1");
+  assert.equal(state.turn.playerId, "2");
+  assert.deepEqual(state.turn.order, ["2", "3"]);
+});
+
+test("a finished game cannot be reactivated by a stale Warden completion", () => {
+  const state = createInitialGameState([{ id: 1, username: "One" }]);
+  state.turn.phase = "awaiting_end";
+  endPlayerTurn(state, "1", () => 0);
+  state.status = "finished";
+  state.turn.phase = "finished";
+  assert.equal(completeWardenTurn(state), false);
+  assert.equal(state.turn.playerId, null);
+});
+
+test("accusations are restricted to the active player", () => {
+  const state = createInitialGameState([
+    { id: 1, username: "One" }, { id: 2, username: "Two" }
+  ], () => 0.999);
+  state.players[1].position = { row: 13, col: 12 };
+  assert.throws(() => submitAccusation(state, "2", state.solution), /not this player's turn/i);
+});
+
+test("the active player must be orthogonally adjacent to the Warden to accuse", () => {
+  const state = createInitialGameState([{ id: 1, username: "One" }]);
+  state.players[0].position = { row: 13, col: 11 };
+  assert.throws(() => submitAccusation(state, "1", state.solution), /adjacent to the Warden/i);
+  state.players[0].position = { row: 12, col: 12 };
+  assert.throws(() => submitAccusation(state, "1", state.solution), /adjacent to the Warden/i);
+  state.players[0].position = { row: 13, col: 12 };
+  assert.equal(submitAccusation(state, "1", state.solution), true);
+});
+
+test("current Warden position is used for accusation eligibility", () => {
+  const state = createInitialGameState([{ id: 1, username: "One" }]);
+  state.players[0].position = { row: 13, col: 12 };
+  state.warden.position = { row: 13, col: 14 };
+  assert.throws(() => submitAccusation(state, "1", state.solution), /adjacent to the Warden/i);
+});
+
+test("an incorrect accusation resolves once and consumes the player's turn", () => {
+  const state = createInitialGameState([
+    { id: 1, username: "One" }, { id: 2, username: "Two" }
+  ], () => 0.999);
+  state.players[0].position = { row: 13, col: 12 };
+  assert.equal(submitAccusation(state, "1", { ...state.solution, killer: "crowley" }), false);
+  assert.equal(state.players[0].canAccuse, false);
+  assert.equal(state.turn.playerId, "2");
+  assert.throws(
+    () => submitAccusation(state, "1", state.solution),
+    /not this player's turn/i
+  );
+});
+
+test("a correct accusation finishes the turn state without advancing", () => {
+  const state = createInitialGameState([
+    { id: 1, username: "One" }, { id: 2, username: "Two" }
+  ], () => 0.999);
+  state.players[0].position = { row: 13, col: 12 };
+  assert.equal(submitAccusation(state, "1", state.solution), true);
+  assert.equal(state.status, "finished");
+  assert.equal(state.turn.phase, "finished");
+  assert.equal(state.turn.playerId, null);
+  assert.equal(completeWardenTurn(state), false);
 });
 
 test("the Warden starts at tile 13,13 using Bonaparte's standing sprite", () => {
@@ -82,7 +214,31 @@ test("the current player rolls once and receives that many movement points", () 
   assert.equal(state.turn.phase, "moving");
   assert.equal(state.turn.die.roll, 8);
   assert.equal(state.turn.movementRemaining, 8);
+  assert.deepEqual(state.turn.visitedPositions, [state.players[0].position]);
   assert.throws(() => rollMovementDie(state, "1"), /already been rolled/i);
+});
+
+test("a player cannot end their turn while movement points remain", () => {
+  const state = createInitialGameState([{ id: 1, username: "Player" }]);
+  rollMovementDie(state, "1", () => 0.5);
+  assert.throws(() => endPlayerTurn(state, "1"), /use all movement points/i);
+  assert.equal(state.turn.playerId, "1");
+  assert.equal(state.turn.movementRemaining, 5);
+});
+
+test("a player cannot revisit or path through a position used earlier in the same turn", () => {
+  const state = createInitialGameState([{ id: 1, username: "Player" }]);
+  state.players[0].position = { row: 18, col: 10 };
+  rollMovementDie(state, "1", () => 0.5);
+  movePlayer(state, "1", { row: 18, col: 11 });
+  movePlayer(state, "1", { row: 18, col: 12 });
+
+  assert.deepEqual(state.turn.visitedPositions, [
+    { row: 18, col: 10 }, { row: 18, col: 11 }, { row: 18, col: 12 }
+  ]);
+  assert.equal(movementDistances(state, "1").has("18,11"), false);
+  assert.equal(movementDistances(state, "1").has("18,10"), false);
+  assert.throws(() => movePlayer(state, "1", { row: 18, col: 11 }), /outside/i);
 });
 
 test("a player cannot roll another player's movement die", () => {
@@ -112,6 +268,7 @@ test("a player cannot move onto or pass through another player", () => {
   ]);
   state.players[0].position = { row: 10, col: 9 };
   state.players[1].position = { row: 10, col: 10 };
+  state.turn.playerId = "1";
   state.turn.phase = "moving";
   state.turn.movementRemaining = 2;
 
@@ -158,15 +315,21 @@ test("the Warden takes a turn after the final active player", () => {
   state.players[0].position = { row: 1, col: 1 };
   state.players[1].position = { row: 2, col: 1 };
   state.turn.playerIndex = 1;
+  state.turn.order = ["1", "2"];
   state.turn.playerId = "2";
   state.turn.phase = "moving";
   state.turn.movementRemaining = 1;
 
   movePlayer(state, "2", { row: 2, col: 2 }, () => 0);
-  assert.equal(state.turn.playerId, "1");
-  assert.equal(state.turn.phase, "awaiting_roll");
+  assert.equal(state.turn.phase, "awaiting_end");
+  endPlayerTurn(state, "2", () => 0);
+  assert.equal(state.turn.playerId, null);
+  assert.equal(state.turn.phase, "warden");
   assert.equal(state.warden.lastRoll, 1);
   assert.equal(state.warden.lastPath.length, 1);
+  assert.equal(completeWardenTurn(state), true);
+  assert.equal(state.turn.playerId, "1");
+  assert.equal(state.turn.round, 2);
 });
 
 test("moving costs one point per grid location and retains unused movement", () => {
@@ -211,17 +374,22 @@ test("characters face left for lower columns and reset right for higher columns"
   assert.equal(state.players[0].facing, "right");
 });
 
-test("using all movement advances to the next player's roll phase", () => {
+test("using all movement requires an explicit end turn before the next player is active", () => {
   const state = createInitialGameState([
     { id: 1, username: "One" },
     { id: 2, username: "Two" }
   ]);
   state.players[0].position = { row: 10, col: 10 };
   state.players[1].position = { row: 20, col: 20 };
+  state.turn.order = ["1", "2"];
+  state.turn.playerId = "1";
   state.turn.phase = "moving";
   state.turn.movementRemaining = 1;
 
   movePlayer(state, "1", { row: 9, col: 10 });
+  assert.equal(state.turn.playerId, "1");
+  assert.equal(state.turn.phase, "awaiting_end");
+  endPlayerTurn(state, "1");
   assert.equal(state.turn.playerId, "2");
   assert.equal(state.turn.phase, "awaiting_roll");
   assert.equal(state.turn.number, 2);
@@ -251,13 +419,15 @@ test("a hallway player's range stops at the room door", () => {
   assert.equal(throughDoorRange.has("7,27"), false);
 });
 
-test("entering a door spends all remaining movement and ends the turn", () => {
+test("entering a door spends all remaining movement and awaits explicit end turn", () => {
   const state = createInitialGameState([
     { id: 1, username: "One" },
     { id: 2, username: "Two" }
   ]);
   state.players[0].position = { row: 8, col: 28 };
   state.players[1].position = { row: 20, col: 20 };
+  state.turn.order = ["1", "2"];
+  state.turn.playerId = "1";
   state.turn.phase = "moving";
   state.turn.movementRemaining = 6;
 
@@ -265,8 +435,8 @@ test("entering a door spends all remaining movement and ends the turn", () => {
   assert.deepEqual(state.players[0].position, { row: 7, col: 28 });
   assert.equal(state.players[0].dialogueEvent, "door_open");
   assert.equal(state.players[0].dialogueEventId, 1);
-  assert.equal(state.turn.playerId, "2");
-  assert.equal(state.turn.phase, "awaiting_roll");
+  assert.equal(state.turn.playerId, "1");
+  assert.equal(state.turn.phase, "awaiting_end");
 });
 
 test("entering the Warden's office triggers Bonaparte's enter dialogue", () => {
@@ -341,6 +511,7 @@ test("an occupied secret passage uses an available adjacent tile, including diag
   ]);
   state.players[0].position = { row: 2, col: 24 };
   state.players[1].position = { row: 23, col: 3 };
+  state.turn.playerId = "1";
   state.turn.phase = "moving";
   state.turn.movementRemaining = 3;
 
@@ -370,11 +541,16 @@ test("a secret passage can be entered again on the player's next turn", () => {
   state.players[0].secretPassageCooldown = { row: 23, col: 3 };
   state.players[1].position = { row: 10, col: 10 };
   state.turn.playerIndex = 1;
+  state.turn.order = ["1", "2"];
   state.turn.playerId = "2";
   state.turn.phase = "moving";
   state.turn.movementRemaining = 1;
 
   movePlayer(state, "2", { row: 11, col: 10 }, () => 0);
+  assert.equal(state.turn.phase, "awaiting_end");
+  endPlayerTurn(state, "2", () => 0);
+  assert.equal(state.turn.phase, "warden");
+  completeWardenTurn(state);
   assert.equal(state.turn.playerId, "1");
   assert.equal(state.players[0].secretPassageCooldown, null);
 });

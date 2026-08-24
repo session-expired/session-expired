@@ -138,6 +138,9 @@
         history.forEach((message) => addMessage("game", message));
       });
       socket.on("game-message", (message) => addMessage("game", message));
+      socket.on("game-state", state => {
+        window.dispatchEvent(new CustomEvent("game-state", { detail: state }));
+      });
       if (gameId) socket.emit("join-game-chat", { gameId });
       socket.on("chat-rejected", ({ reason }) => {
         status.textContent = reason || "This message could not be sent.";

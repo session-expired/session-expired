@@ -18,9 +18,17 @@ const spawnPoints = [
 ];
 
 const secretPass = [
-    {row:3, col: 23}, {row:23, col: 3},
+    {row:2, col: 23}, {row:23, col: 3},
     {row:2, col: 7}, {row:23, col: 28},
 ]
+
+// Kept in the persisted game snapshot so every player in a lobby is solving
+// the same case and a completed game can later be rendered on the scoreboard.
+const initialSolution = Object.freeze({
+    killer: "rasputin",
+    victim: "the victim",
+    method: "defenestration"
+});
 
 //Initializing all rooms
 let wardensOffice = new Room("Wardens_office", {start: 12, end: 19}, {start: 8, end: 17}, {col: 19, row: 12});
@@ -73,7 +81,16 @@ function shuffledSpawnPoints(random = Math.random) {
     return availableSpawnPoints;
 }
 
-function createInitialGameState(gamePlayers, random = Math.random) {
+function shuffledPlayerIds(players, random = Math.random) {
+    const ids = players.map(player => String(player.id));
+    for (let index = ids.length - 1; index > 0; index--) {
+        const swapIndex = Math.floor(random() * (index + 1));
+        [ids[index], ids[swapIndex]] = [ids[swapIndex], ids[index]];
+    }
+    return ids;
+}
+
+function createInitialGameState(gamePlayers, random = Math.random, lobby = {}) {
     if (gamePlayers.length > spawnPoints.length) {
         throw new Error("There are more players than available spawn points.");
     }
@@ -84,14 +101,18 @@ function createInitialGameState(gamePlayers, random = Math.random) {
         id: String(player.id),
         username: player.username,
         character: player.selected_character,
+        canAccuse: true,
         position: availableSpawnPoints[index],
         facing: "right",
         dialogueEvent: null,
         dialogueEventId: 0,
         secretPassageCooldown: null
     }));
+    const turnOrder = shuffledPlayerIds(players, random);
 
     return {
+        lobbyId: lobby.id == null ? null : String(lobby.id),
+        lobbyName: lobby.name ?? null,
         status: "active",
         board: {
             rows: 24,
@@ -112,12 +133,18 @@ function createInitialGameState(gamePlayers, random = Math.random) {
         },
         turn: {
             number: 1,
+            round: 1,
+            order: turnOrder,
             playerIndex: 0,
-            playerId: players[0]?.id ?? null,
+            playerId: turnOrder[0] ?? null,
             phase: "awaiting_roll",
             die: { sides: 8, roll: null },
-            movementRemaining: 0
-        }
+            movementRemaining: 0,
+            visitedPositions: []
+        },
+        solution: { ...initialSolution },
+        winner: null,
+        createdAt: Date.now()
     };
 }
 
@@ -130,9 +157,11 @@ function rollMovementDie(state, playerId, random = Math.random) {
     }
 
     const roll = Math.floor(random() * 8) + 1;
+    const player = state.players.find(candidate => String(candidate.id) === String(playerId));
     state.turn.phase = "moving";
     state.turn.die = { sides: 8, roll };
     state.turn.movementRemaining = roll;
+    state.turn.visitedPositions = player?.position ? [{ ...player.position }] : [];
     return roll;
 }
 
@@ -147,6 +176,9 @@ function movementDistances(state, playerId) {
         blocked.add(`${state.warden.position.row},${state.warden.position.col}`);
     }
     const startKey = `${player.position.row},${player.position.col}`;
+    const visitedThisTurn = new Set((state.turn.visitedPositions || [])
+        .map(position => `${position.row},${position.col}`));
+    visitedThisTurn.delete(startKey);
     const distances = new Map([[startKey, 0]]);
     const previous = new Map();
     const queue = [{ ...player.position }];
@@ -195,7 +227,7 @@ function movementDistances(state, playerId) {
             const col = current.col + colOffset;
             const key = `${row},${col}`;
             if (row < 1 || row > state.board.rows || col < 1 || col > state.board.cols) continue;
-            if (blocked.has(key) || distances.has(key)) continue;
+            if (blocked.has(key) || visitedThisTurn.has(key) || distances.has(key)) continue;
             if (isBlockedTile(row, col)) continue;
             if (!canCrossRoomBoundary(current, { row, col })) continue;
             distances.set(key, distance + 1);
@@ -267,16 +299,87 @@ function takeWardenTurn(state, random = Math.random) {
     return path;
 }
 
-function advanceTurn(state, random = Math.random) {
-    const completedPlayerIndex = state.turn.playerIndex;
-    state.turn.playerIndex = (completedPlayerIndex + 1) % state.players.length;
-    if (completedPlayerIndex === state.players.length - 1) takeWardenTurn(state, random);
-    state.players[state.turn.playerIndex].secretPassageCooldown = null;
-    state.turn.playerId = state.players[state.turn.playerIndex].id;
+function activateTurn(state, index) {
+    const playerId = state.turn.order[index];
+    const player = state.players.find(candidate => String(candidate.id) === String(playerId));
+    if (!player) throw new Error("The next player is no longer in this game.");
+    player.secretPassageCooldown = null;
+    state.turn.playerIndex = index;
+    state.turn.playerId = player.id;
     state.turn.number += 1;
     state.turn.phase = "awaiting_roll";
     state.turn.die = { sides: 8, roll: null };
     state.turn.movementRemaining = 0;
+    state.turn.visitedPositions = [];
+}
+
+function finishPlayerTurn(state, playerId, random = Math.random) {
+    if (state.status !== "active" || state.turn.phase === "finished") {
+        throw new Error("This game has already finished.");
+    }
+    if (String(state.turn.playerId) !== String(playerId)) {
+        throw new Error("It is not this player's turn.");
+    }
+    const completedIndex = state.turn.playerIndex;
+    state.turn.playerId = null;
+    state.turn.movementRemaining = 0;
+    if (completedIndex === state.turn.order.length - 1) {
+        state.turn.phase = "warden";
+        takeWardenTurn(state, random);
+        return { warden: true };
+    }
+    activateTurn(state, completedIndex + 1);
+    return { warden: false };
+}
+
+function endPlayerTurn(state, playerId, random = Math.random) {
+    if (state.turn.phase !== "awaiting_end" || state.turn.movementRemaining !== 0) {
+        if (String(state.turn.playerId) !== String(playerId)) throw new Error("It is not this player's turn.");
+        throw new Error("Use all movement points before ending your turn.");
+    }
+    return finishPlayerTurn(state, playerId, random);
+}
+
+function completeWardenTurn(state) {
+    if (state.status !== "active" || state.turn.phase !== "warden" || state.turn.playerId !== null) return false;
+    state.turn.round += 1;
+    activateTurn(state, 0);
+    return true;
+}
+
+function removePlayerFromGame(state, playerId, random = Math.random) {
+    const id = String(playerId);
+    const removedIndex = state.turn.order.findIndex(candidate => String(candidate) === id);
+    const wasCurrent = String(state.turn.playerId) === id;
+    state.players = state.players.filter(player => String(player.id) !== id);
+    if (removedIndex < 0) return { warden: false };
+    state.turn.order.splice(removedIndex, 1);
+    if (!state.turn.order.length) {
+        state.status = "finished";
+        state.turn.phase = "finished";
+        state.turn.playerId = null;
+        return { warden: false };
+    }
+    if (!wasCurrent) {
+        if (removedIndex < state.turn.playerIndex) state.turn.playerIndex -= 1;
+        return { warden: false };
+    }
+    state.turn.playerId = null;
+    state.turn.movementRemaining = 0;
+    if (removedIndex >= state.turn.order.length) {
+        state.turn.playerIndex = state.turn.order.length - 1;
+        state.turn.phase = "warden";
+        takeWardenTurn(state, random);
+        return { warden: true };
+    }
+    activateTurn(state, removedIndex);
+    return { warden: false };
+}
+
+function isAdjacent(firstPosition, secondPosition) {
+    if (!firstPosition || !secondPosition) return false;
+    return Math.abs(firstPosition.row - secondPosition.row) +
+        Math.abs(firstPosition.col - secondPosition.col) === 1;
 }
 
 function useSecretPassage(state, player, entry, random = Math.random) {
@@ -340,6 +443,7 @@ function movePlayer(state, playerId, destination, random = Math.random) {
     const player = state.players.find(candidate => String(candidate.id) === String(playerId));
     const distance = movementDistances(state, playerId).get(`${destination.row},${destination.col}`);
     if (distance === undefined) throw new Error("That location is outside the player's movement range.");
+    const path = movementPath(state, playerId, destination);
 
     const destinationRoom = (state.board.rooms || rooms).find(room =>
         destination.row >= room.rows.start && destination.row <= room.rows.end &&
@@ -366,19 +470,77 @@ function movePlayer(state, playerId, destination, random = Math.random) {
         }
     }
     useSecretPassage(state, player, destination, random);
+    if (!Array.isArray(state.turn.visitedPositions)) state.turn.visitedPositions = [];
+    for (const position of path) {
+        if (!state.turn.visitedPositions.some(visited => visited.row === position.row && visited.col === position.col)) {
+            state.turn.visitedPositions.push({ ...position });
+        }
+    }
+    if (!state.turn.visitedPositions.some(visited =>
+        visited.row === player.position.row && visited.col === player.position.col
+    )) state.turn.visitedPositions.push({ ...player.position });
     state.turn.movementRemaining -= cost;
-    if (state.turn.movementRemaining === 0) advanceTurn(state, random);
+    if (state.turn.movementRemaining === 0) state.turn.phase = "awaiting_end";
     return cost;
+}
+
+function submitAccusation(state, playerId, accusation) {
+    if (state.status !== "active") throw new Error("This game has already finished.");
+    if (String(state.turn.playerId) !== String(playerId) ||
+        !["awaiting_roll", "moving", "awaiting_end"].includes(state.turn.phase)) {
+        throw new Error("It is not this player's turn.");
+    }
+    const player = state.players.find(candidate => String(candidate.id) === String(playerId));
+    if (!player) throw new Error("Player not found.");
+    if (!player.canAccuse) throw new Error("This player cannot accuse again.");
+    if (!isAdjacent(player.position, state.warden?.position)) {
+        throw new Error("You must be adjacent to the Warden to make an accusation.");
+    }
+
+    const fields = ["killer", "victim", "method"];
+    if (fields.some(field => typeof accusation?.[field] !== "string")) {
+        throw new Error("Choose a killer, victim, and method.");
+    }
+    const correct = fields.every(field =>
+        accusation[field].trim().toLowerCase() === String(state.solution[field]).toLowerCase()
+    );
+
+    if (correct) {
+        state.status = "finished";
+        state.turn.phase = "finished";
+        state.turn.playerId = null;
+        state.turn.movementRemaining = 0;
+        state.winner = {
+            id: player.id,
+            username: player.username,
+            character: player.character
+        };
+    } else {
+        player.canAccuse = false;
+        if (!state.players.some(candidate => candidate.canAccuse)) {
+            state.status = "finished";
+            state.turn.phase = "finished";
+            state.turn.playerId = null;
+            state.turn.movementRemaining = 0;
+        } else finishPlayerTurn(state, playerId);
+    }
+    return correct;
 }
 
 module.exports = {
     rooms,
     spawnPoints,
     secretPass,
+    initialSolution,
     createInitialGameState,
     rollMovementDie,
     movementDistances,
     movementPath,
     movePlayer,
-    takeWardenTurn
+    takeWardenTurn,
+    endPlayerTurn,
+    completeWardenTurn,
+    removePlayerFromGame,
+    isAdjacent,
+    submitAccusation
 };

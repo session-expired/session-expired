@@ -32,8 +32,13 @@ const secureCookies = process.env.COOKIE_SECURE
 const publicDirectory = path.join(__dirname, "..", "public");
 const pageDirectory = path.join(__dirname, "pages");
 const publicPageDirectory = path.join(publicDirectory, "pages");
-const { rooms, spawnPoints, secretPass, rollMovementDie, movementPath, movePlayer } = require("./game/board");
+const {
+  rooms, spawnPoints, secretPass, rollMovementDie, movementPath, movePlayer,
+  endPlayerTurn, completeWardenTurn, removePlayerFromGame, submitAccusation
+} = require("./game/board");
 const minimumLobbyPlayers = process.env.SESSION_EXPIRED_DEV_RUNNER === "true" ? 1 : 2;
+const wardenPhaseMs = Number(process.env.WARDEN_PHASE_MS) || 1200;
+const wardenTimers = new Map();
 
 
 if (!process.env.DATABASE_URL) {
@@ -91,6 +96,45 @@ app.get("/account", requireAuthentication, sendPage("account.html"));
 app.get("/lobby", requireAuthentication, (request, response) => {
   response.sendFile(path.join(publicPageDirectory, "lobbyPage.html"));
 });
+
+function broadcastGameState(gameId, state) {
+  io.to(`game:${gameId}`).emit("game-state", state);
+}
+
+function scheduleWardenCompletion(gameId) {
+  const key = String(gameId);
+  if (wardenTimers.has(key)) return;
+  const timer = setTimeout(async () => {
+    wardenTimers.delete(key);
+    let client;
+    try {
+      client = await pool.connect();
+      await client.query("BEGIN");
+      const result = await client.query("SELECT state FROM games WHERE id = $1 FOR UPDATE", [gameId]);
+      const state = result.rows[0]?.state;
+      if (!state || !completeWardenTurn(state)) {
+        await client.query("ROLLBACK");
+        return;
+      }
+      await client.query("UPDATE games SET state = $1::jsonb WHERE id = $2", [JSON.stringify(state), gameId]);
+      await client.query("COMMIT");
+      broadcastGameState(gameId, state);
+    } catch (error) {
+      if (client) await client.query("ROLLBACK");
+      console.error("Unable to complete Warden phase:", error);
+    } finally {
+      client?.release();
+    }
+  }, wardenPhaseMs);
+  wardenTimers.set(key, timer);
+}
+
+function cancelWardenCompletion(gameId) {
+  const key = String(gameId);
+  const timer = wardenTimers.get(key);
+  if (timer) clearTimeout(timer);
+  wardenTimers.delete(key);
+}
 app.get("/lobbyPage.html", requireAuthentication, (request, response) => {
   response.redirect("/lobby");
 });
@@ -273,6 +317,7 @@ app.post("/api/games/:gameId/roll", requireAuthentication, async (request, respo
     }
     await client.query("UPDATE games SET state = $1::jsonb WHERE id = $2", [JSON.stringify(state), request.params.gameId]);
     await client.query("COMMIT");
+    broadcastGameState(request.params.gameId, state);
     response.json({ roll, state });
   } catch (error) {
     if (client) await client.query("ROLLBACK");
@@ -315,7 +360,83 @@ app.post("/api/games/:gameId/move", requireAuthentication, async (request, respo
     }
     await client.query("UPDATE games SET state = $1::jsonb WHERE id = $2", [JSON.stringify(state), request.params.gameId]);
     await client.query("COMMIT");
+    broadcastGameState(request.params.gameId, state);
     response.json({ cost, distance: path.length, path, state });
+  } catch (error) {
+    if (client) await client.query("ROLLBACK");
+    next(error);
+  } finally {
+    client?.release();
+  }
+});
+
+app.post("/api/games/:gameId/end-turn", requireAuthentication, async (request, response, next) => {
+  if (!/^[1-9]\d*$/.test(request.params.gameId)) return response.status(404).json({ error: "Game not found." });
+  let client;
+  try {
+    client = await pool.connect();
+    await client.query("BEGIN");
+    const result = await client.query(
+      `SELECT g.state FROM games g
+       JOIN lobby_players lp ON lp.lobby_id = g.lobby_id
+       WHERE g.id = $1 AND lp.user_id = $2 FOR UPDATE OF g`,
+      [request.params.gameId, request.session.userId]
+    );
+    if (!result.rows[0]) {
+      await client.query("ROLLBACK");
+      return response.status(404).json({ error: "Game not found." });
+    }
+    const state = result.rows[0].state;
+    let transition;
+    try {
+      transition = endPlayerTurn(state, request.session.userId);
+    } catch (error) {
+      await client.query("ROLLBACK");
+      return response.status(409).json({ error: error.message });
+    }
+    await client.query("UPDATE games SET state = $1::jsonb WHERE id = $2", [JSON.stringify(state), request.params.gameId]);
+    await client.query("COMMIT");
+    broadcastGameState(request.params.gameId, state);
+    if (transition.warden) scheduleWardenCompletion(request.params.gameId);
+    response.json({ state });
+  } catch (error) {
+    if (client) await client.query("ROLLBACK");
+    next(error);
+  } finally {
+    client?.release();
+  }
+});
+
+app.post("/api/games/:gameId/accuse", requireAuthentication, async (request, response, next) => {
+  if (!/^[1-9]\d*$/.test(request.params.gameId)) return response.status(404).json({ error: "Game not found." });
+  let client;
+  try {
+    client = await pool.connect();
+    await client.query("BEGIN");
+    const result = await client.query(
+      `SELECT g.state FROM games g
+       JOIN lobby_players lp ON lp.lobby_id = g.lobby_id
+       WHERE g.id = $1 AND lp.user_id = $2 FOR UPDATE OF g`,
+      [request.params.gameId, request.session.userId]
+    );
+    if (!result.rows[0]) {
+      await client.query("ROLLBACK");
+      return response.status(404).json({ error: "Game not found." });
+    }
+    const state = result.rows[0].state;
+    let correct;
+    try {
+      correct = submitAccusation(state, request.session.userId, request.body);
+    } catch (error) {
+      await client.query("ROLLBACK");
+      return response.status(409).json({ error: error.message });
+    }
+    await client.query("UPDATE games SET state = $1::jsonb WHERE id = $2", [JSON.stringify(state), request.params.gameId]);
+    await client.query("COMMIT");
+    if (correct) cancelWardenCompletion(request.params.gameId);
+    broadcastGameState(request.params.gameId, state);
+    if (!correct && state.turn.phase === "warden") scheduleWardenCompletion(request.params.gameId);
+    response.json({ correct, state });
   } catch (error) {
     if (client) await client.query("ROLLBACK");
     next(error);
@@ -348,15 +469,15 @@ app.post("/api/games/:gameId/quit", requireAuthentication, async (request, respo
     }
 
     const state = game.state;
-    state.players = Array.isArray(state.players)
-      ? state.players.filter((player) => String(player.id) !== String(request.session.userId))
-      : [];
+    const transition = removePlayerFromGame(state, request.session.userId);
     await client.query("UPDATE games SET state = $1::jsonb WHERE id = $2", [JSON.stringify(state), request.params.gameId]);
     await client.query(
       "DELETE FROM lobby_players WHERE lobby_id = $1 AND user_id = $2",
       [game.lobby_id, request.session.userId]
     );
     await client.query("COMMIT");
+    broadcastGameState(request.params.gameId, state);
+    if (transition.warden) scheduleWardenCompletion(request.params.gameId);
     response.json({ ok: true, redirect: "/" });
   } catch (error) {
     if (client) await client.query("ROLLBACK");
@@ -398,8 +519,12 @@ io.engine.on("connection_error", (error) => {
 
 registerChatHandlers({ io, pool, globalChatHistory, globalChatWindowMs });
 
-function startServer() {
-  server.listen(port, hostname, () => console.log(`http://${hostname}:${port}`));
+async function startServer() {
+  const interruptedWardens = await pool.query(
+    "SELECT id FROM games WHERE state->>'status' = 'active' AND state->'turn'->>'phase' = 'warden'"
+  );
+  interruptedWardens.rows.forEach(game => scheduleWardenCompletion(game.id));
+  return server.listen(port, hostname, () => console.log(`http://${hostname}:${port}`));
 }
 
 if (require.main === module) {

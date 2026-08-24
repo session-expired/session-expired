@@ -161,7 +161,19 @@
   font-size: 9px;
 }
 
-#roll-movement {
+.accusation-controls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 6px;
+  font: 9px "Press Start 2P", monospace;
+}
+
+.accusation-controls select,
+.accusation-controls button { padding: 5px; }
+
+#roll-movement,
+#end-turn {
   padding: 7px 9px;
   border: 2px solid #171713;
   background: #8b1e1e;

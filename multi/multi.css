@@ -1,0 +1,9 @@
+.multi-page { display: grid; grid-template: 52px 1fr / minmax(300px, 28vw) 1fr; }
+.multi-page .game-header { grid-column: 1 / -1; }
+.multi-page #game { height: calc(100dvh - 52px); padding: 10px; }
+#multi-panel { overflow: auto; padding: 12px; background: #292923; font: 12px/1.5 Arial, sans-serif; }
+#controlled-player { padding: 8px; border: 2px solid #d5c47f; background: #4a4a42; }
+#multi-panel button, #multi-panel select { padding: 7px; }
+#accusation-form { display: grid; gap: 6px; margin: 12px 0; }
+#raw-state { max-height: 300px; overflow: auto; white-space: pre-wrap; }
+@media (max-width: 850px) { .multi-page { grid-template: 52px auto 1fr / 1fr; } #multi-panel { max-height: 34vh; } .multi-page #game { height: auto; min-height: 65vh; } }

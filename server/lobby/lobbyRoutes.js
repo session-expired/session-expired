@@ -319,7 +319,7 @@ function createLobbyRouter({ pool, requireAuthentication, minimumPlayers = 2 }) 
     try {
       client = await pool.connect();
       await client.query("BEGIN");
-      const lobbyResult = await client.query("SELECT host_id, status FROM lobbies WHERE id = $1 FOR UPDATE", [request.params.lobbyId]);
+      const lobbyResult = await client.query("SELECT id, name, host_id, status FROM lobbies WHERE id = $1 FOR UPDATE", [request.params.lobbyId]);
       const lobby = lobbyResult.rows[0];
       if (!lobby) {
         await client.query("ROLLBACK");
@@ -350,7 +350,7 @@ function createLobbyRouter({ pool, requireAuthentication, minimumPlayers = 2 }) 
         await client.query("ROLLBACK");
         return response.status(409).json({ error: "Every player must choose a character before the game starts." });
       }
-      const state = createInitialGameState(players.rows);
+      const state = createInitialGameState(players.rows, Math.random, lobby);
       const game = await client.query(
         "INSERT INTO games (lobby_id, state) VALUES ($1, $2::jsonb) RETURNING id",
         [request.params.lobbyId, JSON.stringify(state)]

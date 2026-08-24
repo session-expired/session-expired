@@ -9,6 +9,10 @@ const zoomResetButton = document.getElementById("zoom-reset");
 const zoomInButton = document.getElementById("zoom-in");
 const turnStatusElement = document.getElementById("turn-status");
 const rollMovementButton = document.getElementById("roll-movement");
+const endTurnButton = document.getElementById("end-turn");
+const accusationForm = document.getElementById("accusation-form");
+const accusationStatus = document.getElementById("accusation-status");
+const accuseButton = accusationForm?.querySelector('button[type="submit"]');
 const MIN_ZOOM = 1;
 const MAX_ZOOM = 2.5;
 const ZOOM_STEP = 0.25;
@@ -33,11 +37,12 @@ function showCharacterDialogue(character, group) {
         text: sayings[Math.floor(Math.random() * sayings.length)],
         timeout: null
     };
+    const displayDuration = 12000 + (Math.random() * 4000 - 2000);
     entry.timeout = window.setTimeout(() => {
         if (activeDialogue.get(character) !== entry) return;
         activeDialogue.delete(character);
         renderPlayers();
-    }, 10000);
+    }, displayDuration);
     activeDialogue.set(character, entry);
     return entry.text;
 }
@@ -182,6 +187,9 @@ function renderMovementRange() {
         blocked.add(`${gameState.warden.position.row},${gameState.warden.position.col}`);
     }
     const distances = new Map([[`${player.position.row},${player.position.col}`, 0]]);
+    const visitedThisTurn = new Set((turn.visitedPositions || [])
+        .map(position => `${position.row},${position.col}`));
+    visitedThisTurn.delete(`${player.position.row},${player.position.col}`);
     const queue = [{ ...player.position }];
 
     function canCrossRoomBoundary(from, to) {
@@ -208,7 +216,7 @@ function renderMovementRange() {
             const col = current.col + colOffset;
             const key = `${row},${col}`;
             if (row < 1 || row > gameState.board.rows || col < 1 || col > gameState.board.cols) continue;
-            if (blocked.has(key) || distances.has(key)) continue;
+            if (blocked.has(key) || visitedThisTurn.has(key) || distances.has(key)) continue;
             if (player.secretPassageCooldown?.row === row && player.secretPassageCooldown?.col === col) continue;
             if (squareAt(row, col)?.dataset.blocked === "true") continue;
             if (!canCrossRoomBoundary(current, { row, col })) continue;
@@ -225,14 +233,48 @@ function renderGameState() {
     renderMovementRange();
 }
 
+function applyAuthoritativeState(nextState) {
+    const previousWardenPosition = gameState?.warden?.position ? { ...gameState.warden.position } : null;
+    const previousWardenTurns = gameState?.warden?.turnsTaken || 0;
+    const previousPlayerId = gameState?.turn?.playerId;
+    gameState = nextState;
+    const wardenMoved = (gameState.warden?.turnsTaken || 0) > previousWardenTurns;
+    if (wardenMoved) showCharacterDialogue(gameState.warden.character, "turn_start");
+    if (gameState.turn?.playerId && String(gameState.turn.playerId) !== String(previousPlayerId)) {
+        const nextPlayer = gameState.players.find(player => String(player.id) === String(gameState.turn.playerId));
+        if (nextPlayer) showCharacterDialogue(nextPlayer.character, "turn_start");
+    }
+    renderGameState();
+    if (wardenMoved && previousWardenPosition) animateWardenMove(previousWardenPosition);
+}
+
 function renderTurn() {
     const turn = gameState?.turn;
     if (!turn) return;
-    const player = gameState.players[turn.playerIndex];
-    turnStatusElement.textContent = turn.phase === "awaiting_roll"
-        ? `${player?.username || "Player"}'s turn · roll for movement`
-        : `${player?.username || "Player"} rolled ${turn.die.roll} · ${turn.movementRemaining} moves left`;
+    const player = gameState.players.find(candidate => String(candidate.id) === String(turn.playerId));
+    const isMine = String(turn.playerId) === currentUserId;
+    if (turn.phase === "finished") turnStatusElement.textContent = "Game finished";
+    else if (turn.phase === "warden") turnStatusElement.textContent = "The Warden is making his rounds…";
+    else if (isMine) turnStatusElement.textContent = turn.phase === "awaiting_roll"
+        ? "YOUR TURN · roll for movement"
+        : turn.phase === "awaiting_end"
+            ? "YOUR TURN · movement complete · end your turn"
+            : `YOUR TURN · rolled ${turn.die.roll} · ${turn.movementRemaining} moves left`;
+    else turnStatusElement.textContent = `Waiting for ${player?.username || "the next player"}…`;
     rollMovementButton.hidden = turn.phase !== "awaiting_roll" || String(turn.playerId) !== currentUserId;
+    endTurnButton.hidden = !isMine || turn.phase !== "awaiting_end";
+    if (accusationForm) {
+        const localPlayer = gameState.players.find(candidate => String(candidate.id) === currentUserId);
+        const adjacent = localPlayer?.position && gameState.warden?.position &&
+            Math.abs(localPlayer.position.row - gameState.warden.position.row) +
+            Math.abs(localPlayer.position.col - gameState.warden.position.col) === 1;
+        const eligible = gameState.status === "active" && isMine && adjacent && localPlayer?.canAccuse;
+        accuseButton.disabled = !eligible;
+        accusationStatus.textContent = eligible ? "You are adjacent to the Warden." :
+            !isMine ? "You may only accuse during your turn." :
+                !adjacent ? "You must reach the Warden to make an accusation." :
+                    "You cannot make another accusation.";
+    }
 }
 
 rollMovementButton.addEventListener("click", async () => {
@@ -241,12 +283,57 @@ rollMovementButton.addEventListener("click", async () => {
         const response = await fetch(`/api/games/${gameId}/roll`, { method: "POST" });
         const data = await response.json();
         if (!response.ok) throw new Error(data.error || "Unable to roll the movement die.");
-        gameState = data.state;
-        renderGameState();
+        applyAuthoritativeState(data.state);
     } catch (error) {
         statusElement.textContent = error.message;
     } finally {
         rollMovementButton.disabled = false;
+    }
+});
+
+endTurnButton.addEventListener("click", async () => {
+    endTurnButton.disabled = true;
+    try {
+        const response = await fetch(`/api/games/${gameId}/end-turn`, { method: "POST" });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || "Unable to end the turn.");
+        applyAuthoritativeState(data.state);
+    } catch (error) {
+        statusElement.textContent = error.message;
+    } finally {
+        endTurnButton.disabled = false;
+    }
+});
+
+window.addEventListener("game-state", event => {
+    if (!event.detail) return;
+    applyAuthoritativeState(event.detail);
+});
+
+window.addEventListener("game-perspective", event => {
+    if (!window.MULTI_TEST_MODE) return;
+    currentUserId = event.detail == null ? null : String(event.detail);
+    if (gameState) renderGameState();
+});
+
+accusationForm?.addEventListener("submit", async event => {
+    event.preventDefault();
+    accuseButton.disabled = true;
+    try {
+        const response = await fetch(`/api/games/${gameId}/accuse`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(Object.fromEntries(new FormData(accusationForm)))
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || "Unable to make that accusation.");
+        statusElement.textContent = data.correct
+            ? "Correct accusation — game finished."
+            : "Incorrect accusation — your turn has ended.";
+        applyAuthoritativeState(data.state);
+    } catch (error) {
+        statusElement.textContent = error.message;
+        renderTurn();
     }
 });
 
@@ -365,6 +452,10 @@ Promise.all([
         [...gameState.players, gameState.warden]
             .filter(entity => entity?.character)
             .forEach(entity => showCharacterDialogue(entity.character, "game_start"));
+        if (window.MULTI_TEST_MODE && gameState.turn?.playerId) {
+            const activePlayer = gameState.players.find(player => String(player.id) === String(gameState.turn.playerId));
+            if (activePlayer) showCharacterDialogue(activePlayer.character, "turn_start");
+        }
         const { rows, cols } = state.board;
 
         function getRoomAt(row, col) {
@@ -448,7 +539,7 @@ Promise.all([
                 }
                 if ((gameState.turn?.number || 0) > previousTurnNumber &&
                     gameState.turn?.phase === "awaiting_roll") {
-                    const nextPlayer = gameState.players[gameState.turn.playerIndex];
+                    const nextPlayer = gameState.players.find(player => String(player.id) === String(gameState.turn.playerId));
                     if (nextPlayer) showCharacterDialogue(nextPlayer.character, "turn_start");
                 }
                 statusElement.textContent = `Moved ${data.cost} grid location${data.cost === 1 ? "" : "s"}.`;

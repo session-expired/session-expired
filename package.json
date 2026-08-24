@@ -8,6 +8,7 @@
     "predev": "kill-port 3000 || true",
     "dev": "node server/dev.js",
     "game": "node server/game-dev.js",
+    "multi": "node multi/start.js",
     "test": "node --test"
   },
   "dependencies": {
