@@ -34,8 +34,8 @@ export const movePlayer = (gameId, destination) => jsonRequest(`/api/games/${gam
     body: JSON.stringify(destination)
 }, "Unable to move there.");
 
-export const discoverHint = (gameId, hintId) =>
-    jsonRequest(`/api/games/${gameId}/hints/${encodeURIComponent(hintId)}`, {
+export const discoverHint = (gameId, searchItemId) =>
+    jsonRequest(`/api/games/${gameId}/hints/${encodeURIComponent(searchItemId)}`, {
         method: "POST"
     }, "Unable to investigate that object.");
 

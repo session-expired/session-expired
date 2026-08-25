@@ -60,6 +60,11 @@
           "I sense an unseen presence. It may simply be poor ventilation.",
           "If anyone asks, I was praying."
         ],
+        "empty_search": [
+          "Nothing. I have survived worse searches.",
+          "Empty. Perhaps the evidence also refuses to die.",
+          "Nothing here. Suspicious. I like it."
+        ],
         "door_open": [
           "A door opens. This is rarely good news.",
           "At last. Providence has discovered hinges.",
@@ -177,6 +182,11 @@
           "No, more precisely than that.",
           "If the measurement disagrees with Aristotle, measure it again.",
           "If it still disagrees with Aristotle, perhaps Aristotle should have measured it himself."
+        ],
+        "empty_search": [
+          "Nothing. Not even a nose worth losing.",
+          "Empty. My instruments predicted disappointment.",
+          "I have observed absolutely nothing. Precisely."
         ],
         "door_open": [
           "At last. An observable result.",
@@ -305,6 +315,11 @@
           "I have written instructions for a machine that does not exist. Somehow I am the unreasonable one.",
           "Imagine what these machines might become in two hundred years.",
           "I hope future programmers write adequate documentation."
+        ],
+        "empty_search": [
+          "Nothing. An elegant result, if useless.",
+          "Empty. I appear to have computed disappointment.",
+          "No evidence. I blame the input."
         ],
         "door_open": [
           "Excellent. The instruction produced the desired result.",
@@ -441,6 +456,11 @@
           "Whatever you heard about Sicily has been grotesquely exaggerated.",
           "Well. Moderately exaggerated.",
           "Fine. Selectively exaggerated."
+        ],
+        "empty_search": [
+          "Nothing. The universe is being deliberately unhelpful.",
+          "Empty. I shall blame a secret order.",
+          "No evidence. Clearly, it has been occulted."
         ],
         "door_open": [
           "Behold. The ancient mystery of the doorknob.",
@@ -587,6 +607,11 @@
           "Actually, definitely wash your hands.",
           "We knew radiation was energetic. We were somewhat less clear on the consequences.",
           "My definition of 'acceptable exposure' may be historically outdated."
+        ],
+        "empty_search": [
+          "Nothing. Not even mildly radioactive.",
+          "Empty. Scientifically disappointing.",
+          "No evidence. I checked twice. That is how science works."
         ],
         "door_open": [
           "Good. A reproducible result.",
@@ -741,6 +766,11 @@
           "That came out wrong.",
           "Perhaps I'll make sandwiches.",
           "Why is everyone leaving?"
+        ],
+        "empty_search": [
+          "Nothing. Have you checked the kitchen?",
+          "Empty. Finally, something they cannot blame on me.",
+          "No evidence. Wash your hands anyway."
         ],
         "door_open": [
           "Finally. I was beginning to feel quarantined.",

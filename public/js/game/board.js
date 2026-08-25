@@ -205,17 +205,14 @@ function bindBoardInput() {
                 elements.status.textContent = "Move beside the object, then click it to search.";
                 return;
             }
-            const hintId = item?.hintIds?.find(id => !player?.discoveredHintIds?.includes(id));
-            if (!hintId) {
-                elements.status.textContent = `${item?.description || "This object"} contains no undiscovered hints.`;
-            } else {
-                try {
-                    const data = await discoverHint(gameId, hintId);
-                    elements.status.textContent = `${item.description} Hint: ${data.hint.text}`;
-                    applyAuthoritativeState(data.state);
-                } catch (error) {
-                    elements.status.textContent = error.message;
-                }
+            try {
+                const data = await discoverHint(gameId, item.id);
+                elements.status.textContent = data.empty
+                    ? `${item.description} contains no evidence.`
+                    : `${item.description} ${data.hints.map(hint => `Hint: ${hint.text}`).join(" ")}`;
+                applyAuthoritativeState(data.state);
+            } catch (error) {
+                elements.status.textContent = error.message;
             }
         }
         if (debugCoordinates) {

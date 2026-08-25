@@ -241,15 +241,6 @@
   ],
   "search_items": [
     {
-      "id": "search_item_placeholder",
-      "rows": { "start": 1, "end": 2 },
-      "cols": { "start": 1, "end": 2 },
-      "description": "Describe the object players can investigate.",
-      "roomId": "rec_room",
-      "hintIds": [],
-      "enabled": false
-    },
-    {
       "id": "card_table",
       "rows": { "start": 6, "end": 7 },
       "cols": { "start": 2, "end": 3 },

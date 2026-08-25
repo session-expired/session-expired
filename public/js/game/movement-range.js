@@ -3,6 +3,8 @@ export function renderMovementRange(state, currentUserId, boardLayout, elements)
         .forEach(square => square.classList.remove("movement-range"));
     elements.board.querySelectorAll(".search-item-in-range")
         .forEach(square => square.classList.remove("search-item-in-range"));
+    elements.board.querySelectorAll(".search-item-has-hints")
+        .forEach(square => square.classList.remove("search-item-has-hints"));
     const turn = state?.turn;
     if (turn?.phase !== "moving" || String(turn.playerId) !== currentUserId) return;
     const player = state.players.find(candidate => String(candidate.id) === currentUserId);
@@ -63,7 +65,9 @@ export function renderMovementRange(state, currentUserId, boardLayout, elements)
         }
         if (canReachAdjacentTile) {
             elements.board.querySelectorAll("[data-search-item-id]").forEach(square => {
-                if (square.dataset.searchItemId === item.id) square.classList.add("search-item-in-range");
+                if (square.dataset.searchItemId !== item.id) return;
+                square.classList.add("search-item-in-range");
+                if (item.hintIds?.length) square.classList.add("search-item-has-hints");
             });
         }
     }

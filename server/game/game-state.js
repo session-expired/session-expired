@@ -1,6 +1,6 @@
 const { spawnPoints, blockedTiles, searchItems } = require("./board-data");
 const { createSolution } = require("./solution");
-const { roomsForSolution } = require("./hint-rules");
+const { roomsForSolution, distributeHints, validateHintDistribution } = require("./hint-rules");
 
 function shuffle(items, random) {
     for (let index = items.length - 1; index > 0; index--) {
@@ -23,16 +23,9 @@ function createInitialGameState(gamePlayers, random = Math.random, lobby = {}) {
         facing: "right", dialogueEvent: null, dialogueEventId: 0, secretPassageCooldown: null
     }));
     const turnOrder = shuffle(players.map(player => String(player.id)), random);
-    const gameSearchItems = searchItems.map(item => ({ ...structuredClone(item), hintIds: [] }));
-    if (gameSearchItems.length) {
-        const activeHintIds = shuffle(gameRooms.flatMap(room => room.hintIds), random);
-        const itemOffset = Math.floor(random() * gameSearchItems.length);
-        activeHintIds.forEach((hintId, index) => {
-            gameSearchItems[(itemOffset + index) % gameSearchItems.length].hintIds.push(hintId);
-        });
-    }
+    const gameSearchItems = distributeHints(solution, searchItems, random);
 
-    return {
+    const state = {
         lobbyId: lobby.id == null ? null : String(lobby.id),
         lobbyName: lobby.name ?? null,
         status: "active",
@@ -60,6 +53,8 @@ function createInitialGameState(gamePlayers, random = Math.random, lobby = {}) {
         endedAt: null,
         createdAt: Date.now()
     };
+    validateHintDistribution(state);
+    return state;
 }
 
 module.exports = { createInitialGameState };

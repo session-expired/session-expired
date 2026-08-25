@@ -20,6 +20,7 @@ const {
   completeWardenTurn,
   removePlayerFromGame,
   discoverHint,
+  validateHintDistribution,
   submitAccusation
 } = require("../server/game/board");
 
@@ -120,7 +121,7 @@ test("the hint catalog uses valid categories, rooms, and accusation options", ()
   }
 });
 
-test("a player discovers a search-item hint from an adjacent tile", () => {
+test("a player discovers and depletes a search-item hint from an adjacent tile", () => {
   const state = createInitialGameState([
     { id: "1", username: "Ada", selected_character: "lovelace" },
     { id: "2", username: "Grace", selected_character: "curie" }
@@ -142,13 +143,14 @@ test("a player discovers a search-item hint from an adjacent tile", () => {
     description: "A desk.", roomId: "rec_room", hintIds: ["muddy_cuff"]
   }];
 
-  const first = discoverHint(state, player.id, "muddy_cuff", catalog);
+  const first = discoverHint(state, player.id, "desk", catalog);
   state.turn.phase = "moving";
   state.turn.movementRemaining = 2;
-  const second = discoverHint(state, player.id, "muddy_cuff", catalog);
+  const second = discoverHint(state, player.id, "desk", catalog);
 
-  assert.equal(first.alreadyDiscovered, false);
-  assert.equal(second.alreadyDiscovered, true);
+  assert.equal(first.empty, false);
+  assert.equal(second.empty, true);
+  assert.deepEqual(state.board.searchItems[0].hintIds, []);
   assert.deepEqual(player.discoveredHintIds, ["muddy_cuff"]);
   assert.deepEqual(player.discoveredHints, [{
     id: "muddy_cuff",
@@ -159,6 +161,38 @@ test("a player discovers a search-item hint from an adjacent tile", () => {
   }]);
   assert.equal(state.turn.movementRemaining, 0);
   assert.equal(state.turn.phase, "awaiting_end");
+});
+
+test("generated hint distributions are solvable, protect answers, and respect capacity", () => {
+  for (let index = 0; index < 100; index++) {
+    let seed = index + 1;
+    const random = () => ((seed = (seed * 16807) % 2147483647) - 1) / 2147483646;
+    const state = createInitialGameState([{ id: "1", username: "Ada" }], random);
+    assert.equal(validateHintDistribution(state), true);
+    assert.ok(state.board.searchItems.every(item => item.hintIds.length <= 7));
+  }
+});
+
+test("searches award at most two shared hints and empty searches trigger dialogue", () => {
+  const state = createInitialGameState([{ id: "1", username: "Ada", selected_character: "lovelace" }], () => 0);
+  const player = state.players[0];
+  const item = state.board.searchItems.find(source => source.roomId === "rec_room");
+  const validIds = hintCatalog.hints.filter(hint => hintSupportsSolution(hint, state.solution)).slice(0, 5).map(hint => hint.id);
+  item.hintIds = [...validIds];
+  player.position = { row: item.rows.start - 1, col: item.cols.start };
+  state.turn.playerId = player.id;
+  const remaining = [];
+  for (let search = 0; search < 4; search++) {
+    state.turn.phase = "moving";
+    state.turn.movementRemaining = 3;
+    const result = discoverHint(state, player.id, item.id);
+    remaining.push(item.hintIds.length);
+    assert.ok(result.hints.length <= 2);
+  }
+  assert.deepEqual(remaining, [3, 1, 0, 0]);
+  assert.equal(player.dialogueEvent, "empty_search");
+  assert.equal(player.dialogueEventId, 1);
+  assert.equal(state.turn.movementRemaining, 0);
 });
 
 test("hints cannot be collected away from their search item or by an inactive player", () => {
