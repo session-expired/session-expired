@@ -65,6 +65,7 @@ function discoverHint(state, playerId, hintId, catalog = hintCatalog) {
             id: hint.id,
             category: hint.category,
             text: hint.text,
+            excludes: hint.excludes,
             searchItemId: searchItem.id
         });
     }

@@ -55,6 +55,8 @@ test("a launched game snapshots the board and its lobby players", () => {
     method: "electrocuted"
   });
   assert.equal(state.winner, null);
+  assert.equal(state.fullRounds, 0);
+  assert.equal(state.endedAt, null);
   assert.equal(typeof state.createdAt, "number");
 });
 
@@ -130,7 +132,10 @@ test("a player discovers a search-item hint from an adjacent tile", () => {
   const catalog = {
     categories: ["murderer", "victim", "room", "method"],
     roomIds: rooms.map(room => room.id),
-    hints: [{ id: "muddy_cuff", category: "murderer", roomId: "rec_room", text: "A muddy cuff." }]
+    hints: [{
+      id: "muddy_cuff", category: "murderer", roomId: "rec_room",
+      text: "A muddy cuff.", excludes: "mallon"
+    }]
   };
   state.board.searchItems = [{
     id: "desk", rows: { start: 3, end: 3 }, cols: { start: 3, end: 4 },
@@ -149,6 +154,7 @@ test("a player discovers a search-item hint from an adjacent tile", () => {
     id: "muddy_cuff",
     category: "murderer",
     text: "A muddy cuff.",
+    excludes: "mallon",
     searchItemId: "desk"
   }]);
   assert.equal(state.turn.movementRemaining, 0);
@@ -374,6 +380,7 @@ test("a correct accusation finishes the turn state without advancing", () => {
   assert.equal(state.status, "finished");
   assert.equal(state.turn.phase, "finished");
   assert.equal(state.turn.playerId, null);
+  assert.equal(typeof state.endedAt, "number");
   assert.equal(completeWardenTurn(state), false);
 });
 
@@ -512,6 +519,7 @@ test("the Warden rolls 1d4 and moves that many tiles inside his office", () => {
 
   assert.equal(state.warden.lastRoll, 1);
   assert.equal(state.warden.turnsTaken, 1);
+  assert.equal(state.fullRounds, 1);
   assert.equal(path.length, 1);
   assert.deepEqual(state.warden.previousPosition, { row: 13, col: 13 });
   assert.ok(path.every(tile => tile.row >= 8 && tile.row <= 17 && tile.col >= 12 && tile.col <= 19));

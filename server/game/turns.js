@@ -50,6 +50,7 @@ function takeWardenTurn(state, random = Math.random) {
     state.warden.lastRoll = roll;
     state.warden.lastPath = path;
     state.warden.turnsTaken = (state.warden.turnsTaken || 0) + 1;
+    state.fullRounds = (state.fullRounds || 0) + 1;
     return path;
 }
 

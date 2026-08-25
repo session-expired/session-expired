@@ -1,9 +1,9 @@
-const categoryLabels = {
-    murderer: "Murderer",
-    victim: "Victim",
-    room: "Room",
-    method: "Method"
-};
+const categories = [
+    ["method", "Method"],
+    ["murderer", "Murderer"],
+    ["room", "Room"],
+    ["victim", "Victim"]
+];
 
 export function renderJournal(elements, state, currentUserId) {
     if (!elements.journalEntries) return;
@@ -11,23 +11,34 @@ export function renderJournal(elements, state, currentUserId) {
     const hints = player?.discoveredHints || [];
     elements.journalCount.textContent = String(hints.length);
 
-    if (!hints.length) {
-        const empty = document.createElement("li");
-        empty.className = "journal-empty";
-        empty.textContent = "No clues recorded yet.";
-        elements.journalEntries.replaceChildren(empty);
-        return;
-    }
+    const sections = categories.map(([category, label]) => {
+        const section = document.createElement("section");
+        section.className = "journal-category";
+        section.dataset.category = category;
+        const heading = document.createElement("h3");
+        heading.textContent = label;
+        const list = document.createElement("ul");
+        const categoryHints = hints.filter(hint => hint.category === category);
 
-    elements.journalEntries.replaceChildren(...hints.map((hint, index) => {
-        const entry = document.createElement("li");
-        entry.className = "journal-entry";
-        const heading = document.createElement("span");
-        heading.className = "journal-entry-heading";
-        heading.textContent = `${index + 1}. ${categoryLabels[hint.category] || hint.category}`;
-        const text = document.createElement("p");
-        text.textContent = hint.text;
-        entry.append(heading, text);
-        return entry;
-    }));
+        if (!categoryHints.length) {
+            const empty = document.createElement("li");
+            empty.className = "journal-empty";
+            empty.textContent = "No clues recorded.";
+            list.appendChild(empty);
+        } else {
+            list.append(...categoryHints.map(hint => {
+                const entry = document.createElement("li");
+                entry.className = "journal-entry";
+                const text = document.createElement("p");
+                text.textContent = hint.text;
+                entry.appendChild(text);
+                return entry;
+            }));
+        }
+
+        section.append(heading, list);
+        return section;
+    });
+
+    elements.journalEntries.replaceChildren(...sections);
 }

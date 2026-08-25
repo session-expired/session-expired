@@ -5,6 +5,7 @@ async function resetDevelopmentDatabase(pool) {
     await client.query("BEGIN");
     await client.query(
       `TRUNCATE TABLE
+         completed_games,
          games,
          lobby_players,
          lobbies,

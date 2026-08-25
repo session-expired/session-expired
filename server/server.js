@@ -281,7 +281,11 @@ app.get("/api/games/:gameId", requireAuthentication, async (request, response, n
       [request.params.gameId, request.session.userId]
     );
     if (!result.rows[0]) return response.status(404).json({ error: "Game not found." });
-    response.json({ game: result.rows[0], currentUserId: String(request.session.userId) });
+    response.json({
+      game: result.rows[0],
+      currentUserId: String(request.session.userId),
+      debugCoordinates: false
+    });
   } catch (error) {
     next(error);
   }
@@ -474,6 +478,17 @@ app.post("/api/games/:gameId/accuse", requireAuthentication, async (request, res
       return response.status(409).json({ error: error.message });
     }
     await client.query("UPDATE games SET state = $1::jsonb WHERE id = $2", [JSON.stringify(state), request.params.gameId]);
+    if (correct) {
+      await client.query(
+        `INSERT INTO completed_games
+           (game_id, lobby_id, lobby_name, winner_user_id, full_rounds, ended_at, end_state)
+         SELECT g.id, g.lobby_id, $2, $3, $4, $5, $1::jsonb
+         FROM games g WHERE g.id = $6
+         ON CONFLICT (game_id) DO NOTHING`,
+        [JSON.stringify(state), state.lobbyName, state.winner.id, state.fullRounds || 0,
+          new Date(state.endedAt), request.params.gameId]
+      );
+    }
     await client.query("COMMIT");
     if (correct) cancelWardenCompletion(request.params.gameId);
     broadcastGameState(request.params.gameId, state);

@@ -61,7 +61,8 @@ app.get(`/__multi/${gameId}`, (request, response) => response.sendFile(path.join
 app.get(`/api/games/${gameId}`, (request, response) => {
   response.json({
     game: { id: gameId, state, created_at: new Date(state.createdAt).toISOString() },
-    currentUserId: state.turn.playerId
+    currentUserId: state.turn.playerId,
+    debugCoordinates: true
   });
 });
 app.get("/api/board", (request, response) => response.json({

@@ -3,6 +3,31 @@ import { accuse, loadAccusationOptions } from "./board-api.js";
 export function createAccusationControls(elements, gameId, callbacks) {
     let optionsLoaded = false;
 
+    function renderEliminatedOptions(player) {
+        const fieldByCategory = {
+            murderer: "killer",
+            victim: "victim",
+            room: "room",
+            method: "method"
+        };
+        const eliminatedByField = new Map();
+
+        for (const hint of player?.discoveredHints || []) {
+            const field = fieldByCategory[hint.category];
+            if (!field || !hint.excludes) continue;
+            if (!eliminatedByField.has(field)) eliminatedByField.set(field, new Set());
+            eliminatedByField.get(field).add(hint.excludes);
+        }
+
+        for (const field of Object.values(fieldByCategory)) {
+            const select = elements.accusationForm.elements.namedItem(field);
+            const eliminated = eliminatedByField.get(field) || new Set();
+            for (const option of select?.options || []) {
+                option.classList.toggle("accusation-option-eliminated", eliminated.has(option.value));
+            }
+        }
+    }
+
     async function initialize() {
         if (!elements.accusationForm) return;
         try {
@@ -23,6 +48,7 @@ export function createAccusationControls(elements, gameId, callbacks) {
         if (!elements.accusationForm) return;
         const isMine = String(state.turn?.playerId) === currentUserId;
         const player = state.players.find(candidate => String(candidate.id) === currentUserId);
+        renderEliminatedOptions(player);
         const adjacent = player?.position && state.warden?.position &&
             Math.abs(player.position.row - state.warden.position.row) +
             Math.abs(player.position.col - state.warden.position.col) === 1;

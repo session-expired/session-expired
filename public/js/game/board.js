@@ -9,6 +9,7 @@ import { renderJournal } from "./journal.js";
 const gameId = window.location.pathname.split("/").filter(Boolean).at(-1);
 let gameState;
 let currentUserId;
+let debugCoordinates = false;
 let entityRenderer;
 const boardLayout = createBoardLayout(elements, () => entityRenderer?.positionSpeechBubbles());
 entityRenderer = createEntityRenderer(elements.board, boardLayout, () => gameState);
@@ -37,6 +38,15 @@ function renderTurn() {
 }
 
 function renderGameState() {
+    const finished = gameState?.status === "finished" && gameState?.winner;
+    if (elements.gameResult) {
+        elements.gameResult.hidden = !finished;
+        if (finished) {
+            const won = String(gameState.winner.id) === String(currentUserId);
+            elements.gameResultMessage.textContent = won ? "You win!" : "Session Expired";
+        }
+    }
+    elements.quitButton.hidden = Boolean(finished) || window.MULTI_TEST_MODE;
     renderTurn();
     renderJournal(elements, gameState, currentUserId);
     entityRenderer.render();
@@ -99,17 +109,20 @@ window.addEventListener("game-perspective", event => {
     if (gameState) renderGameState();
 });
 
-elements.quitButton.addEventListener("click", async () => {
-    if (!window.confirm("Are you sure you want to leave this game? You will not be able to rejoin.")) return;
-    elements.quitButton.disabled = true;
+async function leaveGame(button, confirmLeave) {
+    if (confirmLeave && !window.confirm("Are you sure you want to leave this game? You will not be able to rejoin.")) return;
+    button.disabled = true;
     try {
         await quitGame(gameId);
         window.location.assign("/");
     } catch (error) {
         elements.status.textContent = error.message;
-        elements.quitButton.disabled = false;
+        button.disabled = false;
     }
-});
+}
+
+elements.quitButton.addEventListener("click", () => leaveGame(elements.quitButton, true));
+elements.finishedLeaveButton?.addEventListener("click", () => leaveGame(elements.finishedLeaveButton, false));
 
 async function handleMovementClick(square) {
     const movingPlayer = gameState.players.find(player => String(player.id) === currentUserId);
@@ -205,12 +218,14 @@ function bindBoardInput() {
                 }
             }
         }
-        const tileLabel = square.dataset.searchDescription || (
-            ["door", "secret passage"].includes(square.dataset.type)
-                ? [square.dataset.type, square.dataset.roomName].filter(Boolean).join(", ")
-                : square.dataset.roomName || square.dataset.type
-        );
-        elements.clickOutput.textContent = `${tileLabel}\ncol ${square.dataset.col}, row ${square.dataset.row}`;
+        if (debugCoordinates) {
+            const tileLabel = square.dataset.searchDescription || (
+                ["door", "secret passage"].includes(square.dataset.type)
+                    ? [square.dataset.type, square.dataset.roomName].filter(Boolean).join(", ")
+                    : square.dataset.roomName || square.dataset.type
+            );
+            elements.clickOutput.textContent = `${tileLabel}\ncol ${square.dataset.col}, row ${square.dataset.row}`;
+        }
     });
 }
 
@@ -218,6 +233,8 @@ loadGameResources(gameId)
     .then(({ game, board, sayings }) => {
         gameState = game.game.state;
         currentUserId = String(game.currentUserId);
+        debugCoordinates = game.debugCoordinates === true;
+        elements.clickOutput.hidden = !debugCoordinates;
         entityRenderer.setDialogue(sayings.characters);
         [...gameState.players, gameState.warden]
             .filter(entity => entity?.character)

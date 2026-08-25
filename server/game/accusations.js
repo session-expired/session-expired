@@ -43,6 +43,7 @@ function submitAccusation(state, playerId, accusation, random = Math.random) {
         state.turn.playerId = null;
         state.turn.movementRemaining = 0;
         state.winner = { id: player.id, username: player.username, character: player.character };
+        state.endedAt = Date.now();
     } else {
         moveToRandomSpawn(state, player, random);
         player.turnsToSkip = (player.turnsToSkip || 0) + 1;

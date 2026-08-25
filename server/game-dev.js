@@ -63,7 +63,8 @@ app.get("/api/users", (request, response) => response.json({ users: [] }));
 app.get(`/api/games/${gameId}`, (request, response) => {
   response.json({
     game: { id: gameId, state, created_at: new Date(0).toISOString() },
-    currentUserId: user.id
+    currentUserId: user.id,
+    debugCoordinates: true
   });
 });
 app.post(`/api/games/${gameId}/roll`, (request, response) => {

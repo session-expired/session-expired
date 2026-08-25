@@ -14,7 +14,7 @@ test("development reset truncates application data inside a transaction", async 
   await resetDevelopmentDatabase(pool);
 
   assert.equal(queries[0], "BEGIN");
-  assert.match(queries[1], /^TRUNCATE TABLE games, lobby_players, lobbies, messages, user_sessions, users RESTART IDENTITY CASCADE$/);
+  assert.match(queries[1], /^TRUNCATE TABLE completed_games, games, lobby_players, lobbies, messages, user_sessions, users RESTART IDENTITY CASCADE$/);
   assert.equal(queries[2], "COMMIT");
   assert.equal(released, true);
 });
