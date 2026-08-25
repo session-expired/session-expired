@@ -174,7 +174,7 @@
 .accusation-controls button { padding: 5px; }
 
 .accusation-controls option.accusation-option-eliminated {
-  color: #746f64;
+  color: #6c2121;
   text-decoration: line-through;
 }
 
