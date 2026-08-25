@@ -185,7 +185,7 @@
     {
       "id": "hydro_bot",
       "rows": { "start": 14, "end": 14 },
-      "cols": { "start": 19, "end": 30 },
+      "cols": { "start": 23, "end": 30 },
       "description": "...",
       "enabled": true
     },
