@@ -1,8 +1,14 @@
 export function createEntityRenderer(boardElement, boardLayout, getGameState) {
     let characterDialogue = new Map();
-    const activeDialogue = new Map();
-    const movingAnimations = new Set();
-    let speechPositionFrame = null;
+    const characterNames = {
+        bonaparte: "Napolean",
+        rasputin: "Rasputin",
+        crowley: "Crowley",
+        lovelace: "Lovelace",
+        brahe: "Brahe",
+        curie: "Curie",
+        mallon: "Typhoid Mary"
+    };
 
     function setDialogue(dialogue) {
         characterDialogue = new Map(dialogue.map(character => [character.character, character.dialogue]));
@@ -11,53 +17,17 @@ export function createEntityRenderer(boardElement, boardLayout, getGameState) {
     function showDialogue(character, group) {
         const sayings = characterDialogue.get(character)?.[group] || [];
         if (!sayings.length) return "";
-        const existing = activeDialogue.get(character);
-        if (existing) window.clearTimeout(existing.timeout);
-        const entry = { text: sayings[Math.floor(Math.random() * sayings.length)], timeout: null };
-        const displayDuration = 12000 + (Math.random() * 4000 - 2000);
-        entry.timeout = window.setTimeout(() => {
-            if (activeDialogue.get(character) !== entry) return;
-            activeDialogue.delete(character);
-            render();
-        }, displayDuration);
-        activeDialogue.set(character, entry);
-        return entry.text;
+        const text = sayings[Math.floor(Math.random() * sayings.length)];
+        const sender = characterNames[character];
+        if (!sender) return "";
+        window.dispatchEvent(new CustomEvent("game-flavor-message", {
+            detail: { sender, text }
+        }));
+        return text;
     }
 
     function positionSpeechBubbles() {
-        const boardBounds = boardElement.getBoundingClientRect();
-        if (!boardBounds.width || !boardBounds.height) return;
-        boardElement.querySelectorAll(".character-speech").forEach(speech => {
-            speech.style.maxWidth = `${Math.max(0, boardBounds.width - 4)}px`;
-            speech.style.maxHeight = `${Math.max(0, boardBounds.height - 4)}px`;
-            speech.style.transform = "translateX(-50%)";
-            const bubbleBounds = speech.getBoundingClientRect();
-            let horizontalShift = 0;
-            let verticalShift = 0;
-            if (bubbleBounds.left < boardBounds.left + 2) horizontalShift = boardBounds.left + 2 - bubbleBounds.left;
-            else if (bubbleBounds.right > boardBounds.right - 2) horizontalShift = boardBounds.right - 2 - bubbleBounds.right;
-            if (bubbleBounds.top < boardBounds.top + 2) verticalShift = boardBounds.top + 2 - bubbleBounds.top;
-            else if (bubbleBounds.bottom > boardBounds.bottom - 2) verticalShift = boardBounds.bottom - 2 - bubbleBounds.bottom;
-            speech.style.transform = `translate(calc(-50% + ${horizontalShift}px), ${verticalShift}px)`;
-        });
-    }
-
-    function trackSpeechBubbles(animation) {
-        movingAnimations.add(animation);
-        if (speechPositionFrame === null) {
-            const positionWhileMoving = () => {
-                positionSpeechBubbles();
-                speechPositionFrame = movingAnimations.size
-                    ? window.requestAnimationFrame(positionWhileMoving)
-                    : null;
-            };
-            speechPositionFrame = window.requestAnimationFrame(positionWhileMoving);
-        }
-        const stopTracking = () => {
-            movingAnimations.delete(animation);
-            positionSpeechBubbles();
-        };
-        animation.finished.then(stopTracking, stopTracking);
+        // Kept as a layout callback; flavor text now renders in game chat.
     }
 
     function render() {
@@ -81,16 +51,8 @@ export function createEntityRenderer(boardElement, boardLayout, getGameState) {
             sprite.title = `${entity.username} (${entity.character})`;
             sprite.setAttribute("role", "img");
             sprite.setAttribute("aria-label", sprite.title);
-            const dialogue = activeDialogue.get(entity.character)?.text;
-            if (dialogue) {
-                const speech = document.createElement("span");
-                speech.className = "character-speech";
-                speech.textContent = dialogue;
-                sprite.appendChild(speech);
-            }
             square.appendChild(sprite);
         });
-        window.requestAnimationFrame(positionSpeechBubbles);
     }
 
     function animate(sprite, previousPosition, currentPosition, path) {
@@ -102,7 +64,6 @@ export function createEntityRenderer(boardElement, boardLayout, getGameState) {
             transform: `translate(calc(-50% + ${(tile.col - currentPosition.col) * boardLayout.cellSize}px), ${(tile.row - currentPosition.row) * boardLayout.cellSize}px)`
         }));
         const movementAnimation = sprite.animate(keyframes, { duration, easing: "linear" });
-        trackSpeechBubbles(movementAnimation);
         let frame = 1;
         const art = sprite.querySelector(".sprite-art");
         const frameTimer = window.setInterval(() => {
@@ -114,9 +75,6 @@ export function createEntityRenderer(boardElement, boardLayout, getGameState) {
             art.style.backgroundPosition = "left top";
         }, duration);
     }
-
-    if ("ResizeObserver" in window) new ResizeObserver(positionSpeechBubbles).observe(boardElement);
-    document.fonts?.ready.then(positionSpeechBubbles);
 
     return { setDialogue, showDialogue, positionSpeechBubbles, render, animate };
 }
