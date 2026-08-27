@@ -18,6 +18,9 @@
       showErrors();
 
       const data = Object.fromEntries(new FormData(form));
+      if (form.id === "login-form") {
+        data.returnTo = new URLSearchParams(window.location.search).get("returnTo") || "/lobby";
+      }
       const endpoint = form.id === "register-form" ? "/api/register" : "/api/login";
       try {
         const response = await fetch(endpoint, {

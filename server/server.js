@@ -82,9 +82,15 @@ function requireAuthentication(request, response, next) {
     if (request.path.startsWith("/api/") || request.originalUrl.startsWith("/api/")) {
       return response.status(401).json({ error: "Your session has expired. Please log in again." });
     }
-    return response.redirect("/login");
+    return response.redirect(`/login?returnTo=${encodeURIComponent(request.originalUrl)}`);
   }
   next();
+}
+
+function safeReturnPath(value) {
+  return typeof value === "string" && value.startsWith("/") && !value.startsWith("//")
+    ? value
+    : "/lobby";
 }
 
 app.get("/register", sendPage("register.html"));
@@ -187,6 +193,7 @@ app.post("/api/register", async (request, response, next) => {
 app.post("/api/login", async (request, response, next) => {
   const identifier = typeof request.body.identifier === "string" ? request.body.identifier.trim() : "";
   const password = typeof request.body.password === "string" ? request.body.password : "";
+  const returnTo = safeReturnPath(request.body.returnTo);
   const invalidMessage = "Invalid username/email or password.";
 
   if (!identifier || !password) {
@@ -207,7 +214,7 @@ app.post("/api/login", async (request, response, next) => {
       request.session.userId = user.id;
       request.session.save((saveError) => {
         if (saveError) return next(saveError);
-        response.json({ ok: true, redirect: "/lobby" });
+        response.json({ ok: true, redirect: returnTo });
       });
     });
   } catch (error) {

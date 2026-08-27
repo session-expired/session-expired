@@ -8,6 +8,8 @@ const launchButton = document.getElementById("launch-game");
 const deleteButton = document.getElementById("delete-lobby");
 const characterPicker = document.getElementById("character-picker");
 const characterOptions = document.getElementById("character-options");
+const inviteLinkPanel = document.getElementById("invite-link-panel");
+const inviteLinkInput = document.getElementById("invite-link");
 let selectedLobbyId = null;
 
 function createCharacterSprite(character) {
@@ -120,7 +122,11 @@ async function loadLobbyDetail() {
     lobbyDetail.hidden = false;
     document.getElementById("detail-heading").textContent = lobby.name;
     document.getElementById("lobby-meta").textContent =
-      `${players.length}/${lobby.max_players} players`;
+      `${players.length}/${lobby.max_players} players${lobby.is_private ? " · Private" : ""}`;
+    inviteLinkPanel.hidden = !lobby.invite_token;
+    inviteLinkInput.value = lobby.invite_token
+      ? `${window.location.origin}/lobby?invite=${encodeURIComponent(lobby.invite_token)}`
+      : "";
     playerList.replaceChildren();
     for (const player of players) {
       const item = document.createElement("li");
@@ -222,9 +228,13 @@ document
     try {
       const { lobbyId } = await api("/api/lobbies", {
         method: "POST",
-        body: JSON.stringify({ name: input.value }),
+        body: JSON.stringify({
+          name: input.value,
+          isPrivate: document.getElementById("private-lobby").checked,
+        }),
       });
       input.value = "";
+      document.getElementById("private-lobby").checked = false;
       selectedLobbyId = lobbyId;
       await Promise.all([loadLobbies(), loadLobbyDetail()]);
     } catch (error) {
@@ -233,6 +243,16 @@ document
   });
 
 joinButton.addEventListener("click", joinLobby);
+
+document.getElementById("copy-invite-link").addEventListener("click", async () => {
+  try {
+    await navigator.clipboard.writeText(inviteLinkInput.value);
+    showStatus("Invite link copied.");
+  } catch {
+    inviteLinkInput.select();
+    showStatus("Select and copy the invite link above.");
+  }
+});
 
 leaveButton.addEventListener("click", async () => {
   if (
@@ -298,7 +318,24 @@ document.getElementById("refresh-lobbies").addEventListener("click", () => {
   loadLobbyDetail();
 });
 
+async function joinFromInviteLink() {
+  const inviteToken = new URLSearchParams(window.location.search).get("invite");
+  if (!inviteToken) return;
+  try {
+    const { lobbyId } = await api("/api/lobbies/join-by-invite", {
+      method: "POST",
+      body: JSON.stringify({ inviteToken }),
+    });
+    selectedLobbyId = lobbyId;
+    window.history.replaceState({}, "", "/lobby");
+    await Promise.all([loadLobbies(), loadLobbyDetail()]);
+  } catch (error) {
+    showStatus(error.message, true);
+  }
+}
+
 loadLobbies();
+joinFromInviteLink();
 const refreshTimer = window.setInterval(() => {
   loadLobbies();
   loadLobbyDetail();

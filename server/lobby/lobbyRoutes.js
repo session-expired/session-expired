@@ -1,10 +1,15 @@
 const express = require("express");
+const crypto = require("crypto");
 const { createInitialGameState } = require("../game/board");
 const { moderateChatMessage } = require("../chat/moderation");
 const { characters, characterIds } = require("./characters");
 
 function validId(value) {
   return /^[1-9]\d*$/.test(value);
+}
+
+function createInviteToken() {
+  return crypto.randomBytes(24).toString("base64url");
 }
 
 const membershipError = "You are already in a lobby or game. Leave it before joining another.";
@@ -39,6 +44,13 @@ function createLobbyRouter({ pool, requireAuthentication, minimumPlayers = 2 }) 
          JOIN users u ON u.id = l.host_id
          LEFT JOIN lobby_players lp ON lp.lobby_id = l.id
          WHERE l.status = 'waiting'
+           AND (
+             l.is_private = FALSE
+             OR EXISTS (
+               SELECT 1 FROM lobby_players member
+               WHERE member.lobby_id = l.id AND member.user_id = $1
+             )
+           )
          GROUP BY l.id, u.username
          HAVING COUNT(lp.user_id) < l.max_players OR BOOL_OR(lp.user_id = $1)
          ORDER BY l.created_at ASC`,
@@ -52,6 +64,7 @@ function createLobbyRouter({ pool, requireAuthentication, minimumPlayers = 2 }) 
 
   router.post("/", async (request, response, next) => {
     const name = typeof request.body.name === "string" ? request.body.name.trim() : "";
+    const isPrivate = request.body.isPrivate === true;
     if (name.length < 3 || name.length > 50) {
       return response.status(400).json({ error: "Lobby name must be between 3 and 50 characters." });
     }
@@ -79,16 +92,83 @@ function createLobbyRouter({ pool, requireAuthentication, minimumPlayers = 2 }) 
         await client.query("ROLLBACK");
         return response.status(409).json({ error: membershipError });
       }
+      const inviteToken = isPrivate ? createInviteToken() : null;
       const lobby = await client.query(
-        "INSERT INTO lobbies (host_id, name) VALUES ($1, $2) RETURNING id",
-        [request.session.userId, name]
+        `INSERT INTO lobbies (host_id, name, is_private, invite_token)
+         VALUES ($1, $2, $3, $4) RETURNING id, invite_token`,
+        [request.session.userId, name, isPrivate, inviteToken]
       );
       await client.query(
         "INSERT INTO lobby_players (lobby_id, user_id) VALUES ($1, $2)",
         [lobby.rows[0].id, request.session.userId]
       );
       await client.query("COMMIT");
-      response.status(201).json({ lobbyId: lobby.rows[0].id });
+      response.status(201).json({
+        lobbyId: lobby.rows[0].id,
+        inviteToken: lobby.rows[0].invite_token
+      });
+    } catch (error) {
+      if (client) await client.query("ROLLBACK");
+      if (error.code === "23505" && error.constraint === "lobby_players_one_active_membership") {
+        return response.status(409).json({ error: membershipError });
+      }
+      next(error);
+    } finally {
+      client?.release();
+    }
+  });
+
+  router.post("/join-by-invite", async (request, response, next) => {
+    const inviteToken = typeof request.body.inviteToken === "string"
+      ? request.body.inviteToken.trim()
+      : "";
+    if (!/^[A-Za-z0-9_-]{32}$/.test(inviteToken)) {
+      return response.status(404).json({ error: "That private lobby invite is invalid." });
+    }
+
+    let client;
+    try {
+      client = await pool.connect();
+      await client.query("BEGIN");
+      const lobbyResult = await client.query(
+        `SELECT id, status, max_players FROM lobbies
+         WHERE is_private = TRUE AND invite_token = $1 FOR UPDATE`,
+        [inviteToken]
+      );
+      const lobby = lobbyResult.rows[0];
+      if (!lobby) {
+        await client.query("ROLLBACK");
+        return response.status(404).json({ error: "That private lobby invite is invalid." });
+      }
+      if (lobby.status !== "waiting") {
+        await client.query("ROLLBACK");
+        return response.status(409).json({ error: "This lobby has already started." });
+      }
+      const existing = await client.query(
+        "SELECT lobby_id FROM lobby_players WHERE user_id = $1",
+        [request.session.userId]
+      );
+      if (existing.rowCount && String(existing.rows[0].lobby_id) !== String(lobby.id)) {
+        await client.query("ROLLBACK");
+        return response.status(409).json({ error: membershipError });
+      }
+      if (!existing.rowCount) {
+        const count = await client.query(
+          "SELECT COUNT(*)::integer AS count FROM lobby_players WHERE lobby_id = $1",
+          [lobby.id]
+        );
+        if (count.rows[0].count >= lobby.max_players) {
+          await client.query("ROLLBACK");
+          return response.status(409).json({ error: "This lobby is full." });
+        }
+        await client.query(
+          "INSERT INTO lobby_players (lobby_id, user_id) VALUES ($1, $2)",
+          [lobby.id, request.session.userId]
+        );
+        await client.query("UPDATE lobbies SET empty_since = NULL WHERE id = $1", [lobby.id]);
+      }
+      await client.query("COMMIT");
+      response.json({ lobbyId: lobby.id });
     } catch (error) {
       if (client) await client.query("ROLLBACK");
       if (error.code === "23505" && error.constraint === "lobby_players_one_active_membership") {
@@ -104,14 +184,22 @@ function createLobbyRouter({ pool, requireAuthentication, minimumPlayers = 2 }) 
     if (!validId(request.params.lobbyId)) return response.status(404).json({ error: "Lobby not found." });
     try {
       const lobbyResult = await pool.query(
-        `SELECT l.id, l.name, l.status, l.max_players, l.host_id,
+        `SELECT l.id, l.name, l.status, l.max_players, l.host_id, l.is_private,
+                CASE WHEN l.host_id = $2 THEN l.invite_token END AS invite_token,
                 g.id AS game_id
          FROM lobbies l
          LEFT JOIN games g ON g.lobby_id = l.id
          WHERE l.id = $1`,
-        [request.params.lobbyId]
+        [request.params.lobbyId, request.session.userId]
       );
       if (!lobbyResult.rows[0]) return response.status(404).json({ error: "Lobby not found." });
+      if (lobbyResult.rows[0].is_private) {
+        const membership = await pool.query(
+          "SELECT 1 FROM lobby_players WHERE lobby_id = $1 AND user_id = $2",
+          [request.params.lobbyId, request.session.userId]
+        );
+        if (!membership.rowCount) return response.status(404).json({ error: "Lobby not found." });
+      }
       const players = await pool.query(
         `SELECT u.id, u.username, lp.selected_character, lp.joined_at
          FROM lobby_players lp
@@ -139,7 +227,7 @@ function createLobbyRouter({ pool, requireAuthentication, minimumPlayers = 2 }) 
       client = await pool.connect();
       await client.query("BEGIN");
       const lobbyResult = await client.query(
-        "SELECT status, max_players FROM lobbies WHERE id = $1 FOR UPDATE",
+        "SELECT status, max_players, is_private FROM lobbies WHERE id = $1 FOR UPDATE",
         [request.params.lobbyId]
       );
       const lobby = lobbyResult.rows[0];
@@ -155,6 +243,10 @@ function createLobbyRouter({ pool, requireAuthentication, minimumPlayers = 2 }) 
         "SELECT lobby_id FROM lobby_players WHERE user_id = $1",
         [request.session.userId]
       );
+      if (lobby.is_private && (!existing.rowCount || String(existing.rows[0].lobby_id) !== String(request.params.lobbyId))) {
+        await client.query("ROLLBACK");
+        return response.status(403).json({ error: "Use the private invite link to join this lobby." });
+      }
       if (existing.rowCount && String(existing.rows[0].lobby_id) !== String(request.params.lobbyId)) {
         await client.query("ROLLBACK");
         return response.status(409).json({ error: membershipError });

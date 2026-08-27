@@ -47,12 +47,22 @@ CREATE TABLE IF NOT EXISTS lobbies (
         CHECK (status IN ('waiting', 'started')),
     max_players SMALLINT NOT NULL DEFAULT 4
         CHECK (max_players BETWEEN 2 AND 8),
+    is_private BOOLEAN NOT NULL DEFAULT FALSE,
+    invite_token VARCHAR(32),
     empty_since TIMESTAMPTZ,
     created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 ALTER TABLE lobbies
     ADD COLUMN IF NOT EXISTS empty_since TIMESTAMPTZ;
+
+ALTER TABLE lobbies
+    ADD COLUMN IF NOT EXISTS is_private BOOLEAN NOT NULL DEFAULT FALSE,
+    ADD COLUMN IF NOT EXISTS invite_token VARCHAR(32);
+
+CREATE UNIQUE INDEX IF NOT EXISTS lobbies_invite_token_unique
+    ON lobbies (invite_token)
+    WHERE invite_token IS NOT NULL;
 
 CREATE TABLE IF NOT EXISTS lobby_players (
     lobby_id BIGINT NOT NULL REFERENCES lobbies(id) ON DELETE CASCADE,

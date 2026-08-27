@@ -37,6 +37,10 @@
             <input id="lobby-name" name="name" minlength="3" maxlength="50" required />
             <button type="submit">Create Lobby</button>
           </div>
+          <label class="private-option">
+            <input id="private-lobby" type="checkbox" />
+            Create a private lobby with an invite link
+          </label>
         </form>
         <p id="lobby-status" class="status-message" role="status"></p>
         <ul id="lobby-list" class="lobby-list"></ul>
@@ -45,6 +49,13 @@
       <section id="lobby-detail" class="lobby-detail" aria-labelledby="detail-heading" hidden>
         <h2 id="detail-heading">Lobby</h2>
         <p id="lobby-meta"></p>
+        <div id="invite-link-panel" class="invite-link-panel" hidden>
+          <label for="invite-link">Private invite link</label>
+          <div class="form-row">
+            <input id="invite-link" type="text" readonly />
+            <button id="copy-invite-link" type="button">Copy Link</button>
+          </div>
+        </div>
         <h3>Players</h3>
         <ul id="player-list"></ul>
         <section id="character-picker" hidden>

@@ -11,7 +11,12 @@
 .section-heading p { margin: 0; font-family: Arial, sans-serif; }
 #create-lobby-form { margin: 28px 0 20px; }
 #create-lobby-form label { display: block; margin-bottom: 8px; font-size: 11px; }
+#create-lobby-form .private-option { display: flex; margin-top: 12px; align-items: center; gap: 8px; font-family: Arial, sans-serif; font-size: 14px; }
+#create-lobby-form .private-option input { width: auto; }
 #lobby-name { flex: 1; min-width: 0; padding: 12px; background: #1b1b18; color: #e8e2c8; border: 1px solid #777263; }
+.invite-link-panel { margin: 16px 0; padding: 12px; background: #292923; }
+.invite-link-panel label { display: block; margin-bottom: 8px; font-family: Arial, sans-serif; }
+#invite-link { min-width: 0; flex: 1; padding: 10px; background: #1b1b18; color: #e8e2c8; border: 1px solid #777263; font-family: Arial, sans-serif; }
 .lobby-page button { padding: 11px 14px; border: 2px solid #171713; background: #6e6101; color: #e8e2c8; font-family: inherit; font-size: 10px; cursor: pointer; }
 .lobby-page button:disabled { cursor: not-allowed; opacity: .45; }
 .lobby-list, #player-list { padding: 0; list-style: none; }
