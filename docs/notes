@@ -1,0 +1,9 @@
+move dialog to game chat.
+board not properly filling viewport.
+chars not using walking animations.
+limit victims to those tied to active chars.
+Red text not working on mac.
+highlight all items in player current room, not just those reachable.
+guesses when entering rooms that contain players.
+mac players teleport.
+teleport happens when others move even on windows.
