@@ -95,7 +95,7 @@ The account system requires Node.js 18 or newer and PostgreSQL.
 2. Create a PostgreSQL database named `session_expired`.
 3. Copy `.env.example` to `.env`, then set the database URL and replace the session secret with a long random value.
 4. Apply pending versioned migrations with `npm run migrate` (`npm run setup` is an alias).
-5. Start the server with `npm start`, then visit `http://localhost:3000/register`. This preserves all existing database data and does not create development accounts.
+5. Start the server with `npm start`, then visit `http://localhost:3000/register`. Startup removes only the four exact development username/email pairs and preserves every other user; it never creates development accounts.
 
 For local HTTP, leave `COOKIE_SECURE=false`. Set it to `true` when the application is served over HTTPS. Set `DATABASE_SSL=true` only when the PostgreSQL provider requires TLS.
 
@@ -105,7 +105,7 @@ For Render, set the pre-deploy command to `npm run migrate`. Migrations in `sql/
 
 Before starting the server, only the development command (`npm run dev`) resets application data and creates four test accounts (`user1`, `user2`, `user3`, and `user4`), each with the password `password`. Their email addresses are `user1@example.com` through `user4@example.com`.
 
-If those development accounts were accidentally added to a database that must otherwise be retained, run `npm run reset`. This removes only the four exact development username/email pairs and their dependent data in a transaction; all other users are retained.
+Production startup removes those four exact development accounts and their dependent data in a transaction before accepting traffic. You can also run the same cleanup manually with `npm run reset`; all other users are retained.
 
 ## Project Structure
 
