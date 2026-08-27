@@ -1,4 +1,4 @@
-move dialog to game chat. Ryan
+Move dialog to game chat. Ryan
 chars not using walking animations. Ryan
 limit victims to those tied to active chars. Ryan
 Red text not working on mac. Ryan
@@ -8,10 +8,11 @@ teleport happens when others move even on windows. Ryan
 Room hints only generate in the correct rooms. Ryan
 Tie methods to certain rooms. Ryan
 Each player starts with some hints. Ryan
+Dev users showing up on live server, actual users resetting - Ryan
 
 board not properly filling viewport. Merlin
 highlight all items in player current room, not just those reachable. Merlin
 
-generate room code and send to friends with invite link. Sean
+generate lobby code and send to friends with invite link. Sean
 
 Reword/rework index - all (Ryan will add a catchy video of gameplay)
