@@ -15,3 +15,6 @@ highlight all items in player current room, not just those reachable. Merlin
 generate room code and send to friends with invite link. Sean
 
 Reword/rework index - all (Ryan will add a catchy video of gameplay)
+
+---done---
+Deployment no longer deletes all users, only development users. Ryan
