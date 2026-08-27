@@ -79,6 +79,15 @@
     messages.scrollTop = messages.scrollHeight;
   }
 
+  window.addEventListener("game-flavor-message", (event) => {
+    const { sender, text } = event.detail || {};
+    if (gameId && typeof sender === "string" && typeof text === "string") {
+      // Flavor messages deliberately have no senderId: the historical character,
+      // not the user controlling that character, is speaking.
+      addMessage("game", { sender, text });
+    }
+  });
+
   panel.querySelectorAll("[data-chat-tab]").forEach((tab) => {
     tab.addEventListener("click", () => {
       activeTab = tab.dataset.chatTab;

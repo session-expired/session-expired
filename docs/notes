@@ -1,4 +1,3 @@
-move dialog to game chat. Ryan
 chars not using walking animations. Ryan
 limit victims to those tied to active chars. Ryan
 Red text not working on mac. Ryan
@@ -18,3 +17,4 @@ Reword/rework index - all (Ryan will add a catchy video of gameplay)
 
 ---done---
 Deployment no longer deletes all users, only development users. Ryan
+move dialog to game chat. Ryan

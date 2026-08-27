@@ -16,6 +16,7 @@ entityRenderer = createEntityRenderer(elements.board, boardLayout, () => gameSta
 const accusationControls = createAccusationControls(elements, gameId, {
     onState: applyAuthoritativeState,
     onStatus: message => { elements.status.textContent = message; },
+    onDialogue: (character, group) => entityRenderer.showDialogue(character, group),
     onEligibilityChanged: () => { if (gameState) renderTurn(); }
 });
 

@@ -2,6 +2,7 @@ import { accuse, loadAccusationOptions } from "./board-api.js";
 
 export function createAccusationControls(elements, gameId, callbacks) {
     let optionsLoaded = false;
+    let currentPlayerCharacter = null;
 
     function renderEliminatedOptions(player) {
         const fieldByCategory = {
@@ -48,6 +49,7 @@ export function createAccusationControls(elements, gameId, callbacks) {
         if (!elements.accusationForm) return;
         const isMine = String(state.turn?.playerId) === currentUserId;
         const player = state.players.find(candidate => String(candidate.id) === currentUserId);
+        currentPlayerCharacter = player?.character || null;
         renderEliminatedOptions(player);
         const adjacent = player?.position && state.warden?.position &&
             Math.abs(player.position.row - state.warden.position.row) +
@@ -65,6 +67,13 @@ export function createAccusationControls(elements, gameId, callbacks) {
         elements.accuseButton.disabled = true;
         try {
             const data = await accuse(gameId, Object.fromEntries(new FormData(elements.accusationForm)));
+            if (currentPlayerCharacter) {
+                callbacks.onDialogue(currentPlayerCharacter, "accuse");
+                callbacks.onDialogue(
+                    currentPlayerCharacter,
+                    data.correct ? "correct_accusation" : "wrong_accusation"
+                );
+            }
             callbacks.onStatus(data.correct ? "Correct accusation — game finished." :
                 "Incorrect accusation — your turn has ended.");
             callbacks.onState(data.state);
