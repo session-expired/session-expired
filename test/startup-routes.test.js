@@ -6,10 +6,11 @@ const test = require("node:test");
 const root = path.join(__dirname, "..");
 const packageJson = require(path.join(root, "package.json"));
 
-test("npm start uses the persistent database startup route", () => {
+test("npm start removes only exact development users before starting", () => {
   assert.equal(packageJson.scripts.start, "node server/start.js");
 
   const source = fs.readFileSync(path.join(root, "server", "start.js"), "utf8");
+  assert.match(source, /removeDevelopmentUsers\(pool\)/);
   assert.doesNotMatch(source, /reset-dev|seed-dev|resetDevelopmentDatabase|seedDevelopmentUsers/);
 });
 
