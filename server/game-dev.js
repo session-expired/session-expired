@@ -16,6 +16,7 @@ const {
   endPlayerTurn,
   completeWardenTurn,
   discoverHint,
+  submitGuess,
   submitAccusation
 } = require("./game/board");
 
@@ -97,6 +98,15 @@ app.post(`/api/games/${gameId}/end-turn`, (request, response) => {
     const transition = endPlayerTurn(state, user.id);
     if (transition.warden) scheduleWardenCompletion();
     response.json({ state });
+  } catch (error) {
+    response.status(409).json({ error: error.message });
+  }
+});
+app.post(`/api/games/${gameId}/guess`, (request, response) => {
+  try {
+    const result = submitGuess(state, user.id, request.body);
+    if (result.transition.warden) scheduleWardenCompletion();
+    response.json({ disproved: result.disproved, provider: result.provider, hint: result.hint, state });
   } catch (error) {
     response.status(409).json({ error: error.message });
   }

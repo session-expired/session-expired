@@ -10,16 +10,21 @@ export const elements = {
     turnStatus: document.getElementById("turn-status"),
     rollMovementButton: document.getElementById("roll-movement"),
     endTurnButton: document.getElementById("end-turn"),
+    openGuessButton: document.getElementById("open-guess"),
+    openAccusationButton: document.getElementById("open-accusation"),
+    guessAvailability: document.getElementById("guess-availability"),
+    accusationAvailability: document.getElementById("accusation-availability"),
+    deductionPanel: document.getElementById("deduction-panel"),
+    deductionTitle: document.getElementById("deduction-title"),
+    deductionFields: document.getElementById("deduction-fields"),
+    cancelDeductionButton: document.getElementById("cancel-deduction"),
+    submitDeductionButton: document.getElementById("submit-deduction"),
     gameResult: document.getElementById("game-result"),
     gameResultMessage: document.getElementById("game-result-message"),
     finishedLeaveButton: document.getElementById("finished-leave-game"),
-    accusationForm: document.getElementById("accusation-form"),
-    accusationStatus: document.getElementById("accusation-status"),
     journal: document.getElementById("journal"),
     journalEntries: document.getElementById("journal-entries"),
     journalCount: document.getElementById("journal-count"),
     clickOutput: document.getElementById("clickOutput"),
     gameMain: document.getElementById("game-main")
 };
-
-elements.accuseButton = elements.accusationForm?.querySelector('button[type="submit"]');

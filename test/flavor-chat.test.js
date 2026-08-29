@@ -30,7 +30,7 @@ test("flavor dialogue is sent to game chat with character-only names", () => {
 
 test("accusations trigger character flavor without using the player's username", () => {
   const controls = fs.readFileSync(
-    path.join(root, "public", "js", "game", "accusation-controls.js"),
+    path.join(root, "public", "js", "game", "deduction-controls.js"),
     "utf8"
   );
 

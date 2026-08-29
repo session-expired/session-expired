@@ -45,13 +45,14 @@
       <button id="roll-movement" type="button" hidden>Roll 1d8</button>
       <button id="end-turn" type="button" hidden>End Turn</button>
     </div>
-    <form id="accusation-form" class="accusation-controls">
-      <span id="accusation-status">You must reach the Warden to make an accusation.</span>
-      <select name="killer" aria-label="Killer"></select>
-      <select name="victim" aria-label="Victim"></select>
-      <select name="room" aria-label="Room"></select>
-      <select name="method" aria-label="Method"></select>
-      <button type="submit" disabled>Accuse</button>
+    <section class="deduction-actions" aria-label="Deduction actions">
+      <div><button id="open-guess" type="button" disabled>Guess</button><small id="guess-availability">Use all movement</small></div>
+      <div><button id="open-accusation" type="button" disabled>Accuse</button><small id="accusation-availability">Warden out of range</small></div>
+    </section>
+    <form id="deduction-panel" class="deduction-panel" hidden>
+      <div class="deduction-heading"><h2 id="deduction-title">Deduction</h2><span>Known eliminations marked ×</span></div>
+      <div id="deduction-fields" class="deduction-fields"></div>
+      <div class="deduction-footer"><button id="cancel-deduction" type="button">Cancel</button><button id="submit-deduction" type="submit">Submit</button></div>
     </form>
     <div class="board-controls" aria-label="Board zoom controls">
       <button id="zoom-out" type="button" aria-label="Zoom out">−</button>

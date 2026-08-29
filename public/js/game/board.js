@@ -1,8 +1,7 @@
 import { elements } from "./board-dom.js";
 import { discoverHint, endTurn, loadGameResources, movePlayer, quitGame, rollMovement } from "./board-api.js";
 import { createBoardLayout } from "./board-layout.js";
-import { createAccusationControls } from "./accusation-controls.js";
-import { createGuessControls } from "./guess-controls.js";
+import { createDeductionControls } from "./deduction-controls.js";
 import { createEntityRenderer } from "./entity-renderer.js";
 import { renderMovementRange } from "./movement-range.js";
 import { renderJournal } from "./journal.js";
@@ -14,7 +13,7 @@ let debugCoordinates = false;
 let entityRenderer;
 const boardLayout = createBoardLayout(elements, () => entityRenderer?.positionSpeechBubbles());
 entityRenderer = createEntityRenderer(elements.board, boardLayout, () => gameState);
-const accusationControls = createAccusationControls(elements, gameId, {
+const deductionControls = createDeductionControls(elements, gameId, {
     onState: applyAuthoritativeState,
     onStatus: message => { elements.status.textContent = message; },
     onDialogue: (character, group) => entityRenderer.showDialogue(character, group),
@@ -36,8 +35,7 @@ function renderTurn() {
     else elements.turnStatus.textContent = `Waiting for ${player?.username || "the next player"}…`;
     elements.rollMovementButton.hidden = turn.phase !== "awaiting_roll" || !isMine;
     elements.endTurnButton.hidden = !isMine || turn.phase !== "awaiting_end";
-    guessControls.render(gameState, currentUserId);
-    accusationControls.render(gameState, currentUserId);
+    deductionControls.render(gameState, currentUserId);
 }
 
 function renderGameState() {
@@ -275,5 +273,4 @@ loadGameResources(gameId)
     })
     .catch(error => { elements.status.textContent = error.message; });
 
-accusationControls.initialize();
-guessControls.initialize();
+deductionControls.initialize();

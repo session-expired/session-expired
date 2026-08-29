@@ -174,21 +174,29 @@
   font-size: 9px;
 }
 
-.accusation-controls {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  margin-bottom: 6px;
-  font: 9px "Press Start 2P", monospace;
-}
-
-.accusation-controls select,
-.accusation-controls button { padding: 5px; }
-
-.accusation-controls option.accusation-option-eliminated {
-  color: #6c2121;
-  text-decoration: line-through;
-}
+.deduction-actions { display: flex; gap: 10px; margin-bottom: 6px; font: 8px "Press Start 2P", monospace; }
+.deduction-actions > div { display: grid; gap: 3px; text-align: center; }
+.deduction-actions button, .deduction-footer button { padding: 7px 10px; border: 2px solid #171713; background: #8b1e1e; color: #e8e2c8; font: inherit; cursor: pointer; }
+.deduction-actions button:disabled { opacity: .45; cursor: not-allowed; }
+.deduction-actions small { color: #d9cc94; font-size: 7px; }
+.deduction-panel { position: relative; z-index: 20; width: min(820px, calc(100% - 16px)); margin-bottom: 8px; padding: 10px; border: 3px solid #171713; background: #4a4a42; color: #e8e2c8; box-shadow: 4px 4px 0 rgba(0,0,0,.5); font: 8px "Press Start 2P", monospace; }
+.deduction-panel[hidden] { display: none; }
+.deduction-heading, .deduction-footer { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.deduction-heading h2 { margin: 0; font-size: 12px; }
+.deduction-heading span { color: #d9cc94; }
+.deduction-fields { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin: 10px 0; }
+.deduction-field { position: relative; display: grid; gap: 4px; min-width: 0; }
+.deduction-label { color: #d9cc94; text-transform: uppercase; }
+.deduction-trigger { display: flex; width: 100%; min-width: 0; padding: 7px; justify-content: space-between; gap: 5px; border: 2px solid #171713; background: #e8e2c8; color: #29251c; font: inherit; text-align: left; cursor: pointer; }
+.deduction-trigger > span:first-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.deduction-options { position: absolute; z-index: 30; top: 100%; left: 0; width: max(100%, 190px); max-height: min(280px, 45vh); overflow-y: auto; border: 2px solid #171713; background: #e8e2c8; box-shadow: 3px 3px 0 rgba(0,0,0,.55); }
+.deduction-options[hidden] { display: none; }
+.deduction-option { display: flex; width: 100%; padding: 8px 7px; align-items: center; gap: 6px; border: 0; border-bottom: 1px solid #8b826b; background: transparent; color: #29251c; font: inherit; line-height: 1.35; text-align: left; cursor: pointer; }
+.deduction-option:hover, .deduction-option:focus-visible { background: #d9cc94; outline: 2px solid #8b1e1e; outline-offset: -2px; }
+.deduction-option[aria-selected="true"] { background: #b9aa72; }
+.deduction-option.eliminated { color: #6c2121; opacity: .82; }
+.elimination-mark { flex: 0 0 12px; color: #8b1e1e; font-size: 13px; font-weight: bold; text-align: center; }
+.deduction-footer { justify-content: flex-end; }
 
 .game-result {
   position: absolute;
@@ -303,7 +311,8 @@
 
 #roll-movement,
 #end-turn,
-#open-guess {
+#open-guess,
+#open-accusation {
   padding: 7px 9px;
   border: 2px solid #171713;
   background: #8b1e1e;
@@ -311,6 +320,9 @@
   font: inherit;
   cursor: pointer;
 }
+
+@media (max-width: 900px) { .deduction-fields { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 560px) { .deduction-fields { grid-template-columns: 1fr; }.deduction-heading { align-items: flex-start; flex-direction: column; } }
 
 #board > div {
   position: relative;
