@@ -1,12 +1,10 @@
 # Session Expired
 
-**Session Expired** is a web based deduction game. Players explore a randomly generated asylum, question one another, gather evidence, and attempt to solve a murder before their opponents do.
+**Session Expired** is a web-based deduction game. Players explore a randomly generated asylum, question one another, gather evidence, and attempt to solve a murder before their opponents do.
 
 The game takes place inside an insane asylum whose captives are themed around historical figures. The setting is comedic horror.
 
-The art will likely be 32 bit.
-
-> **Project status:** Early development. This is a fledgling project, base line functionality is not yet established
+> **Project status:** Early development. The site works, the game is playable, but it is not fun yet.
 
 ## Core Concept
 
@@ -18,7 +16,7 @@ The rules will evolve during development, but the central gameplay loop will foc
 
 * Deduction
 * Partial information
-* Player deception / cooperation
+* Player deception/cooperation
 * Turn-based movement
 * Private and public communication
 * Random board layouts
