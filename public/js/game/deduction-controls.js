@@ -36,7 +36,10 @@ export function createDeductionControls(elements, gameId, callbacks) {
         const player = currentState.players.find(candidate => String(candidate.id) === String(currentUserId));
         const eliminated = eliminatedValues(player);
         for (const [field, controls] of fieldElements) {
-            const options = optionsByField[field];
+            const allowedVictims = new Set(currentState.candidates?.victims || []);
+            const options = field === "victim" && allowedVictims.size
+                ? optionsByField[field].filter(option => allowedVictims.has(option.id))
+                : optionsByField[field];
             if (!options.some(option => option.id === selections[field])) selections[field] = options[0]?.id;
             const selected = options.find(option => option.id === selections[field]);
             controls.value.textContent = selected?.name || "Choose";

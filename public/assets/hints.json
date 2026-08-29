@@ -41,152 +41,158 @@
       "eliminates": ["felix_yusupov"]
     },
     {
-      "id": "victim_not_manderup_parsberg",
+      "id": "victim_not_dmitri_pavlovich",
       "category": "victim",
       "roomId": "operating_theater",
+      "text": "The victim was not Grand Duke Dmitri Pavlovich.",
+      "eliminates": ["dmitri_pavlovich"]
+    },
+
+    {
+      "id": "victim_not_manderup_parsberg",
+      "category": "victim",
+      "roomId": "rec_room",
       "text": "The victim was not Manderup Parsberg.",
       "eliminates": ["manderup_parsberg"]
     },
     {
       "id": "victim_not_johannes_kepler",
       "category": "victim",
-      "roomId": "rec_room",
+      "roomId": "showers",
       "text": "The victim was not Johannes Kepler.",
       "eliminates": ["johannes_kepler"]
     },
     {
-      "id": "victim_not_galileo",
-      "category": "victim",
-      "roomId": "showers",
-      "text": "The victim was not Galileo Galilei.",
-      "eliminates": ["galileo"]
-    },
-    {
-      "id": "victim_not_isaac_newton",
+      "id": "victim_not_frederick_ii_denmark",
       "category": "victim",
       "roomId": "solitary_confinement",
-      "text": "The victim was not Isaac Newton.",
-      "eliminates": ["isaac_newton"]
+      "text": "The victim was not Frederick II of Denmark.",
+      "eliminates": ["frederick_ii_denmark"]
     },
+    {
+      "id": "victim_not_nicolaus_reimers_ursus",
+      "category": "victim",
+      "roomId": "hydrotherapy",
+      "text": "The victim was not Nicolaus Reimers Ursus.",
+      "eliminates": ["nicolaus_reimers_ursus"]
+    },
+
     {
       "id": "victim_not_charles_babbage",
       "category": "victim",
-      "roomId": "hydrotherapy",
+      "roomId": "electrotherapy",
       "text": "The victim was not Charles Babbage.",
       "eliminates": ["charles_babbage"]
     },
     {
       "id": "victim_not_lord_byron",
       "category": "victim",
-      "roomId": "electrotherapy",
+      "roomId": "wardens_office",
       "text": "The victim was not Lord Byron.",
       "eliminates": ["lord_byron"]
     },
     {
       "id": "victim_not_augustus_de_morgan",
       "category": "victim",
-      "roomId": "wardens_office",
+      "roomId": "padded_cells",
       "text": "The victim was not Augustus De Morgan.",
       "eliminates": ["augustus_de_morgan"]
     },
     {
-      "id": "victim_not_alan_turing",
+      "id": "victim_not_annabella_milbanke",
       "category": "victim",
-      "roomId": "padded_cells",
-      "text": "The victim was not Alan Turing.",
-      "eliminates": ["alan_turing"]
+      "roomId": "cafeteria",
+      "text": "The victim was not Annabella Milbanke.",
+      "eliminates": ["annabella_milbanke"]
     },
+
     {
       "id": "victim_not_arthur_edward_waite",
       "category": "victim",
-      "roomId": "cafeteria",
+      "roomId": "operating_theater",
       "text": "The victim was not Arthur Edward Waite.",
       "eliminates": ["arthur_edward_waite"]
     },
     {
       "id": "victim_not_william_butler_yeats",
       "category": "victim",
-      "roomId": "operating_theater",
+      "roomId": "rec_room",
       "text": "The victim was not William Butler Yeats.",
       "eliminates": ["william_butler_yeats"]
     },
     {
       "id": "victim_not_macgregor_mathers",
       "category": "victim",
-      "roomId": "rec_room",
+      "roomId": "showers",
       "text": "The victim was not Samuel Liddell MacGregor Mathers.",
       "eliminates": ["macgregor_mathers"]
     },
     {
-      "id": "victim_not_harry_houdini",
+      "id": "victim_not_rose_edith_kelly",
       "category": "victim",
-      "roomId": "showers",
-      "text": "The victim was not Harry Houdini.",
-      "eliminates": ["harry_houdini"]
+      "roomId": "solitary_confinement",
+      "text": "The victim was not Rose Edith Kelly.",
+      "eliminates": ["rose_edith_kelly"]
     },
+
     {
       "id": "victim_not_pierre_curie",
       "category": "victim",
-      "roomId": "solitary_confinement",
+      "roomId": "hydrotherapy",
       "text": "The victim was not Pierre Curie.",
       "eliminates": ["pierre_curie"]
     },
     {
       "id": "victim_not_henri_becquerel",
       "category": "victim",
-      "roomId": "hydrotherapy",
+      "roomId": "electrotherapy",
       "text": "The victim was not Henri Becquerel.",
       "eliminates": ["henri_becquerel"]
     },
     {
       "id": "victim_not_paul_langevin",
       "category": "victim",
-      "roomId": "electrotherapy",
+      "roomId": "wardens_office",
       "text": "The victim was not Paul Langevin.",
       "eliminates": ["paul_langevin"]
     },
     {
       "id": "victim_not_albert_einstein",
       "category": "victim",
-      "roomId": "wardens_office",
+      "roomId": "padded_cells",
       "text": "The victim was not Albert Einstein.",
       "eliminates": ["albert_einstein"]
     },
+
     {
       "id": "victim_not_george_soper",
       "category": "victim",
-      "roomId": "padded_cells",
+      "roomId": "cafeteria",
       "text": "The victim was not George Soper.",
       "eliminates": ["george_soper"]
     },
     {
       "id": "victim_not_sara_josephine_baker",
       "category": "victim",
-      "roomId": "cafeteria",
+      "roomId": "operating_theater",
       "text": "The victim was not Sara Josephine Baker.",
       "eliminates": ["sara_josephine_baker"]
     },
     {
-      "id": "victim_not_robert_koch",
-      "category": "victim",
-      "roomId": "operating_theater",
-      "text": "The victim was not Robert Koch.",
-      "eliminates": ["robert_koch"]
-    },
-    {
-      "id": "victim_not_louis_pasteur",
+      "id": "victim_not_william_h_park",
       "category": "victim",
       "roomId": "rec_room",
-      "text": "The victim was not Louis Pasteur.",
-      "eliminates": ["louis_pasteur"]
+      "text": "The victim was not William H. Park.",
+      "eliminates": ["william_h_park"]
     },
     {
-      "id": "victim_not_john_snow",
+      "id": "victim_not_hermann_biggs",
       "category": "victim",
       "roomId": "showers",
-      "text": "The victim was not John Snow.",
-      "eliminates": ["john_snow"]
+      "text": "The victim was not Hermann Biggs.",
+      "eliminates": ["hermann_biggs"]
     },
+
     {
       "id": "victim_not_duke_of_wellington",
       "category": "victim",
@@ -214,62 +220,6 @@
       "roomId": "wardens_office",
       "text": "The victim was not Gebhard Leberecht von Blücher.",
       "eliminates": ["blucher"]
-    },
-    {
-      "id": "victim_not_beethoven",
-      "category": "victim",
-      "roomId": "padded_cells",
-      "text": "The victim was not Ludwig van Beethoven.",
-      "eliminates": ["beethoven"]
-    },
-    {
-      "id": "victim_not_sigmund_freud",
-      "category": "victim",
-      "roomId": "cafeteria",
-      "text": "The victim was not Sigmund Freud.",
-      "eliminates": ["sigmund_freud"]
-    },
-    {
-      "id": "victim_not_nikola_tesla",
-      "category": "victim",
-      "roomId": "operating_theater",
-      "text": "The victim was not Nikola Tesla.",
-      "eliminates": ["nikola_tesla"]
-    },
-    {
-      "id": "victim_not_florence_nightingale",
-      "category": "victim",
-      "roomId": "rec_room",
-      "text": "The victim was not Florence Nightingale.",
-      "eliminates": ["florence_nightingale"]
-    },
-    {
-      "id": "victim_not_queen_victoria",
-      "category": "victim",
-      "roomId": "showers",
-      "text": "The victim was not Queen Victoria.",
-      "eliminates": ["queen_victoria"]
-    },
-    {
-      "id": "victim_not_edgar_allan_poe",
-      "category": "victim",
-      "roomId": "solitary_confinement",
-      "text": "The victim was not Edgar Allan Poe.",
-      "eliminates": ["edgar_allan_poe"]
-    },
-    {
-      "id": "victim_not_oscar_wilde",
-      "category": "victim",
-      "roomId": "hydrotherapy",
-      "text": "The victim was not Oscar Wilde.",
-      "eliminates": ["oscar_wilde"]
-    },
-    {
-      "id": "victim_not_charles_darwin",
-      "category": "victim",
-      "roomId": "electrotherapy",
-      "text": "The victim was not Charles Darwin.",
-      "eliminates": ["charles_darwin"]
     },
     {
       "id": "murderer_not_napoleon",

@@ -6,14 +6,16 @@ const fields = ["killer", "victim", "room", "method"];
 const poolByField = { killer: "killers", victim: "victims", room: "rooms", method: "methods" };
 const fieldByCategory = { murderer: "killer", victim: "victim", room: "room", method: "method" };
 
-function validateGuess(guess) {
+function validateGuess(guess, pools = solutionPools) {
     if (fields.some(field => typeof guess?.[field] !== "string")) {
         throw new Error("Choose a killer, victim, room, and method.");
     }
     const normalized = {};
     for (const field of fields) {
         normalized[field] = guess[field].trim();
-        if (!solutionPools[poolByField[field]].some(option => option.id === normalized[field])) {
+        const pool = field === "victim" && Array.isArray(pools.victims) && typeof pools.victims[0] === "string"
+            ? pools.victims.map(id => ({ id })) : pools[poolByField[field]];
+        if (!pool.some(option => option.id === normalized[field])) {
             throw new Error(`Choose a valid ${field}.`);
         }
     }
@@ -41,7 +43,7 @@ function submitGuess(state, playerId, submittedGuess, random = Math.random, cata
         throw new Error("Use all movement points before making a guess.");
     }
     if (state.turn.hasGuessedThisTurn) throw new Error("You have already guessed this turn.");
-    const guess = validateGuess(submittedGuess);
+    const guess = validateGuess(submittedGuess, { ...solutionPools, victims: state.candidates?.victims || solutionPools.victims });
     const guessingPlayer = state.players.find(player => String(player.id) === String(playerId));
     if (!guessingPlayer) throw new Error("Player not found.");
     state.turn.hasGuessedThisTurn = true;

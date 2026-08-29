@@ -21,13 +21,19 @@ function hintSupportsSolution(hint, solution) {
     return Boolean(field) && !eliminatedCandidates(hint).includes(solution[field]);
 }
 
-function selectRequiredHints(solution, catalog = hintCatalog) {
+function hintUsesCandidatePool(hint, pools) {
+    if (hint.category !== "victim") return true;
+    const allowed = new Set(pools.victims.map(candidate => candidate.id));
+    return eliminatedCandidates(hint).every(id => allowed.has(id));
+}
+
+function selectRequiredHints(solution, catalog = hintCatalog, pools = solutionPools) {
     const selected = [];
     for (const category of catalog.categories) {
         const solutionField = solutionFieldByHintCategory[category];
         const poolName = poolByHintCategory[category];
         if (!solutionField || !poolName) throw new Error(`Invalid hint category: ${category}`);
-        const uncovered = new Set(solutionPools[poolName].map(candidate => candidate.id)
+        const uncovered = new Set(pools[poolName].map(candidate => candidate.id)
             .filter(id => id !== solution[solutionField]));
         const candidates = catalog.hints.filter(hint =>
             hint.category === category && hintSupportsSolution(hint, solution)
@@ -46,11 +52,11 @@ function selectRequiredHints(solution, catalog = hintCatalog) {
     return selected.map(hint => hint.id);
 }
 
-function dealStartingHints(solution, playerCount, random = Math.random, catalog = hintCatalog) {
+function dealStartingHints(solution, playerCount, random = Math.random, catalog = hintCatalog, pools = solutionPools) {
     const hands = Array.from({ length: playerCount }, () => []);
     for (const category of catalog.categories) {
         const candidates = catalog.hints.filter(hint =>
-            hint.category === category && hintSupportsSolution(hint, solution)
+            hint.category === category && hintSupportsSolution(hint, solution) && hintUsesCandidatePool(hint, pools)
         );
         if (!candidates.length && playerCount) throw new Error(`No valid starting hints exist for category: ${category}`);
         if (playerCount > candidates.length) {
@@ -68,10 +74,10 @@ function dealStartingHints(solution, playerCount, random = Math.random, catalog 
     return hands;
 }
 
-function distributeHints(solution, searchItems, random = Math.random, catalog = hintCatalog, excludedHintIds = []) {
+function distributeHints(solution, searchItems, random = Math.random, catalog = hintCatalog, excludedHintIds = [], pools = solutionPools) {
     const sources = searchItems.map(item => ({ ...structuredClone(item), hintIds: [] }));
     const excluded = new Set(excludedHintIds);
-    const requiredHintIds = selectRequiredHints(solution, catalog).filter(hintId => !excluded.has(hintId));
+    const requiredHintIds = selectRequiredHints(solution, catalog, pools).filter(hintId => !excluded.has(hintId));
     if (!sources.length && requiredHintIds.length) throw new Error("The board has no search sources.");
     if (requiredHintIds.length > sources.length * MAX_HINTS_PER_SOURCE) {
         throw new Error("The board has insufficient search-source capacity for the required hints.");
@@ -83,7 +89,11 @@ function distributeHints(solution, searchItems, random = Math.random, catalog = 
     return sources;
 }
 
-function validateHintDistribution(game, catalog = hintCatalog) {
+function validateHintDistribution(game, catalog = hintCatalog, pools = solutionPools) {
+    if (Array.isArray(game.candidates?.victims)) {
+        const allowed = new Set(game.candidates.victims);
+        pools = { ...pools, victims: solutionPools.victims.filter(victim => allowed.has(victim.id)) };
+    }
     const definitions = new Map(catalog.hints.map(hint => [hint.id, hint]));
     const coverage = new Map(catalog.categories.map(category => [category, new Set()]));
     const startingHintIds = new Set();
@@ -93,6 +103,7 @@ function validateHintDistribution(game, catalog = hintCatalog) {
             const definition = definitions.get(hint.id);
             if (!definition) throw new Error(`Starting hint does not exist: ${hint.id}`);
             if (!hintSupportsSolution(definition, game.solution)) throw new Error(`Starting hint ${hint.id} eliminates the actual solution.`);
+            if (!hintUsesCandidatePool(definition, pools)) throw new Error(`Starting hint ${hint.id} references an unavailable victim.`);
             startingHintIds.add(hint.id);
             eliminatedCandidates(definition).forEach(id => coverage.get(definition.category).add(id));
         }
@@ -108,12 +119,13 @@ function validateHintDistribution(game, catalog = hintCatalog) {
             if (!hint) throw new Error(`Placed hint does not exist: ${hintId}`);
             if (!catalog.categories.includes(hint.category)) throw new Error(`Hint ${hintId} has an invalid category.`);
             if (!hintSupportsSolution(hint, game.solution)) throw new Error(`Hint ${hintId} eliminates the actual solution.`);
+            if (!hintUsesCandidatePool(hint, pools)) throw new Error(`Hint ${hintId} references an unavailable victim.`);
             eliminatedCandidates(hint).forEach(id => coverage.get(hint.category).add(id));
         }
     }
     for (const category of catalog.categories) {
         const field = solutionFieldByHintCategory[category];
-        const required = solutionPools[poolByHintCategory[category]].map(candidate => candidate.id)
+        const required = pools[poolByHintCategory[category]].map(candidate => candidate.id)
             .filter(id => id !== game.solution[field]);
         const missing = required.filter(id => !coverage.get(category).has(id));
         if (missing.length) throw new Error(`Hint distribution cannot eliminate: ${category} ${missing.join(", ")}`);
@@ -121,12 +133,12 @@ function validateHintDistribution(game, catalog = hintCatalog) {
     return true;
 }
 
-function roomsForSolution(solution, catalog = hintCatalog, excludedHintIds = []) {
+function roomsForSolution(solution, catalog = hintCatalog, excludedHintIds = [], pools = solutionPools) {
     const excluded = new Set(excludedHintIds);
     return rooms.map(room => ({
         ...room,
         hintIds: catalog.hints
-            .filter(hint => hint.roomId === room.id && hintSupportsSolution(hint, solution))
+            .filter(hint => hint.roomId === room.id && hintSupportsSolution(hint, solution) && hintUsesCandidatePool(hint, pools))
             .filter(hint => !excluded.has(hint.id))
             .map(hint => hint.id)
     }));
@@ -185,7 +197,7 @@ function discoverHint(state, playerId, searchItemId, catalog = hintCatalog) {
 }
 
 module.exports = {
-    MAX_HINTS_PER_SOURCE, HINTS_PER_SEARCH, hintCatalog, eliminatedCandidates, hintSupportsSolution,
+    MAX_HINTS_PER_SOURCE, HINTS_PER_SEARCH, hintCatalog, eliminatedCandidates, hintSupportsSolution, hintUsesCandidatePool,
     selectRequiredHints, dealStartingHints, distributeHints, validateHintDistribution, roomsForSolution,
     isAdjacentToArea, discoverHint
 };

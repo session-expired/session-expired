@@ -1,5 +1,5 @@
 const { spawnPoints, blockedTiles, searchItems } = require("./board-data");
-const { createSolution } = require("./solution");
+const { createSolution, solutionPools, victimCandidatesForCharacters } = require("./solution");
 const { hintCatalog, roomsForSolution, dealStartingHints, distributeHints, validateHintDistribution } = require("./hint-rules");
 
 const MAX_GAME_PLAYERS = 4;
@@ -20,10 +20,12 @@ function createInitialGameState(gamePlayers, random = Math.random, lobby = {}) {
         throw new Error("There are more players than available spawn points.");
     }
     const availableSpawnPoints = shuffle(spawnPoints.map(point => ({ ...point })), random);
-    const solution = createSolution(random);
-    const startingHands = dealStartingHints(solution, gamePlayers.length, random);
+    const victimCandidates = victimCandidatesForCharacters(gamePlayers.map(player => player.selected_character));
+    const candidatePools = { ...solutionPools, victims: victimCandidates };
+    const solution = createSolution(random, candidatePools);
+    const startingHands = dealStartingHints(solution, gamePlayers.length, random, hintCatalog, candidatePools);
     const startingHintIds = [...new Set(startingHands.flat().map(hint => hint.id))];
-    const gameRooms = roomsForSolution(solution, hintCatalog, startingHintIds);
+    const gameRooms = roomsForSolution(solution, hintCatalog, startingHintIds, candidatePools);
     const players = gamePlayers.map((player, index) => ({
         id: String(player.id), username: player.username, character: player.selected_character,
         canAccuse: true, turnsToSkip: 0,
@@ -37,12 +39,13 @@ function createInitialGameState(gamePlayers, random = Math.random, lobby = {}) {
         facing: "right", dialogueEvent: null, dialogueEventId: 0, secretPassageCooldown: null
     }));
     const turnOrder = shuffle(players.map(player => String(player.id)), random);
-    const gameSearchItems = distributeHints(solution, searchItems, random, hintCatalog, startingHintIds);
+    const gameSearchItems = distributeHints(solution, searchItems, random, hintCatalog, startingHintIds, candidatePools);
 
     const state = {
         lobbyId: lobby.id == null ? null : String(lobby.id),
         lobbyName: lobby.name ?? null,
         status: "active",
+        candidates: { victims: victimCandidates.map(victim => victim.id) },
         board: {
             rows: 24,
             cols: 30,
@@ -67,7 +70,7 @@ function createInitialGameState(gamePlayers, random = Math.random, lobby = {}) {
         endedAt: null,
         createdAt: Date.now()
     };
-    validateHintDistribution(state);
+    validateHintDistribution(state, hintCatalog, candidatePools);
     return state;
 }
 

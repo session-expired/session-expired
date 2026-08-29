@@ -56,7 +56,7 @@ test("a launched game snapshots the board and its lobby players", () => {
   ));
   assert.deepEqual(state.solution, {
     killer: "brahe",
-    victim: "nicholas_ii",
+    victim: "charles_babbage",
     room: "hydrotherapy",
     method: "electrocuted"
   });

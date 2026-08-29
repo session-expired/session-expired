@@ -233,13 +233,6 @@
       "excludes": "arthur_edward_waite"
     },
     {
-      "id": "victim_houdini_clear",
-      "category": "victim",
-      "roomId": "hydrotherapy",
-      "text": "Harry Houdini performed an escape after the murder had occurred.",
-      "excludes": "harry_houdini"
-    },
-    {
       "id": "victim_pierre_curie_clear",
       "category": "victim",
       "roomId": "electrotherapy",
@@ -275,48 +268,8 @@
       "excludes": "horatio_nelson"
     },
     {
-      "id": "victim_freud_clear",
-      "category": "victim",
-      "roomId": "padded_cell",
-      "text": "Sigmund Freud completed patient notes after the time of death.",
-      "excludes": "sigmund_freud"
-    },
-    {
-      "id": "victim_tesla_clear",
-      "category": "victim",
-      "roomId": "electrotherapy",
-      "text": "Nikola Tesla reset the electrical apparatus after the murder.",
-      "excludes": "nikola_tesla"
-    },
-    {
-      "id": "victim_poe_clear",
-      "category": "victim",
-      "roomId": "solitary_confinement",
-      "text": "Edgar Allan Poe left fresh writing composed after the murder.",
-      "excludes": "edgar_allan_poe"
-    },
-    {
-      "id": "victim_darwin_clear",
-      "category": "victim",
-      "roomId": "hydrotherapy",
-      "text": "Charles Darwin was interviewed after the body was discovered.",
-      "excludes": "charles_darwin"
-    },
-    {
-      "id": "victim_galileo_clear", "category": "victim", "roomId": "rec_room",
-      "text": "Galileo's dated observations continue beyond the time of death.", "excludes": "galileo"
-    },
-    {
-      "id": "victim_newton_clear", "category": "victim", "roomId": "wardens_office",
-      "text": "Isaac Newton signed a report after the murder.", "excludes": "isaac_newton"
-    },
-    {
       "id": "victim_de_morgan_clear", "category": "victim", "roomId": "padded_cell",
       "text": "Augustus De Morgan completed correspondence after the murder.", "excludes": "augustus_de_morgan"
-    },
-    {
-      "id": "victim_turing_clear", "category": "victim", "roomId": "electrotherapy",
-      "text": "Alan Turing's machine log continues beyond the time of death.", "excludes": "alan_turing"
     },
     {
       "id": "victim_yeats_clear", "category": "victim", "roomId": "rec_room",
@@ -339,18 +292,6 @@
       "text": "Sara Josephine Baker filed a health report after the murder.", "excludes": "sara_josephine_baker"
     },
     {
-      "id": "victim_koch_clear", "category": "victim", "roomId": "operating_theater",
-      "text": "Robert Koch recorded a culture result after the murder.", "excludes": "robert_koch"
-    },
-    {
-      "id": "victim_pasteur_clear", "category": "victim", "roomId": "cafeteria",
-      "text": "Louis Pasteur completed laboratory notes after the murder.", "excludes": "louis_pasteur"
-    },
-    {
-      "id": "victim_snow_clear", "category": "victim", "roomId": "showers",
-      "text": "John Snow updated a ward map after the murder.", "excludes": "john_snow"
-    },
-    {
       "id": "victim_alexander_clear", "category": "victim", "roomId": "wardens_office",
       "text": "Tsar Alexander I attended a briefing after the murder.", "excludes": "alexander_i"
     },
@@ -359,20 +300,32 @@
       "text": "Blücher was seen drilling guards after the murder.", "excludes": "blucher"
     },
     {
-      "id": "victim_beethoven_clear", "category": "victim", "roomId": "rec_room",
-      "text": "Beethoven's freshly marked score postdates the murder.", "excludes": "beethoven"
+      "id": "victim_dmitri_clear", "category": "victim", "roomId": "wardens_office",
+      "text": "Grand Duke Dmitri Pavlovich answered a guard's questions after the murder.", "excludes": "dmitri_pavlovich"
     },
     {
-      "id": "victim_nightingale_clear", "category": "victim", "roomId": "operating_theater",
-      "text": "Florence Nightingale completed rounds after the murder.", "excludes": "florence_nightingale"
+      "id": "victim_frederick_clear", "category": "victim", "roomId": "rec_room",
+      "text": "Frederick II of Denmark issued a royal instruction after the murder.", "excludes": "frederick_ii_denmark"
     },
     {
-      "id": "victim_victoria_clear", "category": "victim", "roomId": "wardens_office",
-      "text": "Queen Victoria signed a dispatch after the murder.", "excludes": "queen_victoria"
+      "id": "victim_ursus_clear", "category": "victim", "roomId": "electrotherapy",
+      "text": "Nicolaus Reimers Ursus completed a calculation after the murder.", "excludes": "nicolaus_reimers_ursus"
     },
     {
-      "id": "victim_wilde_clear", "category": "victim", "roomId": "solitary_confinement",
-      "text": "Oscar Wilde left a newly written note after the murder.", "excludes": "oscar_wilde"
+      "id": "victim_milbanke_clear", "category": "victim", "roomId": "padded_cell",
+      "text": "Annabella Milbanke sent correspondence after the time of death.", "excludes": "annabella_milbanke"
+    },
+    {
+      "id": "victim_rose_kelly_clear", "category": "victim", "roomId": "showers",
+      "text": "Rose Edith Kelly was seen returning from the ward after the murder.", "excludes": "rose_edith_kelly"
+    },
+    {
+      "id": "victim_park_clear", "category": "victim", "roomId": "operating_theater",
+      "text": "William H. Park signed a laboratory report after the murder.", "excludes": "william_h_park"
+    },
+    {
+      "id": "victim_biggs_clear", "category": "victim", "roomId": "cafeteria",
+      "text": "Hermann Biggs completed a public-health briefing after the murder.", "excludes": "hermann_biggs"
     }
   ]
 }
