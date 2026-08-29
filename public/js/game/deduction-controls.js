@@ -109,10 +109,11 @@ export function createDeductionControls(elements, gameId, callbacks) {
         const mine = String(state.turn?.playerId) === String(userId);
         const adjacent = player?.position && state.warden?.position &&
             Math.abs(player.position.row - state.warden.position.row) + Math.abs(player.position.col - state.warden.position.col) === 1;
+        const acceptsInput = callbacks.canPerformAction?.() !== false;
         return {
-            guess: Boolean(optionsByField && state.status === "active" && mine && state.turn.phase === "awaiting_end" &&
+            guess: Boolean(acceptsInput && optionsByField && state.status === "active" && mine && state.turn.phase === "awaiting_end" &&
                 state.turn.movementRemaining === 0 && !state.turn.hasGuessedThisTurn),
-            accusation: Boolean(optionsByField && state.status === "active" && mine && adjacent && player?.canAccuse),
+            accusation: Boolean(acceptsInput && optionsByField && state.status === "active" && mine && adjacent && player?.canAccuse),
             mine, adjacent, player
         };
     }

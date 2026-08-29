@@ -11,14 +11,25 @@ let gameState;
 let currentUserId;
 let debugCoordinates = false;
 let entityRenderer;
+let movementInProgress = false;
+let deferredGameState = null;
 const boardLayout = createBoardLayout(elements, () => entityRenderer?.positionSpeechBubbles());
 entityRenderer = createEntityRenderer(elements.board, boardLayout, () => gameState);
 const deductionControls = createDeductionControls(elements, gameId, {
     onState: applyAuthoritativeState,
     onStatus: message => { elements.status.textContent = message; },
     onDialogue: (character, group) => entityRenderer.showDialogue(character, group),
-    onEligibilityChanged: () => { if (gameState) renderTurn(); }
+    onEligibilityChanged: () => { if (gameState) renderTurn(); },
+    canPerformAction: () => !movementInProgress
 });
+
+function setMovementLocked(locked) {
+    movementInProgress = locked;
+    elements.game.classList.toggle("movement-in-progress", locked);
+    elements.rollMovementButton.disabled = locked;
+    elements.endTurnButton.disabled = locked;
+    if (gameState) renderTurn();
+}
 
 function renderTurn() {
     const turn = gameState?.turn;
@@ -55,7 +66,7 @@ function renderGameState() {
 }
 
 function animateWardenMove(previousPosition) {
-    entityRenderer.animate(
+    return entityRenderer.animate(
         elements.board.querySelector(".warden-sprite"),
         previousPosition,
         gameState.warden.position,
@@ -79,6 +90,7 @@ function applyAuthoritativeState(nextState) {
 }
 
 elements.rollMovementButton.addEventListener("click", async () => {
+    if (movementInProgress) return;
     elements.rollMovementButton.disabled = true;
     try {
         applyAuthoritativeState((await rollMovement(gameId)).state);
@@ -90,6 +102,7 @@ elements.rollMovementButton.addEventListener("click", async () => {
 });
 
 elements.endTurnButton.addEventListener("click", async () => {
+    if (movementInProgress) return;
     elements.endTurnButton.disabled = true;
     try {
         applyAuthoritativeState((await endTurn(gameId)).state);
@@ -101,7 +114,14 @@ elements.endTurnButton.addEventListener("click", async () => {
 });
 
 window.addEventListener("game-state", event => {
-    if (event.detail) applyAuthoritativeState(event.detail);
+    if (!event.detail) return;
+    if (movementInProgress) {
+        deferredGameState = event.detail;
+        const sameTurn = event.detail.status === "active" && String(event.detail.turn?.playerId) === currentUserId;
+        if (!sameTurn) entityRenderer.cancelAnimations();
+        return;
+    }
+    applyAuthoritativeState(event.detail);
 });
 
 window.addEventListener("game-perspective", event => {
@@ -123,6 +143,7 @@ window.addEventListener("guess-disproved", event => {
 });
 
 async function leaveGame(button, confirmLeave) {
+    if (movementInProgress) return;
     if (confirmLeave && !window.confirm("Are you sure you want to leave this game? You will not be able to rejoin.")) return;
     button.disabled = true;
     try {
@@ -138,6 +159,8 @@ elements.quitButton.addEventListener("click", () => leaveGame(elements.quitButto
 elements.finishedLeaveButton?.addEventListener("click", () => leaveGame(elements.finishedLeaveButton, false));
 
 async function handleMovementClick(square) {
+    if (movementInProgress) return;
+    setMovementLocked(true);
     const movingPlayer = gameState.players.find(player => String(player.id) === currentUserId);
     const previousPosition = movingPlayer?.position ? { ...movingPlayer.position } : null;
     const previousDialogueEventId = movingPlayer?.dialogueEventId || 0;
@@ -153,8 +176,10 @@ async function handleMovementClick(square) {
         });
     } catch (error) {
         elements.status.textContent = error.message;
+        setMovementLocked(false);
         return;
     }
+    try {
     gameState = data.state;
     const wardenTookTurn = (gameState.warden?.turnsTaken || 0) > previousWardenTurns;
     if (wardenTookTurn) entityRenderer.showDialogue(gameState.warden.character, "turn_start");
@@ -174,7 +199,7 @@ async function handleMovementClick(square) {
         entityRenderer.render();
     }
     if (previousPosition && movedPlayer) {
-        entityRenderer.animate(
+        await entityRenderer.animate(
             elements.board.querySelector(`.player-sprite[data-entity-id="${currentUserId}"]`),
             previousPosition,
             movedPlayer.position,
@@ -184,11 +209,20 @@ async function handleMovementClick(square) {
     if (wardenTookTurn && previousWardenPosition && gameState.warden && (
         previousWardenPosition.row !== gameState.warden.position.row ||
         previousWardenPosition.col !== gameState.warden.position.col
-    )) animateWardenMove(previousWardenPosition);
+    )) await animateWardenMove(previousWardenPosition);
+    } finally {
+        if (deferredGameState) {
+            gameState = deferredGameState;
+            deferredGameState = null;
+        }
+        setMovementLocked(false);
+        renderGameState();
+    }
 }
 
 function bindBoardInput() {
     elements.board.addEventListener("click", async event => {
+        if (movementInProgress) return;
         const square = event.target.closest("[data-row][data-col]");
         if (!square?.dataset.type) return;
         if (square.classList.contains("movement-range")) await handleMovementClick(square);

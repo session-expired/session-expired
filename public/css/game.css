@@ -338,6 +338,14 @@
   background: rgba(75, 225, 90, 0.48);
 }
 
+#game.movement-in-progress #board {
+  cursor: wait;
+}
+
+#game.movement-in-progress #board > [data-row][data-col] {
+  pointer-events: none;
+}
+
 #board > .search-item-in-range {
   cursor: pointer;
 }

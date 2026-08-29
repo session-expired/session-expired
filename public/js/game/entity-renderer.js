@@ -1,5 +1,6 @@
 export function createEntityRenderer(boardElement, boardLayout, getGameState) {
     let characterDialogue = new Map();
+    const activeAnimations = new Set();
     const characterNames = {
         bonaparte: "Napolean",
         rasputin: "Rasputin",
@@ -55,26 +56,60 @@ export function createEntityRenderer(boardElement, boardLayout, getGameState) {
         });
     }
 
-    function animate(sprite, previousPosition, currentPosition, path) {
-        if (!sprite || !path?.length) return;
-        const duration = Math.max(400, path.length * 180);
+    function nextFrame() {
+        return new Promise(resolve => window.requestAnimationFrame(resolve));
+    }
+
+    async function animate(sprite, previousPosition, currentPosition, path) {
+        if (!sprite || !path?.length) return false;
         const tiles = [previousPosition, ...path];
-        const keyframes = tiles.map((tile, index) => ({
-            offset: index / (tiles.length - 1),
-            transform: `translate(calc(-50% + ${(tile.col - currentPosition.col) * boardLayout.cellSize}px), ${(tile.row - currentPosition.row) * boardLayout.cellSize}px)`
-        }));
-        const movementAnimation = sprite.animate(keyframes, { duration, easing: "linear" });
+        const token = { cancelled: false };
+        activeAnimations.add(token);
+        const transformFor = tile => `translate(calc(-50% + ${(tile.col - currentPosition.col) * boardLayout.cellSize}px), ${(tile.row - currentPosition.row) * boardLayout.cellSize}px)`;
         let frame = 1;
         const art = sprite.querySelector(".sprite-art");
         const frameTimer = window.setInterval(() => {
             art.style.backgroundPosition = `${(frame / 7) * 100}% top`;
             frame = frame === 6 ? 1 : frame + 1;
         }, 100);
-        window.setTimeout(() => {
+
+        try {
+            sprite.style.transform = transformFor(tiles[0]);
+            // Two frames guarantee that the starting position is painted before
+            // progression begins in browsers with different compositor timing.
+            await nextFrame();
+            await nextFrame();
+            for (let index = 1; index < tiles.length && !token.cancelled; index += 1) {
+                const from = tiles[index - 1];
+                const to = tiles[index];
+                const startedAt = performance.now();
+                await new Promise(resolve => {
+                    function step(now) {
+                        if (token.cancelled) return resolve();
+                        const progress = Math.min(1, (now - startedAt) / 180);
+                        const tile = {
+                            row: from.row + ((to.row - from.row) * progress),
+                            col: from.col + ((to.col - from.col) * progress)
+                        };
+                        sprite.style.transform = transformFor(tile);
+                        if (progress < 1) window.requestAnimationFrame(step);
+                        else resolve();
+                    }
+                    window.requestAnimationFrame(step);
+                });
+            }
+            if (!token.cancelled) sprite.style.transform = transformFor(currentPosition);
+            return !token.cancelled;
+        } finally {
             window.clearInterval(frameTimer);
             art.style.backgroundPosition = "left top";
-        }, duration);
+            activeAnimations.delete(token);
+        }
     }
 
-    return { setDialogue, showDialogue, positionSpeechBubbles, render, animate };
+    function cancelAnimations() {
+        activeAnimations.forEach(token => { token.cancelled = true; });
+    }
+
+    return { setDialogue, showDialogue, positionSpeechBubbles, render, animate, cancelAnimations };
 }
