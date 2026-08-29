@@ -253,7 +253,7 @@ loadGameResources(gameId)
         });
         window.addEventListener("resize", () => boardLayout.size(rows, cols));
         if (window.ResizeObserver) {
-            new ResizeObserver(() => boardLayout.size(rows, cols)).observe(elements.game);
+    new ResizeObserver(() => boardLayout.size(rows, cols)).observe(elements.gameMain);
         }
         elements.status.textContent = `Game loaded · ${gameState.players.length} players`;
         renderGameState();

@@ -24,18 +24,18 @@ export function createBoardLayout(elements, onLayout = () => {}) {
     }
 
     function size(rows, cols) {
-        const styles = window.getComputedStyle(elements.game);
+        const styles = window.getComputedStyle(elements.gameMain);
         const horizontalPadding = parseFloat(styles.paddingLeft) + parseFloat(styles.paddingRight);
         const verticalPadding = parseFloat(styles.paddingTop) + parseFloat(styles.paddingBottom);
-        const availableWidth = elements.game.clientWidth - horizontalPadding;
-        const reservedHeight = [...elements.game.children]
+        const availableWidth = elements.gameMain.clientWidth - horizontalPadding;
+        const reservedHeight = [...elements.gameMain.children]
             .filter(element => element !== elements.boardViewport)
             .reduce((total, element) => {
                 const childStyles = window.getComputedStyle(element);
                 return total + element.offsetHeight +
                     parseFloat(childStyles.marginTop) + parseFloat(childStyles.marginBottom);
             }, verticalPadding);
-        const availableHeight = Math.max(1, elements.game.clientHeight - reservedHeight);
+        const availableHeight = Math.max(1, elements.gameMain.clientHeight - reservedHeight);
         fittedCellSize = Math.max(1, Math.floor(Math.min(1150 / cols, availableWidth / cols, availableHeight / rows)));
         boardRows = rows;
         boardCols = cols;

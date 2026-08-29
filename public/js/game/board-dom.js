@@ -18,7 +18,8 @@ export const elements = {
     journal: document.getElementById("journal"),
     journalEntries: document.getElementById("journal-entries"),
     journalCount: document.getElementById("journal-count"),
-    clickOutput: document.getElementById("clickOutput")
+    clickOutput: document.getElementById("clickOutput"),
+    gameMain: document.getElementById("game-main")
 };
 
 elements.accuseButton = elements.accusationForm?.querySelector('button[type="submit"]');
