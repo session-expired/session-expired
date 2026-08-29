@@ -3,8 +3,8 @@ const test = require("node:test");
 
 process.env.MULTI_TEST_MODE = "true";
 const packageJson = require("../package.json");
-const { app, createTestState, gameId, testPlayers } = require("../multi/multi-server");
-const { submitAccusation } = require("../server/game/board");
+const { app, createTestState, gameId, renderMultiPage, testPlayers } = require("../multi/multi-server");
+const { submitAccusation, submitGuess } = require("../server/game/board");
 const { controlledPlayerId } = require("../multi/turn-controller");
 
 test("npm run multi uses the isolated four-player server", () => {
@@ -19,6 +19,37 @@ test("multi mode exposes no normal login or lobby routes", () => {
   assert.ok(paths.includes("/__multi/multi-test"));
   assert.ok(!paths.includes("/login"));
   assert.ok(!paths.includes("/lobby"));
+});
+
+test("multi mode wraps the current game page and shared deduction controls", () => {
+  const html = renderMultiPage();
+  assert.match(html, /id="deduction-panel"/);
+  assert.match(html, /id="open-guess"/);
+  assert.match(html, /id="open-accusation"/);
+  assert.match(html, /src="\/js\/game\/board\.js"/);
+  assert.doesNotMatch(html, /id="accusation-form"|<select name="killer"/);
+  assert.match(html, /src="\/__multi\/multi-client\.js"/);
+});
+
+test("real Guess logic shares a qualifying hint without removing it from its owner", () => {
+  const state = createTestState();
+  const guesserId = state.turn.playerId;
+  const guesser = state.players.find(player => player.id === guesserId);
+  const provider = state.players.find(player => player.id !== guesserId);
+  state.players.filter(player => player !== guesser && player !== provider).forEach(player => {
+    player.discoveredHintIds = [];
+    player.discoveredHints = [];
+  });
+  const hint = provider.discoveredHints[0];
+  const fieldByCategory = { murderer: "killer", victim: "victim", room: "room", method: "method" };
+  const guess = { ...state.solution, [fieldByCategory[hint.category]]: hint.eliminates?.[0] || hint.excludes };
+  const providerIdsBefore = [...provider.discoveredHintIds];
+  state.turn.phase = "awaiting_end";
+  state.turn.movementRemaining = 0;
+  const result = submitGuess(state, guesserId, guess, () => 0);
+  assert.equal(result.provider.id, provider.id);
+  assert.ok(guesser.discoveredHintIds.includes(hint.id));
+  assert.deepEqual(provider.discoveredHintIds, providerIdsBefore);
 });
 
 test("shared accusation logic records the discovering player and finishes the game", () => {

@@ -1,4 +1,5 @@
 const path = require("path");
+const fs = require("fs");
 const express = require("express");
 const {
   createInitialGameState,
@@ -25,6 +26,7 @@ const app = express();
 const port = Number(process.env.MULTI_PORT) || 3003;
 const hostname = process.env.HOST || "127.0.0.1";
 const publicDirectory = path.join(__dirname, "..", "public");
+const gamePagePath = path.join(publicDirectory, "pages", "game.html");
 const gameId = "multi-test";
 const testPlayers = [
   { id: "test-player-1", username: "Player 1", selected_character: "rasputin" },
@@ -58,7 +60,33 @@ function actorId(request) {
 app.disable("x-powered-by");
 app.use(express.json({ limit: "10kb" }));
 app.get("/", (request, response) => response.redirect(`/__multi/${gameId}`));
-app.get(`/__multi/${gameId}`, (request, response) => response.sendFile(path.join(__dirname, "multi.html")));
+
+function renderMultiPage() {
+  const debugPanel = `
+    <aside id="multi-panel">
+      <p id="controlled-player">Controlled test player: none</p>
+      <div id="debug-summary">Loading state…</div>
+      <details><summary>Private hint ownership</summary><div id="hint-summary"></div></details>
+      <details><summary>Raw JSON state</summary><pre id="raw-state"></pre></details>
+    </aside>`;
+  return fs.readFileSync(gamePagePath, "utf8")
+    .replace('<body class="game-page">', '<body class="game-page multi-page">')
+    .replace(/<header class="game-header">[\s\S]*?<\/header>/, `
+    <header class="game-header">
+      <strong>MULTI PLAYER TEST</strong>
+      <button id="reset-game" type="button">Reset game</button>
+    </header>${debugPanel}`)
+    .replace('    <script src="/socket.io/socket.io.js"></script>\n', "")
+    .replace('    <script src="/js/chat.js"></script>\n', "")
+    .replace('    <script src="/js/game/music.js"></script>\n', "")
+    .replace('    <script type="module" src="/js/game/board.js"></script>', `
+    <link rel="stylesheet" href="/__multi/multi.css" />
+    <script src="/__multi/turn-controller.js"></script>
+    <script src="/__multi/multi-client.js"></script>
+    <script type="module" src="/js/game/board.js"></script>`);
+}
+
+app.get(`/__multi/${gameId}`, (request, response) => response.type("html").send(renderMultiPage()));
 app.get(`/api/games/${gameId}`, (request, response) => {
   response.json({
     game: { id: gameId, state, created_at: new Date(state.createdAt).toISOString() },
@@ -148,4 +176,4 @@ function startMultiServer() {
 
 if (require.main === module) startMultiServer();
 
-module.exports = { app, createTestState, gameId, startMultiServer, testPlayers };
+module.exports = { app, createTestState, gameId, renderMultiPage, startMultiServer, testPlayers };

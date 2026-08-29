@@ -52,8 +52,13 @@ window.addEventListener("DOMContentLoaded", () => {
     )?.name || "Hallway";
     document.getElementById("debug-summary").innerHTML = `
       <p>Lobby/game: ${state.lobbyName} · Status: ${state.status} · Turn ${state.turn.number}: ${current?.username || "none"}</p>
-      <ul>${state.players.map(player => `<li>${player.id} · ${player.character} · ${roomAt(player)} (${player.position.row}, ${player.position.col}) · turns to skip: ${player.turnsToSkip || 0}</li>`).join("")}</ul>
+      <ul>${state.players.map(player => `<li>${player.id} · ${player.character} · ${roomAt(player)} (${player.position.row}, ${player.position.col}) · ${player.discoveredHintIds?.length || 0} hints · turns to skip: ${player.turnsToSkip || 0}</li>`).join("")}</ul>
       <p>Winner: ${state.winner?.username || "none"}</p>`;
+    document.getElementById("hint-summary").innerHTML = state.players.map(player => `
+      <section class="test-player-hints">
+        <strong>${player.username} · ${player.character}</strong>
+        <ul>${(player.discoveredHints || []).map(hint => `<li>${hint.category}: ${hint.text}${hint.source === "shared" ? " (shared)" : ""}</li>`).join("")}</ul>
+      </section>`).join("");
     document.getElementById("raw-state").textContent = JSON.stringify(state, null, 2);
     const fingerprint = JSON.stringify(state);
     if (fingerprint !== lastStateFingerprint) {
