@@ -28,8 +28,11 @@ CREATE INDEX IF NOT EXISTS user_sessions_expire_idx
 CREATE TABLE IF NOT EXISTS messages (
     id BIGSERIAL PRIMARY KEY,
     sender_id BIGINT NOT NULL REFERENCES users(id),
-    recipient_id BIGINT NOT NULL REFERENCES users(id),
+    recipient_id BIGINT REFERENCES users(id),
     message_text TEXT NOT NULL,
+    channel VARCHAR(16) NOT NULL DEFAULT 'private' CHECK (channel IN ('global', 'private', 'game')),
+    lobby_id BIGINT,
+    game_id BIGINT,
     sent_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     read_at TIMESTAMPTZ
 );
@@ -109,5 +112,26 @@ CREATE TABLE IF NOT EXISTS games (
     state JSONB NOT NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE TABLE IF NOT EXISTS bans (
+    id BIGSERIAL PRIMARY KEY,
+    user_id BIGINT NOT NULL UNIQUE REFERENCES users(id) ON DELETE CASCADE,
+    banned_by BIGINT NOT NULL REFERENCES users(id),
+    reason TEXT,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    expires_at TIMESTAMPTZ
+);
+
+CREATE TABLE IF NOT EXISTS admin_actions (
+    id BIGSERIAL PRIMARY KEY,
+    admin_user_id BIGINT NOT NULL REFERENCES users(id),
+    target_user_id BIGINT NOT NULL REFERENCES users(id),
+    action VARCHAR(20) NOT NULL CHECK (action IN ('kick', 'ban', 'unban')),
+    details TEXT,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS admin_actions_created_idx ON admin_actions (created_at DESC);
+CREATE INDEX IF NOT EXISTS messages_sent_idx ON messages (sent_at DESC, id DESC);
 
 COMMIT;

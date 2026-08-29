@@ -14,6 +14,7 @@ const { Server } = require("socket.io");
 const { registerChatHandlers } = require("./chat/chatHandler");
 const { moderateUsername } = require("./chat/moderation");
 const { createLobbyRouter } = require("./lobby/lobbyRoutes");
+const { createAdminRouter, createRequireAdmin } = require("./admin/admin");
 
 const app = express();
 const server = http.createServer(app);
@@ -77,15 +78,28 @@ function sendPage(name) {
   return (request, response) => response.sendFile(path.join(pageDirectory, name));
 }
 
-function requireAuthentication(request, response, next) {
+async function requireAuthentication(request, response, next) {
   if (!request.session.userId) {
     if (request.path.startsWith("/api/") || request.originalUrl.startsWith("/api/")) {
       return response.status(401).json({ error: "Your session has expired. Please log in again." });
     }
     return response.redirect(`/login?returnTo=${encodeURIComponent(request.originalUrl)}`);
   }
-  next();
+  try {
+    const result = await pool.query(
+      `SELECT 1 FROM bans WHERE user_id = $1
+       AND (expires_at IS NULL OR expires_at > CURRENT_TIMESTAMP) LIMIT 1`,
+      [request.session.userId]
+    );
+    if (result.rowCount) {
+      if (request.originalUrl.startsWith("/api/")) return response.status(403).json({ error: "This account is banned." });
+      return response.status(403).type("text").send("This account is banned.");
+    }
+    next();
+  } catch (error) { next(error); }
 }
+
+const requireAdmin = createRequireAdmin(pool);
 
 function safeReturnPath(value) {
   return typeof value === "string" && value.startsWith("/") && !value.startsWith("//")
@@ -99,6 +113,7 @@ app.get("/login", (request, response) => {
   response.sendFile(path.join(publicPageDirectory, "login.html"));
 });
 app.get("/account", requireAuthentication, sendPage("account.html"));
+app.get("/admin", requireAdmin, sendPage("admin.html"));
 app.get("/lobby", requireAuthentication, (request, response) => {
   response.sendFile(path.join(publicPageDirectory, "lobbyPage.html"));
 });
@@ -202,12 +217,15 @@ app.post("/api/login", async (request, response, next) => {
 
   try {
     const result = await pool.query(
-      "SELECT id, password_hash FROM users WHERE LOWER(username) = LOWER($1) OR LOWER(email) = LOWER($1) LIMIT 1",
+      `SELECT u.id, u.password_hash,
+              EXISTS (SELECT 1 FROM bans b WHERE b.user_id = u.id AND (b.expires_at IS NULL OR b.expires_at > CURRENT_TIMESTAMP)) AS banned
+       FROM users u WHERE LOWER(u.username) = LOWER($1) OR LOWER(u.email) = LOWER($1) LIMIT 1`,
       [identifier]
     );
     const user = result.rows[0];
     const valid = user ? await bcrypt.compare(password, user.password_hash) : false;
     if (!valid) return response.status(401).json({ errors: { form: invalidMessage } });
+    if (user.banned) return response.status(403).json({ errors: { form: "This account is banned." } });
 
     request.session.regenerate((error) => {
       if (error) return next(error);
@@ -226,7 +244,7 @@ app.get("/api/session", async (request, response, next) => {
   if (!request.session.userId) return response.json({ authenticated: false });
   try {
     const result = await pool.query(
-      `SELECT u.username, u.email, active_game.id AS active_game_id
+      `SELECT u.username, u.email, u.role, active_game.id AS active_game_id
        FROM users u
        LEFT JOIN LATERAL (
          SELECT g.id
@@ -270,6 +288,8 @@ app.use("/api/lobbies", createLobbyRouter({
   requireAuthentication,
   minimumPlayers: minimumLobbyPlayers
 }));
+
+app.use("/api/admin", requireAdmin, createAdminRouter({ pool, io }));
 
 app.get("/game/:gameId", requireAuthentication, (request, response) => {
   response.sendFile(path.join(publicPageDirectory, "game.html"));

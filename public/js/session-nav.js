@@ -15,6 +15,17 @@
     authLink.closest("li")?.before(item);
   }
 
+  function addAdminLink(role) {
+    if (role !== "admin" || document.querySelector("[data-admin-link]")) return;
+    const item = document.createElement("li");
+    const link = document.createElement("a");
+    link.href = "/admin";
+    link.textContent = "ADMIN";
+    link.dataset.adminLink = "";
+    item.appendChild(link);
+    authLink.closest("li")?.before(item);
+  }
+
   fetch("/api/session")
     .then((response) => {
       if (!response.ok) throw new Error("Unable to load session.");
@@ -26,6 +37,7 @@
       authLink.textContent = session.user.username;
       authLink.setAttribute("aria-label", `Account for ${session.user.username}`);
       addBackToGameLink(session.activeGame);
+      addAdminLink(session.user.role);
     })
     .catch(() => {
       // Keep the Login link available if session status cannot be loaded.

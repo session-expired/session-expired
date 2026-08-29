@@ -25,14 +25,32 @@ function checkMessage(socket, channel, userId, text) {
 function registerChatHandlers({ io, pool, globalChatHistory, globalChatWindowMs }) {
   const gameChatHistories = new Map();
 
+  async function isBanned(userId) {
+    const result = await pool.query(
+      `SELECT 1 FROM bans WHERE user_id = $1
+       AND (expires_at IS NULL OR expires_at > CURRENT_TIMESTAMP) LIMIT 1`,
+      [userId]
+    );
+    return result.rowCount > 0;
+  }
+
+  async function mayParticipate(socket, userId) {
+    if (!userId || await isBanned(userId)) {
+      if (userId) socket.disconnect(true);
+      return false;
+    }
+    return true;
+  }
+
   function trimHistory(history) {
     const cutoff = Date.now() - globalChatWindowMs;
     while (history[0] && Date.parse(history[0].sentAt) < cutoff) history.shift();
   }
 
-  io.on("connection", (socket) => {
+  io.on("connection", async (socket) => {
     console.log("Socket connected:", socket.id);
     const userId = socket.request.session?.userId;
+    if (userId && await isBanned(userId)) return socket.disconnect(true);
     if (userId) {
       socket.join(`user:${userId}`);
       const cutoff = Date.now() - globalChatWindowMs;
@@ -43,7 +61,7 @@ function registerChatHandlers({ io, pool, globalChatHistory, globalChatWindowMs 
     }
 
     socket.on("global-message", async ({ text } = {}) => {
-      if (!userId || typeof text !== "string" || !text.trim()) return;
+      if (!userId || typeof text !== "string" || !text.trim() || !await mayParticipate(socket, userId)) return;
       const cleanText = text.trim().slice(0, 500);
       if (!checkMessage(socket, "global", userId, cleanText)) return;
 
@@ -56,6 +74,10 @@ function registerChatHandlers({ io, pool, globalChatHistory, globalChatWindowMs 
           text: cleanText,
           sentAt: new Date().toISOString()
         };
+        await pool.query(
+          "INSERT INTO messages (sender_id, recipient_id, message_text, channel) VALUES ($1, NULL, $2, 'global')",
+          [userId, cleanText]
+        );
         globalChatHistory.push(message);
         const cutoff = Date.now() - globalChatWindowMs;
         while (globalChatHistory[0] && Date.parse(globalChatHistory[0].sentAt) < cutoff) {
@@ -69,7 +91,7 @@ function registerChatHandlers({ io, pool, globalChatHistory, globalChatWindowMs 
 
     socket.on("private-message", async ({ recipientId, text } = {}) => {
       const targetId = Number(recipientId);
-      if (!userId || !Number.isInteger(targetId) || typeof text !== "string" || !text.trim()) return;
+      if (!userId || !Number.isInteger(targetId) || typeof text !== "string" || !text.trim() || !await mayParticipate(socket, userId)) return;
       const cleanText = text.trim().slice(0, 500);
       if (!checkMessage(socket, "private", userId, cleanText)) return;
 
@@ -83,6 +105,10 @@ function registerChatHandlers({ io, pool, globalChatHistory, globalChatWindowMs 
           text: cleanText,
           sentAt: new Date().toISOString()
         };
+        await pool.query(
+          "INSERT INTO messages (sender_id, recipient_id, message_text, channel) VALUES ($1, $2, $3, 'private')",
+          [userId, targetId, cleanText]
+        );
         io.to(`user:${targetId}`).emit("private-message", message);
         io.to(`user:${userId}`).emit("private-message", message);
       } catch (error) {
@@ -92,7 +118,7 @@ function registerChatHandlers({ io, pool, globalChatHistory, globalChatWindowMs 
 
     socket.on("join-game-chat", async ({ gameId } = {}) => {
       const targetGameId = Number(gameId);
-      if (!userId || !Number.isInteger(targetGameId) || targetGameId < 1) return;
+      if (!userId || !Number.isInteger(targetGameId) || targetGameId < 1 || !await mayParticipate(socket, userId)) return;
       try {
         const membership = await pool.query(
           `SELECT 1 FROM games g
@@ -115,7 +141,7 @@ function registerChatHandlers({ io, pool, globalChatHistory, globalChatWindowMs 
 
     socket.on("game-message", async ({ text } = {}) => {
       const gameId = socket.data.gameId;
-      if (!userId || !gameId || typeof text !== "string" || !text.trim()) return;
+      if (!userId || !gameId || typeof text !== "string" || !text.trim() || !await mayParticipate(socket, userId)) return;
       const cleanText = text.trim().slice(0, 500);
       if (!checkMessage(socket, "game", userId, cleanText)) return;
 
@@ -128,6 +154,11 @@ function registerChatHandlers({ io, pool, globalChatHistory, globalChatWindowMs 
           text: cleanText,
           sentAt: new Date().toISOString()
         };
+        await pool.query(
+          `INSERT INTO messages (sender_id, recipient_id, message_text, channel, game_id, lobby_id)
+           SELECT $1, NULL, $2, 'game', g.id, g.lobby_id FROM games g WHERE g.id = $3`,
+          [userId, cleanText, gameId]
+        );
         const history = gameChatHistories.get(gameId) || [];
         history.push(message);
         trimHistory(history);
