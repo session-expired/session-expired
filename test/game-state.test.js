@@ -49,6 +49,10 @@ test("a launched game snapshots the board and its lobby players", () => {
   assert.ok(state.players.every(player => player.turnsToSkip === 0));
   assert.ok(state.players.every(player => Array.isArray(player.discoveredHintIds)));
   assert.ok(state.players.every(player => Array.isArray(player.discoveredHints)));
+  assert.ok(state.players.every(player => player.discoveredHints.length === hintCatalog.categories.length));
+  assert.ok(state.players.every(player =>
+    hintCatalog.categories.every(category => player.discoveredHints.filter(hint => hint.category === category).length === 1)
+  ));
   assert.deepEqual(state.solution, {
     killer: "brahe",
     victim: "nicholas_ii",
@@ -106,6 +110,18 @@ test("all active hints are distributed exactly once among search items", () => {
   assert.equal(new Set(distributedHintIds).size, distributedHintIds.length);
 });
 
+test("starting hints are unique between four players and never placed on the board", () => {
+  const players = Array.from({ length: 4 }, (_, index) => ({ id: index + 1, username: `Player ${index + 1}` }));
+  const state = createInitialGameState(players, () => 0.5);
+  const boardHintIds = new Set(state.board.searchItems.flatMap(item => item.hintIds));
+
+  for (const category of hintCatalog.categories) {
+    const dealt = state.players.map(player => player.discoveredHints.find(hint => hint.category === category).id);
+    assert.equal(new Set(dealt).size, 4);
+    assert.ok(dealt.every(hintId => !boardHintIds.has(hintId)));
+  }
+});
+
 test("the hint catalog uses valid categories, rooms, and accusation options", () => {
   const optionsByCategory = {
     murderer: solutionPools.killers,
@@ -142,6 +158,8 @@ test("a player discovers and depletes a search-item hint from an adjacent tile",
     id: "desk", rows: { start: 3, end: 3 }, cols: { start: 3, end: 4 },
     description: "A desk.", roomId: "rec_room", hintIds: ["muddy_cuff"]
   }];
+  const startingHintIds = [...player.discoveredHintIds];
+  const startingHints = [...player.discoveredHints];
 
   const first = discoverHint(state, player.id, "desk", catalog);
   state.turn.phase = "moving";
@@ -151,8 +169,8 @@ test("a player discovers and depletes a search-item hint from an adjacent tile",
   assert.equal(first.empty, false);
   assert.equal(second.empty, true);
   assert.deepEqual(state.board.searchItems[0].hintIds, []);
-  assert.deepEqual(player.discoveredHintIds, ["muddy_cuff"]);
-  assert.deepEqual(player.discoveredHints, [{
+  assert.deepEqual(player.discoveredHintIds, [...startingHintIds, "muddy_cuff"]);
+  assert.deepEqual(player.discoveredHints, [...startingHints, {
     id: "muddy_cuff",
     category: "murderer",
     text: "A muddy cuff.",
@@ -214,11 +232,13 @@ test("hints cannot be collected away from their search item or by an inactive pl
     id: "desk", rows: { start: 3, end: 3 }, cols: { start: 3, end: 4 },
     description: "A desk.", roomId: "rec_room", hintIds: ["muddy_cuff"]
   }];
+  const currentHints = [...current.discoveredHintIds];
+  const inactiveHints = [...inactive.discoveredHintIds];
 
   assert.throws(() => discoverHint(state, current.id, "muddy_cuff", catalog), /adjacent to the search item/);
   assert.throws(() => discoverHint(state, inactive.id, "muddy_cuff", catalog), /not this player's turn/);
-  assert.deepEqual(current.discoveredHintIds, []);
-  assert.deepEqual(inactive.discoveredHintIds, []);
+  assert.deepEqual(current.discoveredHintIds, currentHints);
+  assert.deepEqual(inactive.discoveredHintIds, inactiveHints);
 });
 
 test("a search item is unavailable outside its associated room", () => {
@@ -237,9 +257,10 @@ test("a search item is unavailable outside its associated room", () => {
     roomId: "cafeteria",
     hintIds: [hint.id]
   }];
+  const startingHintIds = [...player.discoveredHintIds];
 
   assert.throws(() => discoverHint(state, player.id, hint.id), /current room/);
-  assert.deepEqual(player.discoveredHintIds, []);
+  assert.deepEqual(player.discoveredHintIds, startingHintIds);
   assert.equal(state.turn.movementRemaining, 3);
 });
 
@@ -255,7 +276,7 @@ test("a game solution draws all four accusation fields from their pools", () => 
 });
 
 test("players receive randomized, exclusive spawn points", () => {
-  const players = Array.from({ length: spawnPoints.length }, (_, index) => ({
+  const players = Array.from({ length: 4 }, (_, index) => ({
     id: index + 1,
     username: `Player ${index + 1}`,
     selected_character: "curie"
@@ -268,9 +289,9 @@ test("players receive randomized, exclusive spawn points", () => {
   assert.notDeepEqual(state.players.map(player => player.position), spawnPoints);
 });
 
-test("a game cannot start without enough exclusive spawn points", () => {
-  const players = Array.from({ length: spawnPoints.length + 1 }, (_, index) => ({ id: index }));
-  assert.throws(() => createInitialGameState(players), /more players than available spawn points/i);
+test("a game cannot start with more than four players", () => {
+  const players = Array.from({ length: 5 }, (_, index) => ({ id: index }));
+  assert.throws(() => createInitialGameState(players), /at most 4 players/i);
 });
 
 test("a game starts with the first player awaiting a 1d8 movement roll", () => {
@@ -799,9 +820,10 @@ test("searching requires retained movement points", () => {
   state.turn.playerId = "1";
   state.turn.phase = "awaiting_end";
   state.turn.movementRemaining = 0;
+  const startingHintIds = [...state.players[0].discoveredHintIds];
 
   assert.throws(() => discoverHint(state, "1", hintId), /retain movement points/);
-  assert.deepEqual(state.players[0].discoveredHintIds, []);
+  assert.deepEqual(state.players[0].discoveredHintIds, startingHintIds);
 });
 
 test("entering a secret passage teleports to another passage and triggers dialogue", () => {

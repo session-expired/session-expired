@@ -1,6 +1,8 @@
 const { spawnPoints, blockedTiles, searchItems } = require("./board-data");
 const { createSolution } = require("./solution");
-const { roomsForSolution, distributeHints, validateHintDistribution } = require("./hint-rules");
+const { hintCatalog, roomsForSolution, dealStartingHints, distributeHints, validateHintDistribution } = require("./hint-rules");
+
+const MAX_GAME_PLAYERS = 4;
 
 function shuffle(items, random) {
     for (let index = items.length - 1; index > 0; index--) {
@@ -11,19 +13,31 @@ function shuffle(items, random) {
 }
 
 function createInitialGameState(gamePlayers, random = Math.random, lobby = {}) {
+    if (gamePlayers.length > MAX_GAME_PLAYERS) {
+        throw new Error(`A game supports at most ${MAX_GAME_PLAYERS} players.`);
+    }
     if (gamePlayers.length > spawnPoints.length) {
         throw new Error("There are more players than available spawn points.");
     }
     const availableSpawnPoints = shuffle(spawnPoints.map(point => ({ ...point })), random);
     const solution = createSolution(random);
-    const gameRooms = roomsForSolution(solution);
+    const startingHands = dealStartingHints(solution, gamePlayers.length, random);
+    const startingHintIds = [...new Set(startingHands.flat().map(hint => hint.id))];
+    const gameRooms = roomsForSolution(solution, hintCatalog, startingHintIds);
     const players = gamePlayers.map((player, index) => ({
         id: String(player.id), username: player.username, character: player.selected_character,
-        canAccuse: true, turnsToSkip: 0, discoveredHintIds: [], discoveredHints: [], position: availableSpawnPoints[index],
+        canAccuse: true, turnsToSkip: 0,
+        discoveredHintIds: startingHands[index].map(hint => hint.id),
+        discoveredHints: startingHands[index].map(hint => ({
+            id: hint.id, category: hint.category, text: hint.text, excludes: hint.excludes,
+            ...(Array.isArray(hint.eliminates) ? { eliminates: [...hint.eliminates] } : {}),
+            searchItemId: null, source: "starting"
+        })),
+        position: availableSpawnPoints[index],
         facing: "right", dialogueEvent: null, dialogueEventId: 0, secretPassageCooldown: null
     }));
     const turnOrder = shuffle(players.map(player => String(player.id)), random);
-    const gameSearchItems = distributeHints(solution, searchItems, random);
+    const gameSearchItems = distributeHints(solution, searchItems, random, hintCatalog, startingHintIds);
 
     const state = {
         lobbyId: lobby.id == null ? null : String(lobby.id),
@@ -57,4 +71,4 @@ function createInitialGameState(gamePlayers, random = Math.random, lobby = {}) {
     return state;
 }
 
-module.exports = { createInitialGameState };
+module.exports = { MAX_GAME_PLAYERS, createInitialGameState };
