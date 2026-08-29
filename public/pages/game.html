@@ -29,53 +29,46 @@
       </div>
     </header>
     <main id="game">
-      <p id="game-status" role="status">Loading game…</p>
-      <div class="turn-controls">
-        <span id="turn-status"></span>
-        <button id="roll-movement" type="button" hidden>Roll 1d8</button>
-        <button id="open-guess" type="button" hidden disabled>Guess</button>
-        <button id="end-turn" type="button" hidden>End Turn</button>
-      </div>
-      <form id="accusation-form" class="accusation-controls">
-        <span id="accusation-status">You must reach the Warden to make an accusation.</span>
-        <select name="killer" aria-label="Killer"></select>
-        <select name="victim" aria-label="Victim"></select>
-        <select name="room" aria-label="Room"></select>
-        <select name="method" aria-label="Method"></select>
-        <button type="submit" disabled>Accuse</button>
-      </form>
-      <div class="board-controls" aria-label="Board zoom controls">
-        <button id="zoom-out" type="button" aria-label="Zoom out">−</button>
-        <button id="zoom-reset" type="button">100%</button>
-        <button id="zoom-in" type="button" aria-label="Zoom in">+</button>
-      </div>
-      <div id="board-viewport">
-        <div id="board"></div>
-        <section id="game-result" class="game-result" hidden aria-live="assertive">
-          <h1 id="game-result-message"></h1>
-          <button id="finished-leave-game" type="button">Leave Game</button>
-        </section>
-      </div>
-      <details id="journal" class="journal">
-        <summary>Investigation Journal (<span id="journal-count">0</span>)</summary>
-        <div class="journal-paper">
-          <h2>Case Notes</h2>
-          <div id="journal-entries"><p class="journal-empty">No clues recorded yet.</p></div>
-        </div>
-      </details>
-      <dialog id="guess-dialog" class="guess-dialog">
-        <form id="guess-form" method="dialog">
-          <h2>Make a Guess</h2>
-          <label>Murderer<select name="killer" required></select></label>
-          <label>Victim<select name="victim" required></select></label>
-          <label>Room<select name="room" required></select></label>
-          <label>Method<select name="method" required></select></label>
-          <div><button id="cancel-guess" type="button">Cancel</button><button type="submit">Submit Guess</button></div>
-        </form>
-      </dialog>
-      <!-- This line is a temporary testing feature to see where you're clicking, see public/game/board.js -->
-      <p id="clickOutput" hidden></p>
-    </main>
+  <aside id="journal-panel" class="journal-panel">
+    <div class="journal-panel-header">
+      Investigation Journal (<span id="journal-count">0</span>)
+    </div>
+    <div class="journal-paper">
+      <h2>Case Notes</h2>
+      <div id="journal-entries"><p class="journal-empty">No clues recorded yet.</p></div>
+    </div>
+  </aside>
+  <div id="game-main" class="game-main">
+    <p id="game-status" role="status">Loading game…</p>
+    <div class="turn-controls">
+      <span id="turn-status"></span>
+      <button id="roll-movement" type="button" hidden>Roll 1d8</button>
+      <button id="end-turn" type="button" hidden>End Turn</button>
+    </div>
+    <form id="accusation-form" class="accusation-controls">
+      <span id="accusation-status">You must reach the Warden to make an accusation.</span>
+      <select name="killer" aria-label="Killer"></select>
+      <select name="victim" aria-label="Victim"></select>
+      <select name="room" aria-label="Room"></select>
+      <select name="method" aria-label="Method"></select>
+      <button type="submit" disabled>Accuse</button>
+    </form>
+    <div class="board-controls" aria-label="Board zoom controls">
+      <button id="zoom-out" type="button" aria-label="Zoom out">−</button>
+      <button id="zoom-reset" type="button">100%</button>
+      <button id="zoom-in" type="button" aria-label="Zoom in">+</button>
+    </div>
+    <div id="board-viewport">
+      <div id="board"></div>
+      <section id="game-result" class="game-result" hidden aria-live="assertive">
+        <h1 id="game-result-message"></h1>
+        <button id="finished-leave-game" type="button">Leave Game</button>
+      </section>
+    </div>
+    <!-- This line is a temporary testing feature to see where you're clicking, see public/game/board.js -->
+    <p id="clickOutput" hidden></p>
+  </div>
+</main>
     
     <script src="/socket.io/socket.io.js"></script>
     <script src="/js/chat.js"></script>

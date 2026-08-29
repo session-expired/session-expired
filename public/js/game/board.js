@@ -20,11 +20,6 @@ const accusationControls = createAccusationControls(elements, gameId, {
     onDialogue: (character, group) => entityRenderer.showDialogue(character, group),
     onEligibilityChanged: () => { if (gameState) renderTurn(); }
 });
-const guessControls = createGuessControls(elements, gameId, {
-    onState: applyAuthoritativeState,
-    onStatus: message => { elements.status.textContent = message; },
-    onEligibilityChanged: () => { if (gameState) renderTurn(); }
-});
 
 function renderTurn() {
     const turn = gameState?.turn;
@@ -272,7 +267,7 @@ loadGameResources(gameId)
         });
         window.addEventListener("resize", () => boardLayout.size(rows, cols));
         if (window.ResizeObserver) {
-            new ResizeObserver(() => boardLayout.size(rows, cols)).observe(elements.game);
+    new ResizeObserver(() => boardLayout.size(rows, cols)).observe(elements.gameMain);
         }
         elements.status.textContent = `Game loaded · ${gameState.players.length} players`;
         renderGameState();

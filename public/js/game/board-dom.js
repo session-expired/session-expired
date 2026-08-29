@@ -10,10 +10,6 @@ export const elements = {
     turnStatus: document.getElementById("turn-status"),
     rollMovementButton: document.getElementById("roll-movement"),
     endTurnButton: document.getElementById("end-turn"),
-    openGuessButton: document.getElementById("open-guess"),
-    guessDialog: document.getElementById("guess-dialog"),
-    guessForm: document.getElementById("guess-form"),
-    cancelGuessButton: document.getElementById("cancel-guess"),
     gameResult: document.getElementById("game-result"),
     gameResultMessage: document.getElementById("game-result-message"),
     finishedLeaveButton: document.getElementById("finished-leave-game"),
@@ -22,7 +18,8 @@ export const elements = {
     journal: document.getElementById("journal"),
     journalEntries: document.getElementById("journal-entries"),
     journalCount: document.getElementById("journal-count"),
-    clickOutput: document.getElementById("clickOutput")
+    clickOutput: document.getElementById("clickOutput"),
+    gameMain: document.getElementById("game-main")
 };
 
 elements.accuseButton = elements.accusationForm?.querySelector('button[type="submit"]');
