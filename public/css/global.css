@@ -329,6 +329,14 @@ footer {
   padding: 8px;
 }
 
+.private-presence {
+  display: block;
+  min-height: 1.2em;
+  margin-top: 5px;
+  color: #c9c2aa;
+  font-size: 11px;
+}
+
 .chat-messages {
   flex: 1;
   overflow-y: scroll;

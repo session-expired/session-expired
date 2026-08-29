@@ -22,7 +22,7 @@ function checkMessage(socket, channel, userId, text) {
   return true;
 }
 
-function registerChatHandlers({ io, pool, globalChatHistory, globalChatWindowMs }) {
+function registerChatHandlers({ io, pool, presence, globalChatHistory, globalChatWindowMs }) {
   const gameChatHistories = new Map();
 
   async function isBanned(userId) {
@@ -35,7 +35,11 @@ function registerChatHandlers({ io, pool, globalChatHistory, globalChatWindowMs 
   }
 
   async function mayParticipate(socket, userId) {
-    if (!userId || await isBanned(userId)) {
+    const session = socket.request.session;
+    const authenticated = session && typeof session.reload === "function"
+      ? await new Promise(resolve => session.reload(error => resolve(!error && String(session.userId) === String(userId))))
+      : String(session?.userId) === String(userId);
+    if (!userId || !authenticated || await isBanned(userId)) {
       if (userId) socket.disconnect(true);
       return false;
     }
@@ -47,17 +51,27 @@ function registerChatHandlers({ io, pool, globalChatHistory, globalChatWindowMs 
     while (history[0] && Date.parse(history[0].sentAt) < cutoff) history.shift();
   }
 
+  function broadcastPresence() {
+    io.to("authenticated-chat").emit("presence-users", { users: presence.list() });
+  }
+
   io.on("connection", async (socket) => {
     console.log("Socket connected:", socket.id);
     const userId = socket.request.session?.userId;
     if (userId && await isBanned(userId)) return socket.disconnect(true);
     if (userId) {
+      const identity = await pool.query("SELECT id, username FROM users WHERE id = $1", [userId]);
+      if (!identity.rows[0]) return socket.disconnect(true);
+      socket.data.chatUserId = String(userId);
+      socket.join("authenticated-chat");
       socket.join(`user:${userId}`);
+      presence.connect(identity.rows[0], socket.id);
       const cutoff = Date.now() - globalChatWindowMs;
       while (globalChatHistory[0] && Date.parse(globalChatHistory[0].sentAt) < cutoff) {
         globalChatHistory.shift();
       }
       socket.emit("global-history", globalChatHistory);
+      broadcastPresence();
     }
 
     socket.on("global-message", async ({ text } = {}) => {
@@ -92,6 +106,12 @@ function registerChatHandlers({ io, pool, globalChatHistory, globalChatWindowMs 
     socket.on("private-message", async ({ recipientId, text } = {}) => {
       const targetId = Number(recipientId);
       if (!userId || !Number.isInteger(targetId) || typeof text !== "string" || !text.trim() || !await mayParticipate(socket, userId)) return;
+      if (String(targetId) === String(userId)) {
+        return socket.emit("chat-rejected", { reason: "Choose another online player." });
+      }
+      if (!presence.isOnline(targetId)) {
+        return socket.emit("chat-rejected", { reason: "That player is no longer online." });
+      }
       const cleanText = text.trim().slice(0, 500);
       if (!checkMessage(socket, "private", userId, cleanText)) return;
 
@@ -148,6 +168,9 @@ function registerChatHandlers({ io, pool, globalChatHistory, globalChatWindowMs 
       try {
         const result = await pool.query("SELECT username FROM users WHERE id = $1", [userId]);
         if (!result.rows[0]) return;
+        if (!presence.isOnline(targetId)) {
+          return socket.emit("chat-rejected", { reason: "That player is no longer online." });
+        }
         const message = {
           senderId: userId,
           sender: result.rows[0].username,
@@ -170,7 +193,10 @@ function registerChatHandlers({ io, pool, globalChatHistory, globalChatWindowMs 
     });
 
     socket.on("error", (error) => console.error(`Socket ${socket.id} error:`, error));
-    socket.on("disconnect", (reason) => console.log("Socket disconnected:", socket.id, reason));
+    socket.on("disconnect", (reason) => {
+      if (socket.data.chatUserId && presence.disconnect(socket.data.chatUserId, socket.id)) broadcastPresence();
+      console.log("Socket disconnected:", socket.id, reason);
+    });
   });
 }
 

@@ -12,6 +12,7 @@ const pgSession = require("connect-pg-simple")(session);
 const { Pool } = require("pg");
 const { Server } = require("socket.io");
 const { registerChatHandlers } = require("./chat/chatHandler");
+const { createPresenceRegistry } = require("./chat/presence");
 const { moderateUsername } = require("./chat/moderation");
 const { createLobbyRouter } = require("./lobby/lobbyRoutes");
 const { createAdminRouter, createRequireAdmin } = require("./admin/admin");
@@ -40,6 +41,7 @@ const {
 const minimumLobbyPlayers = process.env.SESSION_EXPIRED_DEV_RUNNER === "true" ? 1 : 2;
 const wardenPhaseMs = Number(process.env.WARDEN_PHASE_MS) || 1200;
 const wardenTimers = new Map();
+const chatPresence = createPresenceRegistry();
 
 
 if (!process.env.DATABASE_URL) {
@@ -272,15 +274,7 @@ app.get("/api/session", async (request, response, next) => {
 });
 
 app.get("/api/users", requireAuthentication, async (request, response, next) => {
-  try {
-    const result = await pool.query(
-      "SELECT id, username FROM users WHERE id <> $1 ORDER BY LOWER(username)",
-      [request.session.userId]
-    );
-    response.json({ users: result.rows });
-  } catch (error) {
-    next(error);
-  }
+  response.json({ users: chatPresence.list().filter(user => user.id !== String(request.session.userId)) });
 });
 
 app.use("/api/lobbies", createLobbyRouter({
@@ -659,7 +653,7 @@ io.engine.on("connection_error", (error) => {
   console.error("Socket.IO connection error:", error.message);
 });
 
-registerChatHandlers({ io, pool, globalChatHistory, globalChatWindowMs });
+registerChatHandlers({ io, pool, presence: chatPresence, globalChatHistory, globalChatWindowMs });
 
 async function startServer() {
   const interruptedWardens = await pool.query(

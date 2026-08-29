@@ -32,7 +32,8 @@
     </div>
     <div class="chat-recipient" hidden>
       <label for="chat-user">Message</label>
-      <select id="chat-user"><option value="">Select a user</option></select>
+      <select id="chat-user"><option value="">Select an online player</option></select>
+      <span class="private-presence" aria-live="polite"></span>
     </div>
     <ul class="chat-messages" aria-live="polite"></ul>
     <p class="chat-status">Checking login...</p>
@@ -51,10 +52,14 @@
   const status = panel.querySelector(".chat-status");
   const recipientRow = panel.querySelector(".chat-recipient");
   const recipient = panel.querySelector("#chat-user");
+  const privatePresence = panel.querySelector(".private-presence");
+  const sendButton = form.querySelector('button[type="submit"]');
   const toggle = panel.querySelector(".chat-toggle");
   let activeTab = "global";
   let currentUser = null;
   let socket = null;
+  let selectedPrivateUser = null;
+  let onlineUsers = [];
   const gamePathMatch = window.location.pathname.match(/^\/game\/(\d+)\/?$/);
   const gameId = gamePathMatch ? Number(gamePathMatch[1]) : null;
 
@@ -79,6 +84,33 @@
     messages.scrollTop = messages.scrollHeight;
   }
 
+  function updatePrivateControls() {
+    const online = selectedPrivateUser && onlineUsers.some(user => String(user.id) === String(selectedPrivateUser.id));
+    if (!selectedPrivateUser) privatePresence.textContent = "";
+    else privatePresence.textContent = online
+      ? `${selectedPrivateUser.username} — Online`
+      : `${selectedPrivateUser.username} — Offline · This player is offline.`;
+    const unavailable = activeTab === "private" && (!selectedPrivateUser || !online);
+    input.disabled = unavailable;
+    sendButton.disabled = unavailable;
+  }
+
+  function renderOnlineUsers(users) {
+    onlineUsers = users.filter(user => String(user.id) !== String(currentUser?.id));
+    const selectedId = selectedPrivateUser && String(selectedPrivateUser.id);
+    recipient.replaceChildren(new Option("Select an online player", ""));
+    onlineUsers.forEach(user => recipient.add(new Option(`● ${user.username} — Online`, user.id)));
+    const selectedOnline = onlineUsers.find(user => String(user.id) === selectedId);
+    recipient.value = selectedOnline ? String(selectedOnline.id) : "";
+    updatePrivateControls();
+  }
+
+  recipient.addEventListener("change", () => {
+    const user = onlineUsers.find(candidate => String(candidate.id) === recipient.value);
+    if (user) selectedPrivateUser = user;
+    updatePrivateControls();
+  });
+
   window.addEventListener("game-flavor-message", (event) => {
     const { sender, text } = event.detail || {};
     if (gameId && typeof sender === "string" && typeof text === "string") {
@@ -98,6 +130,7 @@
       });
       recipientRow.hidden = activeTab !== "private";
       messages.querySelectorAll("li").forEach((item) => { item.hidden = item.dataset.channel !== activeTab; });
+      updatePrivateControls();
     });
   });
 
@@ -126,12 +159,8 @@
       }
       currentUser = session.user;
       status.textContent = `Signed in as ${currentUser.username}`;
-      const response = await fetch("/api/users");
-      if (response.ok) {
-        const data = await response.json();
-        data.users.forEach((user) => recipient.add(new Option(user.username, user.id)));
-      }
       socket = io();
+      socket.on("presence-users", ({ users } = {}) => renderOnlineUsers(Array.isArray(users) ? users : []));
       socket.on("global-history", (history) => {
         history.forEach((message) => addMessage("global", message));
       });
