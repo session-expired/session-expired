@@ -59,7 +59,7 @@ function createInitialGameState(gamePlayers, random = Math.random, lobby = {}) {
         turn: {
             number: 1, round: 1, order: turnOrder, playerIndex: 0,
             playerId: turnOrder[0] ?? null, phase: "awaiting_roll",
-            die: { sides: 8, roll: null }, movementRemaining: 0, visitedPositions: []
+            die: { sides: 8, roll: null }, movementRemaining: 0, visitedPositions: [], hasGuessedThisTurn: false
         },
         fullRounds: 0,
         solution,

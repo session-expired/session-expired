@@ -45,6 +45,12 @@ export const accuse = (gameId, accusation) => jsonRequest(`/api/games/${gameId}/
     body: JSON.stringify(accusation)
 }, "Unable to make that accusation.");
 
+export const guess = (gameId, selections) => jsonRequest(`/api/games/${gameId}/guess`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(selections)
+}, "Unable to make that guess.");
+
 export const quitGame = gameId => jsonRequest(`/api/games/${gameId}/quit`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },

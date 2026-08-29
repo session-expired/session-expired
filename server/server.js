@@ -35,7 +35,7 @@ const pageDirectory = path.join(__dirname, "pages");
 const publicPageDirectory = path.join(publicDirectory, "pages");
 const {
   rooms, spawnPoints, secretPass, blockedTiles, searchItems, rollMovementDie, movementPath, movePlayer,
-  endPlayerTurn, completeWardenTurn, removePlayerFromGame, discoverHint, submitAccusation
+  endPlayerTurn, completeWardenTurn, removePlayerFromGame, discoverHint, submitAccusation, submitGuess
 } = require("./game/board");
 const minimumLobbyPlayers = process.env.SESSION_EXPIRED_DEV_RUNNER === "true" ? 1 : 2;
 const wardenPhaseMs = Number(process.env.WARDEN_PHASE_MS) || 1200;
@@ -478,6 +478,64 @@ app.post("/api/games/:gameId/end-turn", requireAuthentication, async (request, r
   } finally {
     client?.release();
   }
+});
+
+app.post("/api/games/:gameId/guess", requireAuthentication, async (request, response, next) => {
+  if (!/^[1-9]\d*$/.test(request.params.gameId)) return response.status(404).json({ error: "Game not found." });
+  let client;
+  try {
+    client = await pool.connect();
+    await client.query("BEGIN");
+    const result = await client.query(
+      `SELECT g.state FROM games g
+       JOIN lobby_players lp ON lp.lobby_id = g.lobby_id
+       WHERE g.id = $1 AND lp.user_id = $2 FOR UPDATE OF g`,
+      [request.params.gameId, request.session.userId]
+    );
+    if (!result.rows[0]) {
+      await client.query("ROLLBACK");
+      return response.status(404).json({ error: "Game not found." });
+    }
+    const state = result.rows[0].state;
+    let guessResult;
+    try {
+      guessResult = submitGuess(state, request.session.userId, request.body);
+    } catch (error) {
+      await client.query("ROLLBACK");
+      return response.status(409).json({ error: error.message });
+    }
+    console.log("Game guess resolved:", {
+      gameId: request.params.gameId,
+      playerId: String(request.session.userId),
+      selections: guessResult.guess,
+      disprovedByPlayerId: guessResult.provider?.id || null,
+      sharedHintId: guessResult.hint?.id || null
+    });
+    await client.query("UPDATE games SET state = $1::jsonb WHERE id = $2", [JSON.stringify(state), request.params.gameId]);
+    await client.query("COMMIT");
+    broadcastGameState(request.params.gameId, state);
+    if (guessResult.provider && guessResult.hint) {
+      io.to(`user:${guessResult.provider.id}`).emit("guess-hint-shared", {
+        recipient: state.players.find(player => String(player.id) === String(request.session.userId))?.username,
+        hint: guessResult.hint
+      });
+    }
+    if (guessResult.provider) {
+      io.to(`game:${request.params.gameId}`).emit("guess-disproved", {
+        guesserId: String(request.session.userId), provider: guessResult.provider
+      });
+    }
+    if (guessResult.transition.warden) scheduleWardenCompletion(request.params.gameId);
+    response.json({
+      disproved: guessResult.disproved,
+      provider: guessResult.provider,
+      hint: guessResult.hint,
+      state
+    });
+  } catch (error) {
+    if (client) await client.query("ROLLBACK").catch(() => {});
+    next(error);
+  } finally { client?.release(); }
 });
 
 app.post("/api/games/:gameId/accuse", requireAuthentication, async (request, response, next) => {

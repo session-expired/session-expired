@@ -62,7 +62,7 @@ function activateTurn(state, index) {
     Object.assign(state.turn, {
         playerIndex: index, playerId: player.id, number: state.turn.number + 1,
         phase: "awaiting_roll", die: { sides: 8, roll: null }, movementRemaining: 0,
-        visitedPositions: []
+        visitedPositions: [], hasGuessedThisTurn: false
     });
 }
 

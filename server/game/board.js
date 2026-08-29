@@ -7,5 +7,6 @@ module.exports = {
     ...require("./game-state"),
     ...require("./movement"),
     ...require("./turns"),
-    ...require("./accusations")
+    ...require("./accusations"),
+    ...require("./guesses")
 };

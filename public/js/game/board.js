@@ -2,6 +2,7 @@ import { elements } from "./board-dom.js";
 import { discoverHint, endTurn, loadGameResources, movePlayer, quitGame, rollMovement } from "./board-api.js";
 import { createBoardLayout } from "./board-layout.js";
 import { createAccusationControls } from "./accusation-controls.js";
+import { createGuessControls } from "./guess-controls.js";
 import { createEntityRenderer } from "./entity-renderer.js";
 import { renderMovementRange } from "./movement-range.js";
 import { renderJournal } from "./journal.js";
@@ -17,6 +18,11 @@ const accusationControls = createAccusationControls(elements, gameId, {
     onState: applyAuthoritativeState,
     onStatus: message => { elements.status.textContent = message; },
     onDialogue: (character, group) => entityRenderer.showDialogue(character, group),
+    onEligibilityChanged: () => { if (gameState) renderTurn(); }
+});
+const guessControls = createGuessControls(elements, gameId, {
+    onState: applyAuthoritativeState,
+    onStatus: message => { elements.status.textContent = message; },
     onEligibilityChanged: () => { if (gameState) renderTurn(); }
 });
 
@@ -35,6 +41,7 @@ function renderTurn() {
     else elements.turnStatus.textContent = `Waiting for ${player?.username || "the next player"}…`;
     elements.rollMovementButton.hidden = turn.phase !== "awaiting_roll" || !isMine;
     elements.endTurnButton.hidden = !isMine || turn.phase !== "awaiting_end";
+    guessControls.render(gameState, currentUserId);
     accusationControls.render(gameState, currentUserId);
 }
 
@@ -108,6 +115,18 @@ window.addEventListener("game-perspective", event => {
     if (!window.MULTI_TEST_MODE) return;
     currentUserId = event.detail == null ? null : String(event.detail);
     if (gameState) renderGameState();
+});
+
+window.addEventListener("guess-hint-shared", event => {
+    const { recipient, hint } = event.detail || {};
+    if (hint) elements.status.textContent = `You revealed “${hint.text}” to ${recipient}.`;
+});
+
+window.addEventListener("guess-disproved", event => {
+    const { guesserId, provider } = event.detail || {};
+    if (String(guesserId) === currentUserId || !provider) return;
+    const guesser = gameState?.players.find(player => String(player.id) === String(guesserId));
+    elements.status.textContent = `${provider.username} disproved ${guesser?.username || "a player's"} guess.`;
 });
 
 async function leaveGame(button, confirmLeave) {
@@ -262,3 +281,4 @@ loadGameResources(gameId)
     .catch(error => { elements.status.textContent = error.message; });
 
 accusationControls.initialize();
+guessControls.initialize();

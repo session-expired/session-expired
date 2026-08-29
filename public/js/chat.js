@@ -150,6 +150,12 @@
       socket.on("game-state", state => {
         window.dispatchEvent(new CustomEvent("game-state", { detail: state }));
       });
+      socket.on("guess-hint-shared", detail => {
+        window.dispatchEvent(new CustomEvent("guess-hint-shared", { detail }));
+      });
+      socket.on("guess-disproved", detail => {
+        window.dispatchEvent(new CustomEvent("guess-disproved", { detail }));
+      });
       if (gameId) socket.emit("join-game-chat", { gameId });
       socket.on("chat-rejected", ({ reason }) => {
         status.textContent = reason || "This message could not be sent.";

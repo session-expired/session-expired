@@ -20,6 +20,7 @@ const {
   completeWardenTurn,
   removePlayerFromGame,
   discoverHint,
+  submitGuess,
   validateHintDistribution,
   submitAccusation
 } = require("../server/game/board");
@@ -305,7 +306,8 @@ test("a game starts with the first player awaiting a 1d8 movement roll", () => {
     phase: "awaiting_roll",
     die: { sides: 8, roll: null },
     movementRemaining: 0,
-    visitedPositions: []
+    visitedPositions: [],
+    hasGuessedThisTurn: false
   });
 });
 
@@ -890,4 +892,69 @@ test("a secret passage can be entered again on the player's next turn", () => {
   completeWardenTurn(state);
   assert.equal(state.turn.playerId, "1");
   assert.equal(state.players[0].secretPassageCooldown, null);
+});
+
+function readyGuessState() {
+  const state = createInitialGameState([
+    { id: 1, username: "Ada" }, { id: 2, username: "Curie" }, { id: 3, username: "Crowley" }
+  ], () => 0.5);
+  state.turn.order = ["1", "2", "3"];
+  state.turn.playerIndex = 0;
+  state.turn.playerId = "1";
+  state.turn.phase = "awaiting_end";
+  state.turn.movementRemaining = 0;
+  return state;
+}
+
+test("guessing is rejected before movement reaches zero", () => {
+  const state = readyGuessState();
+  state.turn.phase = "moving";
+  state.turn.movementRemaining = 1;
+  assert.throws(() => submitGuess(state, "1", state.solution), /use all movement points/i);
+});
+
+test("the first opponent in turn order shares one disproving hint and keeps it", () => {
+  const state = readyGuessState();
+  const clue = hintCatalog.hints.find(hint => hint.category === "murderer" && hint.excludes !== state.solution.killer);
+  const guess = { ...state.solution, killer: clue.excludes };
+  state.players[0].discoveredHintIds = [];
+  state.players[0].discoveredHints = [];
+  state.players[1].discoveredHintIds = [clue.id];
+  state.players[1].discoveredHints = [{ ...clue }];
+  state.players[2].discoveredHintIds = [clue.id];
+  state.players[2].discoveredHints = [{ ...clue }];
+
+  const result = submitGuess(state, "1", guess, () => 0);
+  assert.equal(result.provider.id, "2");
+  assert.equal(result.hint.id, clue.id);
+  assert.deepEqual(state.players[1].discoveredHintIds, [clue.id]);
+  assert.deepEqual(state.players[0].discoveredHintIds, [clue.id]);
+  assert.equal(state.turn.playerId, "2");
+});
+
+test("guess resolution skips an opponent who cannot disprove", () => {
+  const state = readyGuessState();
+  const clue = hintCatalog.hints.find(hint => hint.category === "method" && hint.excludes !== state.solution.method);
+  const guess = { ...state.solution, method: clue.excludes };
+  state.players.forEach(player => { player.discoveredHintIds = []; player.discoveredHints = []; });
+  state.players[2].discoveredHintIds = [clue.id];
+  state.players[2].discoveredHints = [{ ...clue }];
+  assert.equal(submitGuess(state, "1", guess, () => 0).provider.id, "3");
+});
+
+test("an undisproved exact guess reveals nothing and does not win", () => {
+  const state = readyGuessState();
+  state.players.slice(1).forEach(player => { player.discoveredHintIds = []; player.discoveredHints = []; });
+  const result = submitGuess(state, "1", { ...state.solution });
+  assert.equal(result.disproved, false);
+  assert.equal(result.hint, null);
+  assert.equal(state.status, "active");
+  assert.equal(state.winner, null);
+});
+
+test("a duplicate guess cannot resolve after the turn advances", () => {
+  const state = readyGuessState();
+  state.players.slice(1).forEach(player => { player.discoveredHintIds = []; player.discoveredHints = []; });
+  submitGuess(state, "1", { ...state.solution });
+  assert.throws(() => submitGuess(state, "1", { ...state.solution }), /not this player's turn/i);
 });
