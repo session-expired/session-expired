@@ -5,6 +5,7 @@ button.addEventListener("click", ()=>{
 });
 
 const playHook = document.getElementById("play-hook");
+const wardenHook = document.getElementById("warden-hook");
 const warden = document.getElementById("wandering-warden");
 const patientLayer = document.getElementById("wandering-patients");
 const patientNames = ["brahe", "crowley", "curie", "lovelace", "mallon", "rasputin"];
@@ -50,7 +51,7 @@ function wander(character) {
 function patrolWarden() {
   if (reducedMotion) return;
   const currentX = Number.parseFloat(warden.style.left) || 12;
-  const targetX = currentX < playHook.clientWidth / 2 ? playHook.clientWidth - 52 : 12;
+  const targetX = currentX < wardenHook.clientWidth / 2 ? wardenHook.clientWidth - 52 : 12;
   const duration = Math.max(2400, Math.abs(targetX - currentX) * 10);
   warden.dataset.walking = "true";
   warden.dataset.facing = targetX < currentX ? "-1" : "1";
@@ -71,7 +72,7 @@ function animateSprites(time) {
 }
 
 warden.dataset.character = "bonaparte";
-place(warden, 12, 128, 1);
+place(warden, 12, 48, 1);
 warden.dataset.walking = reducedMotion ? "false" : "true";
 patientNames.forEach((name, index) => {
   const patient = createPatient(name, index);

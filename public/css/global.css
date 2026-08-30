@@ -159,16 +159,25 @@ nav li a.back-to-game-link:focus-visible {
 [data-character="lovelace"] { --character-scale: .96; }
 [data-character="curie"] { --character-scale: .92; }
 
+#warden-hook,
 #play-hook {
   position: relative;
   width: min(900px, calc(100% - 32px));
-  height: 260px;
-  margin: 0 auto 32px;
   overflow: hidden;
   border: 5px solid #171713;
   background: #514f46;
   box-shadow: 7px 7px 0 #171713;
   isolation: isolate;
+}
+
+#warden-hook {
+  height: 130px;
+  margin: 20px auto 24px;
+}
+
+#play-hook {
+  height: 260px;
+  margin: 0 auto 32px;
 }
 
 .hook-wall {
@@ -201,7 +210,6 @@ nav li a.back-to-game-link:focus-visible {
   image-rendering: pixelated;
   filter: drop-shadow(2px 3px 0 rgba(0, 0, 0, .45));
   transform-origin: center bottom;
-  --character-scale: 1;
   will-change: left, top, transform;
 }
 
