@@ -46,6 +46,7 @@ export function createEntityRenderer(boardElement, boardLayout, getGameState) {
             if (entity.id) sprite.dataset.entityId = String(entity.id);
             const art = document.createElement("div");
             art.className = "sprite-art";
+            art.dataset.character = entity.character;
             art.style.backgroundImage = `url("/assets/images/chars/${encodeURIComponent(entity.character)}/${encodeURIComponent(entity.character)}.png")`;
             if (entity.facing === "left") art.classList.add("facing-left");
             sprite.appendChild(art);

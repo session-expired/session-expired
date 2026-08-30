@@ -34,7 +34,7 @@
 .lobby-page .character-option { display: flex; min-width: 0; padding: 6px; align-items: center; gap: 8px; background: #292923; text-align: left; }
 .lobby-page .character-option.selected { border-color: #d5c47f; background: #6e6101; }
 .lobby-page .character-option span:last-child { overflow-wrap: anywhere; }
-.character-sprite { display: inline-block; width: 32px; height: 57px; flex: 0 0 32px; background-position: 0 0; background-repeat: no-repeat; image-rendering: pixelated; }
+.character-sprite { display: inline-block; width: 32px; height: 57px; flex: 0 0 32px; background-position: 0 0; background-repeat: no-repeat; image-rendering: pixelated; transform: scale(var(--character-scale, 1)); transform-origin: center bottom; }
 @media (max-width: 760px) {
   .lobby-page { grid-template-columns: 1fr; }
   .section-heading, .form-row { align-items: stretch; flex-direction: column; }

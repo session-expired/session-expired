@@ -24,16 +24,17 @@
       </ul>
     </nav>
 
-    <h2 id="welcome">Welcome to Session Expired!</h2>
+
+
     <div id="welcomeMessage">
       <p>
-        **Locked in an asylum. Someone has been murdered. Unfortunately, you’re the detectives.**
+        <h3>Locked in an asylum. Someone has been murdered. Unfortunately, you’re the detectives.</h3>
 
         Explore the asylum, search for clues, and piece together the murderer, victim, method, and location before your fellow patients do. When you think you’ve solved the case, track down the Warden and make your accusation.
 
         Choose carefully - a false accusation can cost you precious time while everyone else keeps searching.
 
-        **Find the clues. Solve the murder. Get to the Warden first. Don't let it be your session that expires**
+        <h3>Find the clues. Solve the murder. Get to the Warden first. Don't let it be your session that expires</h3>
 
       </p>
     </div>
@@ -42,6 +43,13 @@
     <div id="playOptions">
       
       <button id="joinGame">Start Game</button>
+    </div>
+
+    <div id="play-hook" aria-label="The Warden patrols while the patients wander the asylum">
+      <div class="hook-wall" aria-hidden="true"></div>
+      <div class="hook-floor" aria-hidden="true"></div>
+      <div id="wandering-warden" class="hook-character hook-warden" aria-hidden="true"></div>
+      <div id="wandering-patients" aria-hidden="true"></div>
     </div>
     
 

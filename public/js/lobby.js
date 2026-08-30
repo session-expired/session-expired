@@ -15,6 +15,7 @@ let selectedLobbyId = null;
 function createCharacterSprite(character) {
   const sprite = document.createElement("span");
   sprite.className = "character-sprite";
+  sprite.dataset.character = character.id;
   sprite.style.backgroundImage = `url("${character.image}")`;
   sprite.setAttribute("role", "img");
   sprite.setAttribute("aria-label", character.name);

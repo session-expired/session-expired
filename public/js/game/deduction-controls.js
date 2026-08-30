@@ -180,7 +180,7 @@ export function createDeductionControls(elements, gameId, callbacks) {
                     callbacks.onDialogue(currentPlayerCharacter, "accuse");
                     callbacks.onDialogue(currentPlayerCharacter, data.correct ? "correct_accusation" : "wrong_accusation");
                 }
-                callbacks.onStatus(data.correct ? "Correct accusation — game finished." : "Incorrect accusation — your turn has ended.");
+                callbacks.onStatus(data.correct ? "Correct accusation — game finished." : "Incorrect accusation — your session has ended.");
             }
             callbacks.onState(data.state);
         } catch (error) { callbacks.onStatus(error.message); }

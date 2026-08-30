@@ -11,6 +11,7 @@ nav {
   background-color: #4a4a42;
   height: 50 px;
   text-align: center;
+  padding: 5px;
 }
 
 nav ul {
@@ -117,7 +118,7 @@ nav li a.back-to-game-link:focus-visible {
 #welcomeMessage {
   background-color: #6e6101;
   border: 5px solid black;
-  padding: 5px;
+  padding: 10px;
   width: 75%;
   margin: 0 auto;
   text-align: center;
@@ -148,6 +149,69 @@ nav li a.back-to-game-link:focus-visible {
 #playOptions button:hover {
   background-color: white;
   color: #8b1e1e;
+}
+
+[data-character="rasputin"] { --character-scale: 1.08; }
+[data-character="crowley"] { --character-scale: 1.02; }
+[data-character="brahe"] { --character-scale: 1.01; }
+[data-character="bonaparte"] { --character-scale: .92; }
+[data-character="mallon"] { --character-scale: .97; }
+[data-character="lovelace"] { --character-scale: .96; }
+[data-character="curie"] { --character-scale: .92; }
+
+#play-hook {
+  position: relative;
+  width: min(900px, calc(100% - 32px));
+  height: 260px;
+  margin: 0 auto 32px;
+  overflow: hidden;
+  border: 5px solid #171713;
+  background: #514f46;
+  box-shadow: 7px 7px 0 #171713;
+  isolation: isolate;
+}
+
+.hook-wall {
+  position: absolute;
+  inset: 0 0 42% 0;
+  background:
+    linear-gradient(rgba(0, 0, 0, .12) 2px, transparent 2px) 0 0 / 100% 30px,
+    linear-gradient(90deg, rgba(0, 0, 0, .1) 2px, transparent 2px) 0 0 / 60px 100%,
+    #68665a;
+  border-bottom: 5px solid #24231f;
+}
+
+.hook-floor {
+  position: absolute;
+  inset: 58% 0 0;
+  background:
+    linear-gradient(90deg, transparent 49%, rgba(0, 0, 0, .13) 50%, transparent 51%) 0 0 / 90px 100%,
+    linear-gradient(rgba(255, 255, 255, .04) 49%, rgba(0, 0, 0, .14) 50%, transparent 52%) 0 0 / 100% 42px,
+    #37362f;
+  transform: perspective(180px) rotateX(7deg) scale(1.05);
+  transform-origin: bottom;
+}
+
+.hook-character {
+  position: absolute;
+  z-index: 2;
+  width: 32px;
+  height: 57px;
+  background-repeat: no-repeat;
+  image-rendering: pixelated;
+  filter: drop-shadow(2px 3px 0 rgba(0, 0, 0, .45));
+  transform-origin: center bottom;
+  --character-scale: 1;
+  will-change: left, top, transform;
+}
+
+.hook-warden {
+  z-index: 4;
+  background-image: url("/assets/images/chars/bonaparte/bonaparte.png");
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hook-character { transition: none !important; }
 }
 
 #interactions button {
