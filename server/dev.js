@@ -4,22 +4,6 @@ require("dotenv").config({ quiet: true });
 // point never enables the single-player testing exception.
 process.env.SESSION_EXPIRED_DEV_RUNNER = "true";
 
-const { pool, startServer } = require("./server");
-const { resetDevelopmentDatabase } = require("./database/reset-dev");
-const { seedDevelopmentUsers } = require("./database/seed-dev");
+const { startServer } = require("./server");
 
-resetDevelopmentDatabase(pool)
-  .then(() => seedDevelopmentUsers(pool))
-  .then(() => startServer())
-  .catch(async (error) => {
-    const details =
-      error.errors?.map((cause) => cause.message).join("; ") || error.message;
-
-    console.error(
-      "Unable to reset and seed the development database. Is PostgreSQL running, initialized, and is DATABASE_URL correct?",
-      details
-    );
-
-    await pool.end();
-    process.exitCode = 1;
-  });
+startServer();

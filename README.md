@@ -130,14 +130,7 @@ Run:
 
 Server, database, cookie, and asset-server settings are loaded from the root `.env` file.
 
-Development mode resets application data and creates four test accounts:
-
-* `user1`
-* `user2`
-* `user3`
-* `user4`
-
-Each account uses the password `password`, with email addresses ranging from `user1@example.com` through `user4@example.com`.
+Development mode preserves all existing database records. Create and manage any development accounts manually.
 
 ### Production
 
@@ -149,11 +142,7 @@ Migrations in `sql/migrations` are applied once in filename order and tracked in
 
 Never modify a migration that has already been applied. Database changes should instead be added as new numbered SQL migration files.
 
-Production startup removes the four exact development accounts and their dependent data in a transaction before accepting traffic. All other user accounts are preserved.
-
-The same cleanup can be run manually with:
-
-`npm run reset`
+Production startup preserves all existing database records and only starts the application server.
 
 ## Project Structure
 

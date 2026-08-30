@@ -2,7 +2,6 @@
   "scripts": {
     "setup": "npm run migrate",
     "migrate": "node server/database/migrate.js",
-    "reset": "node server/database/remove-dev-users.js",
     "start": "node server/start.js",
     "assets": "node server/assets.js",
     "predev": "kill-port 3000 || true",

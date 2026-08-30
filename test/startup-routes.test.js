@@ -6,18 +6,19 @@ const test = require("node:test");
 const root = path.join(__dirname, "..");
 const packageJson = require(path.join(root, "package.json"));
 
-test("npm start removes only exact development users before starting", () => {
+test("npm start does not mutate database records before starting", () => {
   assert.equal(packageJson.scripts.start, "node server/start.js");
 
   const source = fs.readFileSync(path.join(root, "server", "start.js"), "utf8");
-  assert.match(source, /removeDevelopmentUsers\(pool\)/);
-  assert.doesNotMatch(source, /reset-dev|seed-dev|resetDevelopmentDatabase|seedDevelopmentUsers/);
+  assert.match(source, /startServer\(\)/);
+  assert.doesNotMatch(source, /remove|reset|seed|DELETE|TRUNCATE/i);
 });
 
-test("development reset and seed remain confined to npm run dev", () => {
+test("npm run dev does not reset or seed database records", () => {
   assert.equal(packageJson.scripts.dev, "node server/dev.js");
 
   const source = fs.readFileSync(path.join(root, "server", "dev.js"), "utf8");
-  assert.match(source, /resetDevelopmentDatabase/);
-  assert.match(source, /seedDevelopmentUsers/);
+  assert.match(source, /startServer\(\)/);
+  assert.doesNotMatch(source, /remove|reset|seed|DELETE|TRUNCATE/i);
+  assert.equal(packageJson.scripts.reset, undefined);
 });
